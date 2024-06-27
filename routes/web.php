@@ -28,11 +28,12 @@ Route::get('/reports', function () {
 
 Route::get('/sites/{site}', [SiteController::class, 'show'])->name('sites.show');
 Route::resource('/roles', RoleController::class);
+Route::resource('/users', UserController::class);
 
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::middleware(['auth'])->group(function () {
-    Route::resource('/users', UserController::class);
+//    Route::resource('/users', UserController::class);
     Route::resource('/menus', MenuController::class);
 });

@@ -27,4 +27,9 @@ class DataFile extends Model
     {
         return $this->belongsTo(Device::class);
     }
+
+    public function data()
+    {
+        return $this->hasMany(SensorData::class);
+    }
 }

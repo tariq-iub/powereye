@@ -18,7 +18,9 @@ class DataFileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
+        return DataFile::with('data')->get();
 
         if ($request->ajax())
         {

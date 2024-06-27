@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DataFileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
@@ -29,6 +30,7 @@ Route::get('/reports', function () {
 Route::get('/sites/{site}', [SiteController::class, 'show'])->name('sites.show');
 Route::resource('/roles', RoleController::class);
 Route::resource('/users', UserController::class);
+Route::resource('/files', DataFileController::class);
 
 Auth::routes();
 

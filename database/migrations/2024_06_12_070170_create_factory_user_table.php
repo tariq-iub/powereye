@@ -29,10 +29,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::table('factory_user', function (Blueprint $table) {
-            $table->dropForeign(['factory_id']);
-            $table->dropForeign(['user_id']);
-        });
+//        Schema::table('factory_user', function (Blueprint $table) {
+//            $table->dropForeign(['factory_id']);
+//            $table->dropForeign(['user_id']);
+//        });
         Schema::dropIfExists('factory_user');
     }
 };

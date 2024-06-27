@@ -145,8 +145,7 @@ class DataFileController extends Controller
         $validator = Validator::make($request->all(), [
             'file' => 'required|mimes:csv,txt|max:2048',
             'site_id' => 'required|exists:sites,id',
-            'device_serial' => 'required|string|exists:devices,serial_number', // Ensure device is registered
-            'inspection_id' => 'required|exists:inspections,id',
+            'device_serial' => 'required|string|exists:devices,serial_number',
         ]);
 
         $device = Device::where('serial_number', $request->input('device_serial'))->first();
@@ -167,10 +166,8 @@ class DataFileController extends Controller
             DataFile::create([
                 'file_name' => $fileName,
                 'file_path' => $filePath,
-                'component_id' => $request->input('component_id'),
                 'site_id' => $request->input('site_id'),
                 'device_id' => $device->id,
-                'inspection_id' => $request->input('inspection_id'),
             ]);
 
             return response()->json(['message' => 'File uploaded successfully'], 200);

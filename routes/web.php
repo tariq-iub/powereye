@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;

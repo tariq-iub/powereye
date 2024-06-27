@@ -11,17 +11,7 @@ class DataFile extends Model
     use HasFactory;
     use Loggable;
 
-    protected $fillable = ['file_name', 'file_path', 'site_id', 'device_id', 'inspection_id'];
-
-    public function inspection()
-    {
-        return $this->belongsTo(Inspection::class);
-    }
-
-    public function component()
-    {
-        return $this->belongsTo(Component::class);
-    }
+    protected $fillable = ['file_name', 'file_path', 'site_id', 'device_id'];
 
     public function site()
     {

@@ -6,10 +6,12 @@ use App\Models\DataFile;
 use App\Models\Device;
 use App\Models\Factory;
 use App\Models\Inspection;
+use App\Models\SensorData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use DataTables;
+use League\Csv\Reader;
 
 class DataFileController extends Controller
 {
@@ -163,17 +165,58 @@ class DataFileController extends Controller
             $filePath = $file->storeAs('data_files', $fileName, 'public');
 
             // Store file metadata in the database
-            DataFile::create([
+            $dataFile = DataFile::create([
                 'file_name' => $fileName,
                 'file_path' => $filePath,
                 'site_id' => $request->input('site_id'),
                 'device_id' => $device->id,
             ]);
 
+            $this->process_file($dataFile);
+
             return response()->json(['message' => 'File uploaded successfully'], 200);
         }
 
         return response()->json(['message' => 'Invalid file upload'], 400);
+    }
+
+    private function process_file(DataFile $dataFile)
+    {
+        $filePath = $dataFile->file_path;
+
+        if (Storage::disk('public')->exists($filePath)) {
+            $csv = Reader::createFromPath(Storage::disk('public')->path($filePath), 'r');
+            $csv->setHeaderOffset(0);
+            $rows = $csv->getRecords();
+
+            foreach ($rows as $row) {
+                SensorData::create([
+                    'data_file_id' => $dataFile->id,
+                    'timestamp' => $row['timestamp'],
+                    'V1' => $row['V1'],
+                    'I1' => $row['I1'],
+                    'P1' => $row['P1'],
+                    'Q1' => $row['Q1'],
+                    'E1' => $row['E1'],
+                    'V2' => $row['V2'],
+                    'I2' => $row['I2'],
+                    'P2' => $row['P2'],
+                    'Q2' => $row['Q2'],
+                    'E2' => $row['E2'],
+                    'V3' => $row['V3'],
+                    'I3' => $row['I3'],
+                    'P3' => $row['P3'],
+                    'Q3' => $row['Q3'],
+                    'E3' => $row['E3'],
+                    'temperature' => $row['temperature'],
+                    'misc1' => $row['misc1'],
+                    'misc2' => $row['misc2'],
+                    'misc3' => $row['misc3'],
+                    'misc4' => $row['misc4'],
+                    'misc5' => $row['misc5'],
+                ]);
+            }
+        }
     }
 
     public function replace(Request $request)

@@ -11,7 +11,7 @@ class SensorData extends Model
     use HasFactory;
     use Loggable;
 
-    protected $fillable = ['timestamp', 'data_file_id'];
+    protected $fillable = ['data_file_id', 'timestamp', 'V1', 'I1', 'P1', 'Q1', 'E1', 'temperature'];
     protected $dates = ['timestamp'];
 
     public function data_file()

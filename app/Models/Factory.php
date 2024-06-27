@@ -6,17 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Haruncpi\LaravelUserActivity\Traits\Loggable;
 
-class Role extends Model
+class Factory extends Model
 {
     use HasFactory;
-    Use Loggable;
+    use Loggable;
 
-    protected $fillable = [
-        'title',
-    ];
+    protected $fillable = ['title', 'address', 'owner_name', 'email'];
 
-    public function menus()
+    public function sites()
     {
-        return $this->belongsToMany(Menu::class, 'menus_roles');
+        return $this->hasMany(Site::class);
     }
 }

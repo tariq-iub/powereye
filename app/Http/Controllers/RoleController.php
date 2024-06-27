@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use App\Models\Role;
 use Illuminate\Http\Request;
 
@@ -13,15 +14,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::all();
-        return view('admin.users.index', compact('roles'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return view('admin.roles.index', compact('roles'));
     }
 
     /**
@@ -29,15 +22,15 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $this->validate(request(),[
+            'title' => 'required|string',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Role $role)
-    {
-        //
+        $role = new Role();
+        $role->title = $request->input('title');
+        $role->save();
+
+        return redirect()->route('roles.index');
     }
 
     /**
@@ -45,7 +38,12 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        //
+        $menus =  Menu::where('status', true)
+            ->orderBy('id', 'asc')
+            ->orderBy('display_order', 'asc')
+            ->get();
+
+        return view('admin.roles.edit', compact('role', 'menus'));
     }
 
     /**
@@ -53,7 +51,7 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        //
+        return $request;
     }
 
     /**

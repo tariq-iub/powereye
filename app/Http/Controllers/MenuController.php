@@ -21,7 +21,8 @@ class MenuController extends Controller
      */
     public function create()
     {
-        //
+        $parentMenus = (new Menu())->parentsOnly();
+        return view('admin.menus.create', compact('parentMenus'));
     }
 
     /**
@@ -29,15 +30,21 @@ class MenuController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $this->validate(request(),[
+            'title' => 'required|string',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Menu $menu)
-    {
-        //
+        $menu = new Menu();
+        $menu->title = $request['title'];
+        $menu->icon = $request['icon'];
+        $menu->route = $request['route'];
+        $menu->parent_id = $request['parent_id'];
+        $menu->display_order = $request['display_order'];
+        $menu->level = $request['level'];
+        $menu->status = $request['status'];
+        $menu->save();
+
+        return redirect()->route('menus.index');
     }
 
     /**
@@ -45,7 +52,8 @@ class MenuController extends Controller
      */
     public function edit(Menu $menu)
     {
-        //
+        $parentMenus = (new Menu())->parentsOnly();
+        return view('admin.menus.edit', compact('menu', 'parentMenus'));
     }
 
     /**
@@ -53,7 +61,20 @@ class MenuController extends Controller
      */
     public function update(Request $request, Menu $menu)
     {
-        //
+        $this->validate(request(),[
+            'title' => 'required|string',
+        ]);
+
+        $menu->title = $request['title'];
+        $menu->icon = $request['icon'];
+        $menu->route = $request['route'];
+        $menu->parent_id = $request['parent_id'];
+        $menu->display_order = $request['display_order'];
+        $menu->level = $request['level'];
+        $menu->status = $request['status'];
+        $menu->save();
+
+        return redirect()->route('menus.index');
     }
 
     /**
@@ -61,6 +82,7 @@ class MenuController extends Controller
      */
     public function destroy(Menu $menu)
     {
-        //
+        $menu->delete();
+        return redirect()->route('menus.index');
     }
 }

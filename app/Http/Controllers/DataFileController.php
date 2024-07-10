@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\DataFile;
 use App\Models\Device;
 use App\Models\Factory;
-use App\Models\Inspection;
 use App\Models\SensorData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,17 +19,12 @@ class DataFileController extends Controller
      */
     public function index(Request $request)
     {
-        return DataFile::with('data')->get();
-
         if ($request->ajax())
         {
             $data = DataFile::select('*');
 
             return Datatables::of($data)
                 ->addIndexColumn()
-                ->addColumn('inspection', function($row) {
-                    return view('admin.data.partial.inspection', compact('row'));
-                })
                 ->addColumn('device', function ($row) {
                     return $row->device->serial_number;
                 })
@@ -49,14 +43,13 @@ class DataFileController extends Controller
                 ->addColumn('action', function($row) {
                     return view('admin.data.partial.action', compact('row'));
                 })
-                ->rawColumns(['inspection', 'uploaded_at', 'action'])
+                ->rawColumns(['uploaded_at', 'action'])
                 ->make(true);
         }
 
         $factories = Factory::all();
         $devices = Device::all();
-        $inspections = Inspection::where('taken_up', false)->get();
-        return view('admin.data.index', compact('factories', 'devices', 'inspections'));
+        return view('admin.files.index', compact('factories', 'devices'));
     }
 
 

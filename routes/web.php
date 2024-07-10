@@ -8,34 +8,28 @@ use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 Route::get('/', function () {
-    return view('dashboard.index');
+    return view('welcome');
 });
-
-Route::get('/reports', function () {
-    return view('reports.index');
-})->name('reports');
-
-Route::get('/sites/{site}', [SiteController::class, 'show'])->name('sites.show');
-Route::resource('/roles', RoleController::class);
-Route::resource('/users', UserController::class);
-Route::resource('/files', DataFileController::class);
 
 Auth::routes();
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
-Route::middleware(['auth'])->group(function () {
-//    Route::resource('/users', UserController::class);
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::resource('/users', UserController::class);
+    Route::resource('/roles', RoleController::class);
     Route::resource('/menus', MenuController::class);
+    Route::controller(DataFileController::class)
+        ->as('files.')
+        ->group(function () {
+            Route::get('/files', 'index')->name('index');
+            Route::get('/files/{data_file}/edit', 'edit')->name('edit');
+            Route::put('/files/{data_file}', 'update')->name('update');
+            Route::delete('/files/{data_file}', 'destroy')->name('delete');
+            Route::get('/files/download/{data_file}', 'download')->name('download');
+        });
+    Route::resource('/sites', SiteController::class);
+    Route::get('/reports', function () {
+        return view('reports.index');
+    })->name('reports');
 });

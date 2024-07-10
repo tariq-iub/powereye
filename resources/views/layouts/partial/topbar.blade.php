@@ -3,9 +3,9 @@
         <div class="d-flex flex-between-center dual-nav-first-layer">
             <div class="navbar-logo">
                 <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTopCollapse" aria-controls="navbarTopCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
-                <a class="navbar-brand me-1 me-sm-3" href="{{ url('/') }}">
+                <a class="navbar-brand me-1 me-sm-3" href="{{ url('/home') }}">
                     <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center"><img src="{{ asset('assets/img/icons/logo.png') }}" alt="phoenix" width="27" />
+                        <div class="d-flex align-items-center"><img src="{{ asset('assets/img/icons/logo.png') }}" alt="{{ config('app.name', 'PowerEye') }}" width="27" />
                             <p class="logo-text ms-2 d-none d-sm-block">{{ config('app.name', 'PowerEye') }}</p>
                         </div>
                     </div>
@@ -16,10 +16,10 @@
                 <li class="nav-item">
                     <div class="theme-control-toggle fa-icon-wait px-2">
                         <input class="form-check-input ms-0 theme-control-toggle-input" type="checkbox" data-theme-control="phoenixTheme" value="dark" id="themeControlToggle" />
-                        <label class="mb-0 theme-control-toggle-label theme-control-toggle-light" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px;width:32px;">
+                        <label class="mb-0 theme-control-toggle-label theme-control-toggle-light" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px; width:32px;">
                             <span class="icon" data-feather="moon"></span>
                         </label>
-                        <label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px;width:32px;">
+                        <label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px; width:32px;">
                             <span class="icon" data-feather="sun"></span>
                         </label>
                     </div>
@@ -27,8 +27,8 @@
 
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" style="min-width: 2.25rem" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-bs-auto-close="outside">
-                        <span class="d-block" style="height:20px;width:20px;">
-                            <span data-feather="bell" style="height:20px;width:20px;"></span>
+                        <span class="d-block" style="height:20px; width:20px;">
+                            <span data-feather="bell" style="height:20px; width:20px;"></span>
                         </span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end notification-dropdown-menu py-0 shadow border navbar-dropdown-caret" id="navbarDropdownNotfication" aria-labelledby="navbarDropdownNotfication">
@@ -136,7 +136,9 @@
                                 </div>
                             </div>
                             <div class="card-footer p-0 border-top border-translucent border-0">
-                                <div class="my-2 text-center fw-bold fs-10 text-body-tertiary text-opactity-85"><a class="fw-bolder" href="../pages/notifications.html">Notification history</a></div>
+                                <div class="my-2 text-center fw-bold fs-10 text-body-tertiary text-opactity-85">
+                                    <a class="fw-bolder" href="../pages/notifications.html">Notification history</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -145,7 +147,12 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
                         <div class="avatar avatar-l ">
-                            <img class="rounded-circle " src="{{ asset('assets/img/57.webp') }}" alt="" />
+                            @php
+                                $src = url('assets/img/users/user1.png');
+                                if(Auth::user()->photo_path)
+                                    $src = url(Auth::user()->photo_path);
+                            @endphp
+                            <img class="rounded-circle " src="{{ $src }}" alt="" />
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border" aria-labelledby="navbarDropdownUser">
@@ -153,9 +160,9 @@
                             <div class="card-body p-0">
                                 <div class="text-center pt-4 pb-3">
                                     <div class="avatar avatar-xl ">
-                                        <img class="rounded-circle " src="{{ asset('assets/img/57.webp') }}" alt="" />
+                                        <img class="rounded-circle " src="{{ $src }}" alt="" />
                                     </div>
-                                    <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
+                                    <h6 class="mt-2 text-body-emphasis">{{ Auth::user()->name }}</h6>
                                 </div>
                                 <div class="mb-3 mx-3"><input class="form-control form-control-sm" id="statusUpdateInput" type="text" placeholder="Update your status" /></div>
                             </div>
@@ -171,11 +178,22 @@
                             </div>
                             <div class="card-footer p-0 border-top border-translucent">
                                 <ul class="nav d-flex flex-column my-3">
-                                    <li class="nav-item"><a class="nav-link px-3" href="#!"> <span class="me-2 text-body" data-feather="user-plus"></span>Add another account</a></li>
+                                    <li class="nav-item">
+                                        <a class="nav-link px-3" href="#!">
+                                            <span class="me-2 text-body" data-feather="user-plus"></span>Add another account</a>
+                                    </li>
                                 </ul>
                                 <hr />
-                                <div class="px-3"> <a class="btn btn-phoenix-secondary d-flex flex-center w-100" href="#!"> <span class="me-2" data-feather="log-out"> </span>Sign out</a></div>
-                                <div class="my-2 text-center fw-bold fs-10 text-body-quaternary"><a class="text-body-quaternary me-1" href="#!">Privacy policy</a>&bull;<a class="text-body-quaternary mx-1" href="#!">Terms</a>&bull;<a class="text-body-quaternary ms-1" href="#!">Cookies</a></div>
+                                <div class="px-3">
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-phoenix-secondary d-flex flex-center w-100">
+                                            <span class="me-2" data-feather="log-out"> </span>Sign out
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="my-2 text-center fw-bold fs-10 text-body-quaternary">
+                                    <a class="text-body-quaternary me-1" href="#!">Privacy policy</a>&bull;<a class="text-body-quaternary mx-1" href="#!">Terms</a>&bull;<a class="text-body-quaternary ms-1" href="#!">Cookies</a></div>
                             </div>
                         </div>
                     </div>
@@ -186,7 +204,7 @@
         <div class="collapse navbar-collapse navbar-top-collapse justify-content-center" id="navbarTopCollapse">
             <ul class="navbar-nav navbar-nav-top" data-dropdown-on-hover="data-dropdown-on-hover">
                 <li class="nav-item lh-1">
-                    <a class="nav-link" href="{{ url('/') }}" role="button">
+                    <a class="nav-link" href="{{ url('/home') }}" role="button">
                         <span class="uil fs-8 me-2 uil-chart-pie"></span>Home
                     </a>
                 </li>
@@ -197,22 +215,22 @@
                     <ul class="dropdown-menu navbar-dropdown-caret">
                         @foreach($factories as $row)
                         <li class="dropdown">
-                                <a class="dropdown-item dropdown-toggle" id="e-commerce" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                                    <div class="dropdown-item-wrapper">
-                                        <span class="uil fs-8 uil-angle-right lh-1 dropdown-indicator-icon"></span>
-                                        <span><span class="me-2 uil" data-feather="trello"></span>{{ $row->title }}</span>
-                                    </div>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    @foreach($row->sites as $site)
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('sites.show', $site->id) }}">
-                                                <div class="dropdown-item-wrapper"><span class="me-2 uil"></span>{{ $site->title }}</div>
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </li>
+                            <a class="dropdown-item dropdown-toggle" id="e-commerce" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                <div class="dropdown-item-wrapper">
+                                    <span class="uil fs-8 uil-angle-right lh-1 dropdown-indicator-icon"></span>
+                                    <span><span class="me-2 uil" data-feather="trello"></span>{{ $row->title }}</span>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu">
+                                @foreach($row->sites as $site)
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('sites.show', $site->id) }}">
+                                            <div class="dropdown-item-wrapper"><span class="me-2 uil"></span>{{ $site->title }}</div>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </li>
                         @endforeach
                     </ul>
                 </li>

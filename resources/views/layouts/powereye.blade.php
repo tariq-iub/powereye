@@ -1,9 +1,7 @@
-@include('layouts.partial.head')
+@include('layouts.partial.admin_head')
 
 <main class="main" id="top">
-
-    @include('layouts.partial.topbar')
-
+    @include('layouts.partial.sidebar')
     <div class="content">
         @yield('content')
         @include('layouts.partial.footer')
@@ -23,15 +21,15 @@
 <script src="{{ asset('assets/vendors/list.js/list.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/feather-icons/feather.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/dayjs/dayjs.min.js') }}"></script>
-<script src="{{ asset('assets/vendors/leaflet/leaflet.js') }}"></script>
-<script src="{{ asset('assets/vendors/leaflet.markercluster/leaflet.markercluster.js') }}"></script>
-<script src="{{ asset('assets/vendors/leaflet.tilelayer.colorfilter/leaflet-tilelayer-colorfilter.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/choices/choices.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/dhtmlx-gantt/dhtmlxgantt.js') }}"></script>
+<script src="{{ asset('assets/vendors/flatpickr/flatpickr.min.js') }}"></script>
 <script src="{{ asset('assets/js/phoenix.js') }}"></script>
 <script src="{{ asset('assets/vendors/echarts/echarts.min.js') }}"></script>
-<script src="{{ asset('assets/js/ecommerce-dashboard.js') }}"></script>
+<script src="../assets/js/projectmanagement-dashboard.js"></script>
 
 <!-- Stacking JavaScript -->
 @stack('scripts')
-    
+
 </body>
 </html>

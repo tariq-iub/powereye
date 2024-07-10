@@ -1,4 +1,4 @@
-@extends('layouts.powereye')
+@extends('layouts.client')
 
 @section('content')
     <div class="pb-5">

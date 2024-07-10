@@ -13,7 +13,7 @@ class SiteController extends Controller
     public function index()
     {
         $sites = Site::with('factory')->get();
-        return view('sites.index', compact('sites'));
+        return view('admin.sites.index', compact('sites'));
     }
 
     /**
@@ -37,7 +37,7 @@ class SiteController extends Controller
      */
     public function show(Site $site)
     {
-        return view('sites.show', compact('site'));
+        return view('admin.sites.show', compact('site'));
     }
 
     /**

@@ -2,6 +2,7 @@
 
 <main class="main" id="top">
     @include('layouts.partial.sidebar')
+    @include('layouts.partial.navbar')
     <div class="content">
         @yield('content')
         @include('layouts.partial.footer')

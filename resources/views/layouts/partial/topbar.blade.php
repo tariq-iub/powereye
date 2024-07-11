@@ -5,8 +5,8 @@
                 <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTopCollapse" aria-controls="navbarTopCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
                 <a class="navbar-brand me-1 me-sm-3" href="{{ url('/home') }}">
                     <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center"><img src="{{ asset('assets/img/icons/logo.png') }}" alt="{{ config('app.name', 'PowerEye') }}" width="27" />
-                            <p class="logo-text ms-2 d-none d-sm-block">{{ config('app.name', 'PowerEye') }}</p>
+                        <div class="d-flex align-items-center"><img src="{{ asset('assets/img/icons/logo.png') }}" alt="{{ config('app.name', 'Care') }}" width="27" />
+                            <p class="logo-text ms-2 d-none d-sm-block">{{ config('app.name', 'Care') }}</p>
                         </div>
                     </div>
                 </a>
@@ -164,9 +164,9 @@
                                     </div>
                                     <h6 class="mt-2 text-body-emphasis">{{ Auth::user()->name }}</h6>
                                 </div>
-                                <div class="mb-3 mx-3"><input class="form-control form-control-sm" id="statusUpdateInput" type="text" placeholder="Update your status" /></div>
                             </div>
-                            <div class="overflow-auto scrollbar" style="height: 10rem;">
+
+                            <div class="overflow-auto border-top border-translucent scrollbar" style="height: 10rem;">
                                 <ul class="nav d-flex flex-column mb-2 pb-1">
                                     <li class="nav-item"><a class="nav-link px-3" href="#!"> <span class="me-2 text-body" data-feather="user"></span><span>Profile</span></a></li>
                                     <li class="nav-item"><a class="nav-link px-3" href="#!"><span class="me-2 text-body" data-feather="pie-chart"></span>Dashboard</a></li>
@@ -176,15 +176,9 @@
                                     <li class="nav-item"><a class="nav-link px-3" href="#!"> <span class="me-2 text-body" data-feather="globe"></span>Language</a></li>
                                 </ul>
                             </div>
+
                             <div class="card-footer p-0 border-top border-translucent">
-                                <ul class="nav d-flex flex-column my-3">
-                                    <li class="nav-item">
-                                        <a class="nav-link px-3" href="#!">
-                                            <span class="me-2 text-body" data-feather="user-plus"></span>Add another account</a>
-                                    </li>
-                                </ul>
-                                <hr />
-                                <div class="px-3">
+                                <div class="px-3 pt-3">
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="btn btn-phoenix-secondary d-flex flex-center w-100">
@@ -193,7 +187,8 @@
                                     </form>
                                 </div>
                                 <div class="my-2 text-center fw-bold fs-10 text-body-quaternary">
-                                    <a class="text-body-quaternary me-1" href="#!">Privacy policy</a>&bull;<a class="text-body-quaternary mx-1" href="#!">Terms</a>&bull;<a class="text-body-quaternary ms-1" href="#!">Cookies</a></div>
+                                    <a class="text-body-quaternary me-1" href="#!">Privacy policy</a>&bull;<a class="text-body-quaternary mx-1" href="#!">Terms</a>&bull;<a class="text-body-quaternary ms-1" href="#!">Cookies</a>
+                                </div>
                             </div>
                         </div>
                     </div>

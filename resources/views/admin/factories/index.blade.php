@@ -39,7 +39,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover fs-8 mb-0">
+                        <table class="table table-hover fs-8s mb-0">
                             <thead>
                             <tr class="bg-body-highlight">
                                 <th class="border-top border-translucent ps-3" data-sort="name">Factory Detail</th>
@@ -95,11 +95,11 @@
     <div class="modal fade" id="add-factory" tabindex="-1" data-bs-backdrop="static" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header d-flex justify-content-between">
+                <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
                         Add Factory
                     </h5>
-                    <button class="btn" type="button" data-bs-dismiss="modal" aria-label="Close">
+                    <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal" aria-label="Close">
                         <span class="fas fa-times fs-9"></span>
                     </button>
                 </div>

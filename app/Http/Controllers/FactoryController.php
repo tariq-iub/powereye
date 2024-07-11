@@ -16,6 +16,7 @@ class FactoryController extends Controller
         return view('admin.factories.index', compact('factories'));
     }
 
+
     /**
      * Show the form for creating a new resource.
      */
@@ -46,7 +47,7 @@ class FactoryController extends Controller
         $factory->fax = $request->input('fax');
         $factory->save();
 
-        return redirect(route('factories.index'))->with('message', 'Factory register successfully.');
+        return redirect(route('factories.index'))->with('message', 'Factory registration updated successfully.');
     }
 
     /**

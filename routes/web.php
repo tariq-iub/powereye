@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DataFileController;
+use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
@@ -19,6 +20,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('/users', UserController::class);
     Route::resource('/roles', RoleController::class);
     Route::resource('/menus', MenuController::class);
+    Route::resource('/factories', FactoryController::class);
+    Route::resource('/sites', SiteController::class);
     Route::controller(DataFileController::class)
         ->as('files.')
         ->group(function () {
@@ -28,7 +31,6 @@ Route::group(['middleware' => ['auth']], function () {
             Route::delete('/files/{data_file}', 'destroy')->name('delete');
             Route::get('/files/download/{data_file}', 'download')->name('download');
         });
-    Route::resource('/sites', SiteController::class);
     Route::get('/reports', function () {
         return view('reports.index');
     })->name('reports');

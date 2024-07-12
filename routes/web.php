@@ -17,7 +17,8 @@ Auth::routes();
 
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
-    Route::resource('/users', UserController::class);
+    Route::resource('/users', UserController::class)->except(['show']);
+    Route::put('/users/status/{user}', [UserController::class, 'statusToggle'])->name('users.status');
     Route::resource('/roles', RoleController::class);
     Route::resource('/menus', MenuController::class);
     Route::resource('/factories', FactoryController::class);

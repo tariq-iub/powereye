@@ -60,7 +60,9 @@
 
                 </div>
 
-                <button type="submit" class="btn btn-primary mt-3">Register New Factory</button>
+                <button type="submit" class="btn btn-primary mt-3">
+                    <span class="me-2" data-feather="save"></span>Register New Factory
+                </button>
             </form>
         </div>
     </div>

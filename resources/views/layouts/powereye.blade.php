@@ -28,6 +28,7 @@
 <script src="{{ asset('assets/vendors/popper/popper.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/bootstrap/bootstrap.min.js') }}"></script>
 <script src="{{ asset('assets/js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/anchorjs/anchor.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/is/is.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/fontawesome/all.min.js') }}"></script>
@@ -42,17 +43,32 @@
 <script src="{{ asset('assets/js/jquery.mask.min.js') }}"></script>
 <script src="{{ asset('assets/js/phoenix.js') }}"></script>
 <script src="{{ asset('assets/vendors/echarts/echarts.min.js') }}"></script>
+<script src="{{ asset('assets/vendors/sweetalert2/sweetalert2.js') }}"></script>
 <script src="../assets/js/projectmanagement-dashboard.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        @if(session('message'))
-        var toastEl = document.getElementById('toast-message');
-        var toast = new bootstrap.Toast(toastEl);
-        toast.show();
-        @endif
-    });
-</script>
+@if(Session::has('message'))
+    <script>
+        Swal.fire({
+            title: 'Success',
+            text: '{{ Session::get('message') }}',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 3000
+        })
+    </script>
+@endif
+
+@if(Session::has('error-message'))
+    <script>
+        Swal.fire({
+            title: 'Error',
+            text: '{{ Session::get('error-message') }}',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            timer: 3000
+        })
+    </script>
+@endif
 
 <!-- Stacking JavaScript -->
 @stack('scripts')

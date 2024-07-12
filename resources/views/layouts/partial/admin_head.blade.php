@@ -42,6 +42,8 @@
     <link href="{{ asset('assets/css/theme.min.css') }}" type="text/css" rel="stylesheet" id="style-default">
     <link href="{{ asset('assets/css/user-rtl.min.css') }}" type="text/css" rel="stylesheet" id="user-style-rtl">
     <link href="{{ asset('assets/css/user.min.css') }}" type="text/css" rel="stylesheet" id="user-style-default">
+    <link rel="stylesheet" href="{{ asset('assets/vendors/sweetalert2/sweetalert2.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendors/datatables/datatables.min.css') }}">
     <script>
         var phoenixIsRTL = window.config.config.phoenixIsRTL;
         if (phoenixIsRTL) {

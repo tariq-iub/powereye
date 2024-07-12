@@ -17,7 +17,7 @@
                 <div class="col col-md-auto">
                     <nav class="nav justify-content-end doc-tab-nav align-items-center" role="tablist">
                         <a role="button" class="btn btn-sm btn-phoenix-primary ms-2" href="{{ route('factories.create') }}">
-                            Add Factory
+                            <span class="me-2" data-feather="plus-square"></span>Add Factory
                         </a>
                     </nav>
                 </div>
@@ -76,7 +76,7 @@
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end py-2" style="">
                                             <a class="dropdown-item" href="#!">Edit</a>
-                                            <a class="dropdown-item" href="#!">Link User</a>
+                                            <a class="dropdown-item" href="">Link User</a>
                                             <div class="dropdown-divider"></div>
                                             <a class="dropdown-item text-danger" href="#!">Remove</a>
                                         </div>

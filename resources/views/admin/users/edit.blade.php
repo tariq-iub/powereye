@@ -27,22 +27,48 @@
 
         <div class="row g-5">
             <div class="col-12 col-xl-8">
-                <h4 class="mb-3">User Name</h4>
-                <input class="form-control mb-5" type="text" name="name" placeholder="User Name"
-                       value="{{ old('name', $user->name) }}" required>
+                <div class="mb-5">
+                    <h5>User Name</h5>
+                    <input class="form-control" type="text" name="name" placeholder="User Name"
+                           value="{{ old('name', $user->name) }}" required>
+                    @if($errors->has('name'))
+                        <div class="text-danger small">
+                            {{ $errors->first('name') }}
+                        </div>
+                    @endif
+                </div>
 
-                <h4 class="mb-3">User Image</h4>
-                <input type="file" class="form-control mb-5" id="photo_path" name="photo_path" accept="image/*">
+                <div class="mb-5">
+                    <h5>User Image</h5>
+                    <input type="file" class="form-control" id="photo_path" name="photo_path" accept="image/*">
+                    @if($errors->has('photo_path'))
+                        <div class="text-danger small">
+                            {{ $errors->first('photo_path') }}
+                        </div>
+                    @endif
+                </div>
 
-                <h4 class="mb-3">Email</h4>
-                <input class="form-control mb-5" type="email" placeholder="User Email"
-                       value="{{ old('email', $user->email) }}" readonly>
+                <div class="mb-5">
+                    <h5>Email</h5>
+                    <input class="form-control" type="email" placeholder="User Email"
+                           value="{{ old('email', $user->email) }}" readonly>
+                </div>
 
-                <h4 class="mb-3">Password</h4>
-                <input class="form-control mb-5" type="password" name="password" placeholder="Password" required>
+                <div class="mb-5">
+                    <h5>Password</h5>
+                    <input class="form-control" type="password" name="password" placeholder="Password" required>
+                    @if($errors->has('password'))
+                        <div class="text-danger small">
+                            {{ $errors->first('password') }}
+                        </div>
+                    @endif
+                </div>
 
-                <h4 class="mb-3">Confirm Password</h4>
-                <input class="form-control mb-5" type="password" name="password_confirmation" placeholder="Confirm Password">
+                <div class="mb-5">
+                    <h5>Confirm Password</h5>
+                    <input class="form-control" type="password" name="password_confirmation" placeholder="Confirm Password">
+                </div>
+
             </div>
             <div class="col-12 col-xl-4">
                 <div class="row g-2">
@@ -56,12 +82,17 @@
                                             <div class="d-flex flex-wrap mb-2">
                                                 <h5 class="mb-0 text-body-highlight me-2">Role</h5>
                                             </div>
-                                            <select class="form-select mb-3" aria-label="role" name="role_id" required>
+                                            <select class="form-select" aria-label="role" name="role_id" required>
                                                 <option value="">Select Role</option>
                                                 @foreach($roles as $row)
                                                     <option value="{{ $row->id }}" {{ $user->role_id == $row->id ? 'selected' : '' }}>{{ $row->title }}</option>
                                                 @endforeach
                                             </select>
+                                            @if($errors->has('role_id'))
+                                                <div class="text-danger small">
+                                                    {{ $errors->first('role_id') }}
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="col-12 col-sm-6 col-xl-12">

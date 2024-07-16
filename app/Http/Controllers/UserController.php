@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
-use DataTables;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use PhpParser\Node\Stmt\Return_;
 
 class UserController extends Controller
 {
@@ -135,5 +133,10 @@ class UserController extends Controller
         }
 
         return redirect('/users');
+    }
+
+    public function profile()
+    {
+
     }
 }

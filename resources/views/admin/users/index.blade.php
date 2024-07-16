@@ -9,9 +9,7 @@
             <li class="breadcrumb-item active">Users</li>
         </ol>
     </nav>
-
     <h2 class="text-bold text-body-emphasis mb-5">Users</h2>
-
     <div id="users" data-list='{"valueNames":["user","email","status","role"],"page":10,"pagination":true}'>
         <div class="row align-items-center justify-content-between g-3 mb-4">
             <div class="col col-auto">
@@ -59,7 +57,7 @@
                 <tbody class="list" id="users-table-body">
                 @foreach($users as $row)
                     <tr class="hover-actions-trigger btn-reveal-trigger position-static">
-                        <td class="customer align-middle white-space-nowrap">
+                        <td class="user align-middle white-space-nowrap">
                             @php
                                 $src = url('assets/img/users/user1.png');
                                 if($row->photo_path)
@@ -75,7 +73,7 @@
                         <td class="email align-middle white-space-nowrap">
                             <a class="fw-semibold" href="mailto:{{ $row->email }}">{{ $row->email }}</a>
                         </td>
-                        <td class="mobile_number align-middle white-space-nowrap">
+                        <td class="status align-middle white-space-nowrap">
                             @if($row->status)
                                 <span class="badge badge-phoenix fs-10 badge-phoenix-success">
                                     <span class="badge-label">Active</span>
@@ -86,7 +84,7 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="city align-middle white-space-nowrap text-body">
+                        <td class="role align-middle white-space-nowrap text-body">
                             {{ $row->role->title }}
                         </td>
                         <td class="last_active align-middle text-end white-space-nowrap text-body-tertiary">
@@ -130,7 +128,6 @@
             </div>
         </div>
     </div>
-
 @endsection
 
 @push("scripts")

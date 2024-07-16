@@ -9,7 +9,6 @@ use App\Models\SensorData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use DataTables;
 use League\Csv\Reader;
 
 class DataFileController extends Controller
@@ -19,37 +18,20 @@ class DataFileController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->ajax())
-        {
-            $data = DataFile::select('*');
-
-            return Datatables::of($data)
-                ->addIndexColumn()
-                ->addColumn('device', function ($row) {
-                    return $row->device->serial_number;
-                })
-                ->addColumn('component', function ($row) {
-                    return ($row->component) ? $row->component->title : "";
-                })
-                ->addColumn('site', function ($row) {
-                    return $row->site->title;
-                })
-                ->addColumn('factory', function ($row) {
-                    return $row->site->factory->title;
-                })
-                ->addColumn('uploaded_at', function ($row) {
-                    return view('admin.data.partial.uploaded_at', compact('row'));
-                })
-                ->addColumn('action', function($row) {
-                    return view('admin.data.partial.action', compact('row'));
-                })
-                ->rawColumns(['uploaded_at', 'action'])
-                ->make(true);
-        }
-
+        $files = DataFile::orderBy('id', 'desc')->get();
         $factories = Factory::all();
         $devices = Device::all();
-        return view('admin.files.index', compact('factories', 'devices'));
+        return view('admin.files.index', compact('files', 'factories', 'devices'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $factories = Factory::all();
+        $devices = Device::all();
+        return view('admin.files.create', compact('factories', 'devices'));
     }
 
 
@@ -60,8 +42,8 @@ class DataFileController extends Controller
     {
         $factories = Factory::all();
         $devices = Device::all();
-        $inspections = Inspection::all();
-        return view('admin.data.edit', compact('dataFile', 'factories', 'devices', 'inspections'));
+
+        return view('admin.data.edit', compact('dataFile', 'factories', 'devices', ));
     }
 
     /**

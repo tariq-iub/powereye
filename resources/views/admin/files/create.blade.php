@@ -4,12 +4,12 @@
     <nav class="mb-3" aria-label="breadcrumb">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ url('/users') }}">Users</a></li>
-            <li class="breadcrumb-item active">Add User</li>
+            <li class="breadcrumb-item"><a href="{{ url('/files') }}">Files</a></li>
+            <li class="breadcrumb-item active">Add File</li>
         </ol>
     </nav>
 
-    <form class="mb-9" method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data">
+    <form class="mb-9" method="POST" action="{{ route('files.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="row g-3 flex-between-end mb-5">
             <div class="col-auto">
@@ -19,8 +19,8 @@
                 </h5>
             </div>
             <div class="col-auto">
-                <a href="{{ route('users.index') }}" class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0">Discard</a>
-                <button class="btn btn-primary mb-2 mb-sm-0" type="submit">Add user</button>
+                <a href="{{ route('files.index') }}" class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0">Discard</a>
+                <button class="btn btn-primary mb-2 mb-sm-0" type="submit">Add file</button>
             </div>
         </div>
 

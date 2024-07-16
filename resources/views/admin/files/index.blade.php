@@ -1,58 +1,136 @@
 @extends('layouts.powereye')
-@section('page-title', 'Data Files')
-@section('page-message', "Manage uploaded files with appropriate actions.")
 
 @section('content')
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="iq-card">
-                <div class="iq-card-header d-flex justify-content-between">
-                    <div class="iq-header-title">
-                        <h4 class="card-title">Uploaded Files</h4>
-                    </div>
-                    <a href="javascript:void(0)" class="btn btn-outline-primary"
-                       data-toggle="modal" data-target=".bd-add-modal-lg">
-                        <i class="ri-add-circle-line"></i>Add File
+
+    <nav class="mb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{{ url('/home') }}">Home</a>
+            </li>
+            <li class="breadcrumb-item active">Data Files</li>
+        </ol>
+    </nav>
+    <h2 class="text-bold text-body-emphasis mb-5">Data Files</h2>
+    <div id="files" data-list='{"valueNames":["title","device","site","factory"],"page":10,"pagination":true}'>
+        <div class="row align-items-center justify-content-between g-3 mb-4">
+            <div class="col col-auto">
+                <div class="search-box">
+                    <form class="position-relative">
+                        <input class="form-control search-input search" type="search" placeholder="Search files" aria-label="Search" />
+                        <span class="fas fa-search search-box-icon"></span>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-auto">
+                <div class="d-flex align-items-center">
+                    <a href="javascript:void(0)" class="btn btn-primary"
+                       data-bs-toggle="modal" data-bs-target=".bd-add-modal-lg">
+                        <span class="fas fa-plus me-2"></span>Add file
                     </a>
                 </div>
-                <div class="iq-card-body">
-                    <div class="table-responsive">
-                        <table id="table" class="table table-hover table-bordered mt-4" style="width:100%">
-                            <thead>
-                            <tr>
-                                <th>File Name</th>
-                                <th>Device</th>
-                                <th>Component</th>
-                                <th>Site</th>
-                                <th>Factory</th>
-                                <th class="text-center">Uploaded At</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+        </div>
+
+        <div class="mx-n4 mx-lg-n6 px-4 px-lg-6 mb-9 bg-body-emphasis border-y mt-2 position-relative top-1">
+            <div class="table-responsive scrollbar ms-n1 ps-1">
+                <table class="table table-sm fs-9 mb-0">
+                    <thead>
+                    <tr>
+                        <th class="sort align-middle" scope="col" data-sort="title" style="width:15%; min-width:200px;">
+                            FILE TITLE
+                        </th>
+                        <th class="sort align-middle" scope="col" data-sort="device" style="width:15%; min-width:200px;">
+                            DEVICE
+                        </th>
+                        <th class="sort align-middle pe-3" scope="col" data-sort="site" style="width:20%; min-width:200px;">
+                            SITE
+                        </th>
+                        <th class="sort align-middle" scope="col" data-sort="factory" style="width:10%;">
+                            FACTORY
+                        </th>
+                        <th class="sort align-middle" scope="col" data-sort="factory" style="width:10%;">
+                            UPLOADED
+                        </th>
+                        <th class="sort align-middle text-end" scope="col" style="width:21%;  min-width:200px;">
+                            ACTIONS
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="list" id="files-table-body">
+                    @foreach($files as $row)
+                        <tr class="hover-actions-trigger btn-reveal-trigger position-static">
+                            <td class="title align-middle white-space-nowrap text-body">
+                                {{ $row->file_name }}
+                            </td>
+                            <td class="device align-middle white-space-nowrap text-body">
+                                {{ $row->device->serial_number }}
+                            </td>
+                            <td class="site align-middle white-space-nowrap text-body">
+                                {{ $row->site->title }}
+                            </td>
+                            <td class="factory align-middle white-space-nowrap text-body">
+                                {{ $row->site->factory->title }}
+                            </td>
+                            <td class="factory align-middle white-space-nowrap text-body" title="{{ $row->created_at }}">
+                                {{ $row->created_at->diffForHumans() }}
+                            </td>
+                            <td class="last_active align-middle text-end white-space-nowrap text-body-tertiary">
+                                <div class="btn-reveal-trigger position-static">
+                                    <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal fs-10"
+                                            type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent">
+                                        <svg class="svg-inline--fa fa-ellipsis fs-10" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="ellipsis" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="">
+                                            <path fill="currentColor" d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"></path>
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-end py-2" style="">
+                                        <a class="dropdown-item" href="{{ route('users.edit', $row->id) }}">Edit</a>
+                                        <a class="dropdown-item" href="javascript:void(0)"
+                                           onclick="document.querySelector(`#update-status-{{ $row->id }}`).submit();">
+                                            Change Status
+                                        </a>
+                                        <form id="update-status-{{ $row->id }}" action="{{ route('users.status', $row->id) }}" method="POST" style="display:none;">
+                                            @csrf
+                                            @method("PUT")
+                                            <input type="hidden" name="status" value="{{ !$row->status }}">
+                                        </form>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-danger" href="#!">Remove</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                <div class="col-auto d-flex">
+                    <p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p>
+                    <a class="fw-semibold" href="#!" data-list-view="*">View all<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a><a class="fw-semibold d-none" href="#!" data-list-view="less">View Less<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
+                </div>
+                <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button>
+                    <ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade bd-add-modal-lg" tabindex="-1" role="dialog" style="display: none;" aria-hidden="true">
+    <div class="modal fade bd-add-modal-lg" tabindex="-1" data-bs-backdrop="static" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New File</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                <div class="modal-header justify-content-between">
+                    <h5 class="modal-title" id="staticBackdropLabel">Add New File</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="fas fa-times fs-9"></span>
                     </button>
                 </div>
-                <form id="posted" method="POST" action=""
-                      class="needs-validation" enctype="multipart/form-data" novalidate>
+                <form id="posted" method="POST" action="" class="row g-3 needs-validation"
+                      enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="modal-body">
-
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="factory_id">Factory</label>
                             <select class="custom-select select2" id="factory_id" style="width: 100%" required>
                                 <option value="">Select Factory</option>
@@ -63,7 +141,7 @@
                             <div class="invalid-feedback">Select a factory name...</div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="site_id">Site</label>
                             <select class="custom-select select2" id="site_id" name="site_id"
                                     style="width: 100%" required>
@@ -72,7 +150,7 @@
                             <div class="invalid-feedback">Select a site name...</div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="component_id">Component (optional)</label>
                             <select class="custom-select select2" id="component_id" name="component_id" style="width: 100%">
                                 <option value="">Not Applicable</option>
@@ -80,7 +158,7 @@
                             <div class="invalid-feedback">Select a component name...</div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="device_serial">Device</label>
                             <select class="custom-select select2" id="device_serial" name="device_serial" style="width: 100%" required>
                                 <option value="">Select Device</option>
@@ -91,15 +169,15 @@
                             <div class="invalid-feedback">Select a device name...</div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="data-file">Data file</label>
                             <input type="file" class="form-control-file" name="file" id="data-file" required>
                             <div class="invalid-feedback">Data file needs to be selected.</div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Upload Data</button>
+                        <button class="btn btn-primary" type="submit">Upload Data</button>
+                        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -115,15 +193,13 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form id="replace-form" method="POST" action=""
-                      class="needs-validation" enctype="multipart/form-data" novalidate>
+                <form id="replace-form" method="POST" action="" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" id="record-id" name="id" value="">
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="data-file">Data file</label>
                             <input type="file" class="form-control-file" name="file" id="data-file" required>
-                            <div class="invalid-feedback">Data file needs to be selected.</div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -138,28 +214,6 @@
 
 @push('scripts')
     <script>
-        $(function () {
-            var table = $('#table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: "{{ route('files.index') }}",
-                columns: [
-                    {data: 'file_name', name: 'file_name'},
-                    {data: 'device', name: 'device'},
-                    {data: 'component', name: 'component'},
-                    {data: 'site', name: 'site'},
-                    {data: 'factory', name: 'factory'},
-                    {data: 'uploaded_at', name: 'uploaded_at'},
-                    {data: 'action', name: 'action', orderable: false, searchable: false},
-                ],
-                createdRow: function (row, data, dataIndex) {
-                    $('td', row).eq(0).addClass('text-center');
-                    $('td', row).eq(7).addClass('text-center');
-                    $('td', row).eq(8).addClass('text-center');
-                },
-            });
-        });
-
         function deleteFile(ctrl, id) {
             if (confirm('Are you sure to delete this file?')) {
                 fetch(`{{ url('data') }}/${id}`, {

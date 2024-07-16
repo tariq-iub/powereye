@@ -129,10 +129,11 @@
                 <form id="posted" method="POST" action="" class="row g-3 needs-validation"
                       enctype="multipart/form-data" novalidate>
                     @csrf
-                    <div class="modal-body">
+                    <div class="modal-body px-5">
                         <div class="mb-3">
-                            <label for="factory_id">Factory</label>
-                            <select class="custom-select select2" id="factory_id" style="width: 100%" required>
+                            <label class="form-label" for="factory_id">Factory</label>
+                            <select class="form-select" id="factory_id" data-choices="data-choices"
+                                    data-options='{"removeItemButton":true,"placeholder":true}' required>
                                 <option value="">Select Factory</option>
                                 @foreach($factories as $factory)
                                     <option value="{{ $factory->id }}">{{ $factory->title }}</option>
@@ -142,25 +143,27 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="site_id">Site</label>
-                            <select class="custom-select select2" id="site_id" name="site_id"
-                                    style="width: 100%" required>
+                            <label class="form-label" for="site_id">Site</label>
+                            <select class="form-select" id="site_id" name="site_id" data-choices="data-choices"
+                                    data-options='{"removeItemButton":true,"placeholder":true}' required>
                                 <option value="">Select Site</option>
                             </select>
                             <div class="invalid-feedback">Select a site name...</div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="component_id">Component (optional)</label>
-                            <select class="custom-select select2" id="component_id" name="component_id" style="width: 100%">
+                            <label class="form-label" for="component_id">Component (optional)</label>
+                            <select class="form-select" id="component_id" name="component_id"
+                                    data-choices="data-choices" data-options='{"removeItemButton":true,"placeholder":true}'>
                                 <option value="">Not Applicable</option>
                             </select>
                             <div class="invalid-feedback">Select a component name...</div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="device_serial">Device</label>
-                            <select class="custom-select select2" id="device_serial" name="device_serial" style="width: 100%" required>
+                            <label class="form-label" for="device_serial">Device</label>
+                            <select class="form-select" id="device_serial" name="device_serial" data-choices="data-choices"
+                                    data-options='{"removeItemButton":true,"placeholder":true}' required>
                                 <option value="">Select Device</option>
                                 @foreach($devices as $device)
                                     <option value="{{ $device->serial_number }}">{{ $device->serial_number }}</option>
@@ -170,8 +173,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="data-file">Data file</label>
-                            <input type="file" class="form-control-file" name="file" id="data-file" required>
+                            <label class="form-label" for="data-file">Data file</label>
+                            <input type="file" class="form-control" name="file" id="data-file" required>
                             <div class="invalid-feedback">Data file needs to be selected.</div>
                         </div>
                     </div>

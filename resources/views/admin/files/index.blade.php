@@ -84,18 +84,23 @@
                                         </svg>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-end py-2" style="">
-                                        <a class="dropdown-item" href="{{ route('users.edit', $row->id) }}">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                           onclick="document.querySelector(`#update-status-{{ $row->id }}`).submit();">
-                                            Change Status
+                                        <a class="dropdown-item" href="{{ route('users.edit', $row->id) }}"
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                                            Edit
                                         </a>
-                                        <form id="update-status-{{ $row->id }}" action="{{ route('users.status', $row->id) }}" method="POST" style="display:none;">
-                                            @csrf
-                                            @method("PUT")
-                                            <input type="hidden" name="status" value="{{ !$row->status }}">
-                                        </form>
+                                        <a class="dropdown-item" href="{{ route('files.download', $row->id) }}"
+                                           data-bs-toggle="tooltip" data-bs-placement="top" title="Download">
+                                            Download
+                                        </a>
+                                        <a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="tooltip"
+                                           data-bs-placement="top" title="Replace" onclick="OpenReplaceModal({{ $row->id }})">
+                                            Replace
+                                        </a>
                                         <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item text-danger" href="#!">Remove</a>
+                                        <a class="dropdown-item text-danger" href="javascript:void(0)" data-bs-toggle="tooltip"
+                                           data-bs-placement="top" title="Remove File" onclick="deleteFile(this, {{ $row->id }})" >
+                                            Remove
+                                        </a>
                                     </div>
                                 </div>
                             </td>
@@ -144,8 +149,7 @@
 
                         <div class="mb-3">
                             <label class="form-label" for="site_id">Site</label>
-                            <select class="form-select" id="site_id" name="site_id" data-choices="data-choices"
-                                    data-options='{"removeItemButton":true,"placeholder":true}' required>
+                            <select class="form-select" id="site_id" name="site_id" required>
                                 <option value="">Select Site</option>
                             </select>
                             <div class="invalid-feedback">Select a site name...</div>
@@ -187,13 +191,13 @@
         </div>
     </div>
 
-    <div class="modal fade bd-replace-modal-lg" tabindex="-1" role="dialog" style="display: none;" aria-hidden="true">
+    <div class="modal fade bd-replace-modal-lg" tabindex="-1" data-bs-backdrop="static" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Replace File</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                <div class="modal-header justify-content-between">
+                    <h5 class="modal-title" id="staticBackdropLabel">Replace File</h5>
+                    <button class="btn p-1" type="button" data-bs-dismiss="modal" aria-label="Close">
+                        <span class="fas fa-times fs-9"></span>
                     </button>
                 </div>
                 <form id="replace-form" method="POST" action="" enctype="multipart/form-data">
@@ -201,13 +205,13 @@
                     <div class="modal-body">
                         <input type="hidden" id="record-id" name="id" value="">
                         <div class="mb-3">
-                            <label for="data-file">Data file</label>
-                            <input type="file" class="form-control-file" name="file" id="data-file" required>
+                            <label class="form-label" for="data-file">Data file</label>
+                            <input type="file" class="form-control" name="file" id="data-file" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Replace File</button>
+                        <button class="btn btn-primary" type="submit">Replace File</button>
+                        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -246,6 +250,7 @@
                 })
                 .then(data => {
                     $("#site_id").append(`<option value=''>Select Site</option>`);
+                    console.log(data.sites);
                     data.sites.forEach((item, index) => {
                         $("#site_id").append(`<option value='${item.id}'>${item.title}</option>`);
                     });

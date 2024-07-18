@@ -148,7 +148,7 @@
                         @php
                             $src = url('assets/img/users/user1.png');
                             if(Auth::user()->photo_path)
-                                $src = url(Auth::user()->photo_path);
+                                $src = Storage::url(Auth::user()->photo_path);
                         @endphp
                         <img class="rounded-circle " src="{{ $src }}" alt="" />
                     </div>

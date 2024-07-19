@@ -1,9 +1,9 @@
 <div class="d-flex align-items-center list-user-action">
     <a class="iq-bg-primary" data-toggle="tooltip" data-placement="top" title="Download"
-       href="{{ route('data.download', $row->id) }}"><i class="ri-download-cloud-2-line"></i>
+       href="{{ route('files.download', $row->id) }}"><i class="ri-download-cloud-2-line"></i>
     </a>
     <a class="iq-bg-primary" data-toggle="tooltip" data-placement="top" title="Edit"
-       href="{{ route('data.edit', $row->id) }}">
+       href="{{ route('files.edit', $row->id) }}">
         <i class="ri-pencil-line"></i>
     </a>
     <a class="iq-bg-primary" data-toggle="tooltip" data-placement="top" title="Replace"

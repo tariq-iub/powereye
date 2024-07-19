@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DataFileController;
 use App\Http\Controllers\FactoryController;
+use App\Http\Controllers\FactoryUserController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,3 +27,5 @@ Route::post('/data/edit', [DataFileController::class, 'edit'])->name('edit');
 Route::post('/data/replace', [DataFileController::class, 'replace'])->name('replace');
 Route::get('/factories', [FactoryController::class, 'fetch']);
 Route::get('/sites', [SiteController::class, 'fetch']);
+
+Route::post('/factory-users', [FactoryUserController::class, 'store'])->name('api.factory-users.store');

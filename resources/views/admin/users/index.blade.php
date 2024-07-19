@@ -9,6 +9,7 @@
             <li class="breadcrumb-item active">Users</li>
         </ol>
     </nav>
+
     <h2 class="text-bold text-body-emphasis mb-5">Users</h2>
     <div id="users" data-list='{"valueNames":["user","email","status","role"],"page":10,"pagination":true}'>
         <div class="row align-items-center justify-content-between g-3 mb-4">

@@ -1,155 +1,191 @@
 @extends('layouts.powereye')
 
 @section('content')
-    <h2 class="mb-2 lh-sm">Factories</h2>
-    <p class="text-body-tertiary lead mb-2">
-        Manage factory registration process.
-    </p>
+    <nav class="mb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
+            <li class="breadcrumb-item active">Factories</li>
+        </ol>
+    </nav>
 
-    <div class="card shadow-none border mb-3" data-component-card="data-component-card">
-        <div class="card-header p-4 border-bottom bg-body">
-            <div class="row g-3 justify-content-between align-items-center">
-                <div class="col-12 col-md">
-                    <h4 class="text-body mb-0" data-anchor="data-anchor" id="factory-list">
-                        Factories List
-                    </h4>
-                </div>
-                <div class="col col-md-auto">
-                    <nav class="nav justify-content-end doc-tab-nav align-items-center" role="tablist">
-                        <a role="button" class="btn btn-sm btn-phoenix-primary ms-2" href="{{ route('factories.create') }}">
-                            <span class="me-2" data-feather="plus-square"></span>Add Factory
-                        </a>
-                    </nav>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-body p-0">
-            <div class="p-4">
-                <div id="tableExample4">
-                    <div class="row justify-content-end g-0">
-                        <div class="col-auto px-3">
-                            <select class="form-select form-select-sm mb-3" data-list-filter="data-list-filter">
-                                <option selected="" value="">Select payment status</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Success">Success</option>
-                                <option value="Blocked">Blocked</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover fs-8s mb-0">
-                            <thead>
-                            <tr class="bg-body-highlight">
-                                <th class="border-top border-translucent ps-3" data-sort="name">Factory Detail</th>
-                                <th class="border-top border-translucent">Owner's Detail</th>
-                                <th class="border-top border-translucent" data-sort="email">Email</th>
-                                <th class="border-top border-translucent">Contact No</th>
-                                <th class="border-top border-translucent">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody class="list">
-                            @foreach($factories  as $row)
-                            <tr>
-                                <td class="align-middle ps-3">
-                                    {{ $row->title }}
-                                    <div class="small">
-                                        {{ $row->address }}
-                                    </div>
-                                </td>
-                                <td class="align-middle">
-                                    {{ $row->owner_name }}
-                                    <div class="small">
-                                        {{ $row->owner_cnic }}
-                                    </div>
-                                </td>
-                                <td class="align-middle email">{{ $row->email }}</td>
-                                <td class="align-middle">{{ $row->contact_no }}</td>
-                                <td class="align-middle white-space-nowrap text-end pe-2">
-                                    <div class="btn-reveal-trigger position-static">
-                                        <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal fs-10"
-                                                type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent">
-                                            <svg class="svg-inline--fa fa-ellipsis fs-10" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="ellipsis" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="">
-                                                <path fill="currentColor" d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"></path>
-                                            </svg>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end py-2" style="">
-                                            <a class="dropdown-item" href="#!">Edit</a>
-                                            <a class="dropdown-item" href="">Link User</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item text-danger" href="#!">Remove</a>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="mb-5">
+        <h2 class="text-bold text-body-emphasis">Factories</h2>
+        <p class="text-body-tertiary lead">
+            Manage factory registration process.
+        </p>
     </div>
 
-    <div class="modal fade" id="add-factory" tabindex="-1" data-bs-backdrop="static" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">
+    <div id="factories" data-list='{"valueNames":["title","owner_name","email","contact_no"],"page":10,"pagination":true}'>
+        <div class="row align-items-center justify-content-between g-3 mb-4">
+            <div class="col col-auto">
+                <div class="search-box">
+                    <form class="position-relative">
+                        <input class="form-control search-input search" type="search" placeholder="Search users"
+                               aria-label="Search"/>
+                        <span class="fas fa-search search-box-icon"></span>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-auto">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-link text-body me-4 px-0">
+                        <span class="fa-solid fa-file-export fs-9 me-2"></span>Export
+                    </button>
+                    <a class="btn btn-primary" href="{{ route('factories.create') }}">
+                        <span class="fas fa-plus me-2"></span>
                         Add Factory
-                    </h5>
-                    <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal" aria-label="Close">
-                        <span class="fas fa-times fs-9"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mx-n4 mx-lg-n6 px-4 px-lg-6 mb-9 bg-body-emphasis border-y mt-2 position-relative top-1">
+            <div class="table-responsive scrollbar ms-n1 ps-1">
+                <table class="table table-sm fs-9 mb-0">
+                    <thead>
+                    <tr>
+                        <th class="sort align-middle" scope="col" data-sort="title" style="width:15%; min-width:200px;">
+                            FACTORY DETAILS
+                        </th>
+                        <th class="sort align-middle" scope="col" data-sort="owner_name" style="width:15%; min-width:200px;">
+                            OWNER DETAILS
+                        </th>
+                        <th class="sort align-middle pe-3" scope="col" data-sort="email"
+                            style="width:20%; min-width:200px;">
+                            EMAIL
+                        </th>
+                        <th class="sort align-middle" scope="col" data-sort="contact_no" style="width:10%;">
+                            CONTACT
+                        </th>
+                        <th class="sort align-middle text-end" scope="col" style="width:21%;  min-width:200px;">
+                            ACTIONS
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="list" id="users-table-body">
+                    @foreach($factories as $row)
+                        <tr class="hover-actions-trigger btn-reveal-trigger position-static">
+                            <td class="align-middle ps-3">
+                                <a class="d-flex align-items-center text-body text-hover-1000 ps-0" href="#">
+                                    <h6 class="fw-semibold">
+                                        {{ $row->title }}
+                                    </h6>
+                                </a>
+                                <div class="small">
+                                    {{ $row->address }}
+                                </div>
+                            </td>
+                            <td class="align-middle pas-3">
+                                <a class="d-flex align-items-center text-body text-hover-1000 ps-0" href="#">
+                                    <h6 class="fw-semibold">{{ $row->owner_name }}</h6>
+                                </a>
+                                <div class="small">
+                                    {{ $row->owner_cnic }}
+                                </div>
+                            </td>
+                            <td class="mobile_number align-middle white-space-nowrap">
+                                <a class="fw-semibold" href="mailto:{{ $row->email }}">
+                                    {{ $row->email }}
+                                </a>
+                            </td>
+                            <td class="city align-middle white-space-nowrap text-body">
+                                {{ $row->contact_no }}
+                            </td>
+                            <td class="last_active align-middle text-end white-space-nowrap text-body-tertiary">
+                                <div class="btn-reveal-trigger position-static">
+                                    <button
+                                        class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal fs-10"
+                                        type="button" data-bs-toggle="dropdown" data-boundary="window"
+                                        aria-haspopup="true" aria-expanded="false" data-bs-reference="parent">
+                                        <svg class="svg-inline--fa fa-ellipsis fs-10" aria-hidden="true"
+                                             focusable="false" data-prefix="fas" data-icon="ellipsis" role="img"
+                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="">
+                                            <path fill="currentColor"
+                                                  d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"></path>
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-end py-2" style="">
+                                        <a class="dropdown-item" href="{{ route('factories.edit', $row->id) }}">
+                                            Edit
+                                        </a>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#linkUserModal" data-factory-id="{{ $row->id }}">
+                                            Link User
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item text-danger" href="#!">
+                                            Remove
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
+                <div class="col-auto d-flex">
+                    <p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p>
+                    <a class="fw-semibold" href="#!" data-list-view="*">
+                        View all
+                        <span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span>
+                    </a>
+                    <a class="fw-semibold d-none" href="#!" data-list-view="less">
+                        View Less
+                        <span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span>
+                    </a>
+                </div>
+                <div class="col-auto d-flex">
+                    <button class="page-link" data-list-pagination="prev">
+                        <span class="fas fa-chevron-left"></span>
+                    </button>
+                    <ul class="mb-0 pagination"></ul>
+                    <button class="page-link pe-0" data-list-pagination="next">
+                        <span class="fas fa-chevron-right"></span>
                     </button>
                 </div>
-
-                <form id="posted" class="needs-validation" novalidate>
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                <label class="form-label" for="title">Factory Name</label>
-                                <input type="text" class="form-control" id="title" name="title" required>
-                                <div class="invalid-feedback">Factory name is required.</div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label" for="address">Address</label>
-                                <input type="text" class="form-control" id="address" name="address" required>
-                                <div class="invalid-feedback">Factory address is required.</div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label" for="owner_name">Owner Name</label>
-                                <input type="text" class="form-control" id="owner_name" name="owner_name" required>
-                                <div class="invalid-feedback">Owner name is required.</div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="owner_cnic">CNIC No</label>
-                                <input type="text" class="form-control" id="owner_cnic" name="owner_cnic">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="contact_no">Contact No</label>
-                                <input type="text" class="form-control" id="contact_no" name="contact_no">
-                            </div>
-
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label" for="email">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                                <div class="invalid-feedback">Email address is required.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary" type="submit">Save</button>
-                        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
+
+    <!-- Link User Modal -->
+    <div class="modal fade" id="linkUserModal" tabindex="-1" aria-labelledby="linkUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="linkUserModalLabel">Link User to Factory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="linkUserForm">
+                        @csrf
+                        <input type="hidden" name="factory_id" id="factory_id">
+                        <div class="mb-3">
+                            <label for="user_id" class="form-label">Select User</label>
+                            <select class="form-select" id="user_id" name="user_id" required>
+                                <option selected disabled>Choose a user...</option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="access_level" class="form-label">Access Level</label>
+                            <select class="form-select" id="access_level" name="access_level" required>
+                                <option value="owner">Owner</option>
+                                <option value="employee">Employee</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Link User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 @endsection
 
 @push('scripts')
@@ -187,13 +223,13 @@
                 })
                     .then(response => response.json())
                     .then(data => {
-                    alert(data.message);
-                    $(ctrl).closest('tr').hide().remove();
-                });
+                        alert(data.message);
+                        $(ctrl).closest('tr').hide().remove();
+                    });
             }
         }
 
-        $("#factory_id").on("change", function() {
+        $("#factory_id").on("change", function () {
             var id = $(this).val();
             $("#site_id").empty();
             fetch(`{{ url('api/factories?id=') }}${id}`)
@@ -214,7 +250,7 @@
                 });
         });
 
-        $("#site_id").on("change", function() {
+        $("#site_id").on("change", function () {
             var id = $(this).val();
             $("#component_id").empty();
             fetch(`{{ url('api/sites?id=') }}${id}`)
@@ -235,8 +271,7 @@
                 });
         });
 
-        function OpenReplaceModal(id)
-        {
+        function OpenReplaceModal(id) {
             $("#record-id").val(id);
             $(".bd-replace-modal-lg").modal('show');
         }
@@ -254,6 +289,94 @@
                 .then(data => {
                     alert(data.message);
                     location.reload();
+                });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var linkUserModal = document.getElementById('linkUserModal');
+            if (linkUserModal) {
+                linkUserModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget; // Button that triggered the modal
+                    var factoryId = button.getAttribute('data-factory-id'); // Extract info from data-* attributes
+                    var modalBodyInput = linkUserModal.querySelector('#factory_id');
+                    console.log("Factory ID set in modal:", factoryId); // Debugging line
+                    if (modalBodyInput) {
+                        modalBodyInput.value = factoryId; // Set the factory ID in the hidden input field
+                    }
+                });
+
+                var linkUserForm = document.getElementById('linkUserForm');
+                if (linkUserForm) {
+                    linkUserForm.addEventListener('submit', function(e) {
+                        e.preventDefault(); // Prevent the default form submission
+
+                        let formData = new FormData(this);
+                        console.log("Form Data:", Array.from(formData.entries())); // Debugging line
+
+                        fetch("{{ route('api.factory-users.store') }}", {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
+                                'Accept': 'application/json'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                // handle the response
+                                if (data.success) {
+                                    // Close the modal and refresh the page or show a success message
+                                    alert('User linked successfully!');
+                                    location.reload(); // Reload the page to reflect changes
+                                } else {
+                                    // Show error message
+                                    alert('Error linking user: ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                // Handle error
+                                console.error('Error:', error);
+                                alert('An error occurred while linking the user.');
+                            });
+                    });
+                } else {
+                    console.error('Form element #linkUserForm not found.');
+                }
+            } else {
+                console.error('Modal element #linkUserModal not found.');
+            }
+        });
+
+        linkUserForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            let formData = new FormData(this);
+            console.log("Form Data:", Array.from(formData.entries())); // Debugging line
+
+            fetch("{{ route('api.factory-users.store') }}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value,
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // handle the response
+                    if (data.success) {
+                        // Close the modal and refresh the page or show a success message
+                        alert('User linked successfully!');
+                        location.reload(); // Reload the page to reflect changes
+                    } else {
+                        // Show error message
+                        alert('Error linking user: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error:', error);
+                    alert('An error occurred while linking the user.');
                 });
         });
     </script>

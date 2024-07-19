@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Factory;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class FactoryController extends Controller
@@ -13,7 +14,9 @@ class FactoryController extends Controller
     public function index()
     {
         $factories = Factory::all();
-        return view('admin.factories.index', compact('factories'));
+        $users = User::all();
+
+        return view('admin.factories.index', compact('factories', 'users'));
     }
 
 
@@ -30,7 +33,7 @@ class FactoryController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate(request(),[
+        $this->validate(request(), [
             'title' => 'required|string',
             'address' => 'required|string',
             'owner_name' => 'required|string',
@@ -63,7 +66,7 @@ class FactoryController extends Controller
      */
     public function update(Request $request, Factory $factory)
     {
-        $this->validate(request(),[
+        $this->validate(request(), [
             'title' => 'required|string',
             'address' => 'required|string',
             'owner_name' => 'required|string',
@@ -87,26 +90,25 @@ class FactoryController extends Controller
      */
     public function destroy(Factory $factory)
     {
-        //
+        $factory->delete();
+        return redirect()->route('factories.index')->with('message', 'Factory deleted successfully.');
+
     }
 
     public function fetch(Request $request)
     {
-        if($request->input('id'))
-        {
+        if ($request->input('id')) {
             $data = Factory::where('id', $request->input('id'))
                 ->with(['sites'])
                 ->first();
 
-            if($data) return response()->json($data, 200);
+            if ($data) return response()->json($data, 200);
             else return response()->json(['message' => 'Factory is not registered in the system.'], 404);
-        }
-        else
-        {
+        } else {
             $data = Factory::with(['sites'])
                 ->get();
 
-            if($data) return response()->json($data, 200);
+            if ($data) return response()->json($data, 200);
             else return response()->json(['message' => 'No factories registered in the system.'], 404);
         }
     }

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('contact_no')->nullable();
             $table->string('fax')->nullable();
             $table->string('email')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

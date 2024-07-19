@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use League\Csv\Reader;
+use Yajra\DataTables\DataTables;
 
 class DataFileController extends Controller
 {
@@ -43,7 +44,7 @@ class DataFileController extends Controller
         $factories = Factory::all();
         $devices = Device::all();
 
-        return view('admin.data.edit', compact('dataFile', 'factories', 'devices', ));
+        return view('admin.data.edit', compact('dataFile', 'factories', 'devices',));
     }
 
     /**
@@ -102,17 +103,41 @@ class DataFileController extends Controller
         return response()->json(['message' => 'File deleted successfully.'], 200);
     }
 
+    public function getData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = DataFile::with(['device', 'site.factory'])->select('*');
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('device', function ($row) {
+                    return $row->device->serial_number;
+                })
+                ->addColumn('site', function ($row) {
+                    return $row->site->title;
+                })
+                ->addColumn('factory', function ($row) {
+                    return $row->site->factory->title;
+                })
+                ->addColumn('created_at', function ($row) {
+                    return $row->created_at->diffForHumans();
+                })
+                ->addColumn('actions', function ($row) {
+                    return view('admin.files.partial.action', compact('row'))->render();
+                })
+                ->rawColumns(['actions'])
+                ->make(true);
+        }
+    }
+
     public function download(DataFile $dataFile)
     {
         $filePath = $dataFile->file_path;
 
         // Check if the file exists
-        if (Storage::disk('public')->exists($filePath))
-        {
+        if (Storage::disk('public')->exists($filePath)) {
             // Return the file as a download response
             return Storage::disk('public')->download($filePath, $dataFile->file_name);
-        }
-        else {
+        } else {
             // Return an error response if the file does not exist
             return response()->json(['message' => 'File not found.'], 404);
         }
@@ -222,8 +247,7 @@ class DataFileController extends Controller
             }
 
             return response()->json(['message' => 'File replaced successfully.', 'data' => $dataFile], 201);
-        }
-        else {
+        } else {
             return response()->json(['message' => 'Invalid file upload.'], 400);
         }
     }

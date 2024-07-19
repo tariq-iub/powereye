@@ -12,7 +12,9 @@ class DeviceController extends Controller
      */
     public function index()
     {
-        //
+        $devices = Device::all();
+
+        return view('admin.devices.index', compact('devices'));
     }
 
     /**
@@ -20,7 +22,7 @@ class DeviceController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.devices.create');
     }
 
     /**
@@ -28,7 +30,17 @@ class DeviceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $device = new Device();
+        $device->serial_number = $device->getSerial();
+        $device->description = $request->description;
+        $device->save();
+
+        return redirect()->route('devices.index')->with('success', 'Device created successfully.');
+
     }
 
     /**
@@ -44,7 +56,7 @@ class DeviceController extends Controller
      */
     public function edit(Device $device)
     {
-        //
+        return view('admin.devices.edit', compact('device'));
     }
 
     /**
@@ -52,7 +64,14 @@ class DeviceController extends Controller
      */
     public function update(Request $request, Device $device)
     {
-        //
+        $request->validate([
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $device->description = $request->description;
+        $device->save();
+
+        return redirect()->route('devices.index')->with('success', 'Device updated successfully.');
     }
 
     /**
@@ -60,6 +79,9 @@ class DeviceController extends Controller
      */
     public function destroy(Device $device)
     {
-        //
+        $device->delete();
+
+        return redirect()->route('devices.index')->with('success', 'Device deleted successfully.');
+
     }
 }

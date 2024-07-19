@@ -5,7 +5,8 @@
                 <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTopCollapse" aria-controls="navbarTopCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
                 <a class="navbar-brand me-1 me-sm-3" href="{{ url('/home') }}">
                     <div class="d-flex align-items-center">
-                        <div class="d-flex align-items-center"><img src="{{ asset('assets/img/icons/logo.png') }}" alt="{{ config('app.name', 'Care') }}" width="27" />
+                        <div class="d-flex align-items-center">
+                            <img src="{{ asset('assets/img/icons/logo.png') }}" alt="{{ config('app.name', 'Care') }}" width="27" />
                             <p class="logo-text ms-2 d-none d-sm-block">{{ config('app.name', 'Care') }}</p>
                         </div>
                     </div>
@@ -216,6 +217,7 @@
                                     <span><span class="me-2 uil" data-feather="trello"></span>{{ $row->title }}</span>
                                 </div>
                             </a>
+                            {{-- Site Links --}}
                             <ul class="dropdown-menu">
                                 @foreach($row->sites as $site)
                                     <li>

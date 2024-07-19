@@ -135,7 +135,7 @@ class UserController extends Controller
         return redirect('/users');
     }
 
-    public function profile()
+    public function profile(User $user)
     {
 
     }

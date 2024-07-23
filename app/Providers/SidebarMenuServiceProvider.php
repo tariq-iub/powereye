@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Menu;
+use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
@@ -23,9 +24,10 @@ class SidebarMenuServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Facades\View::composer('include.sidebar', function (View $view)
+        Facades\View::composer('layouts.partial.sidebar', function (View $view)
         {
-            if (Auth::check() && in_array(Auth::user()->role_id, [1]))
+            $role = new Role();
+            if (Auth::check() && $role->isSuperAdmin())
             {
                 $view->with('menus', Menu::with('subMenus')
                     ->where('status', true)
@@ -33,7 +35,7 @@ class SidebarMenuServiceProvider extends ServiceProvider
                     ->orderBy('display_order', 'asc')
                     ->get());
             }
-            elseif (Auth::check() && in_array(Auth::user()->role_id, [2]))
+            elseif (Auth::check() && $role->isAdmin())
             {
                 $view->with('menus', Menu::with('subMenus')
                     ->where('status', true)

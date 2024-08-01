@@ -29,9 +29,9 @@
 
             <div class="col-auto">
                 <div class="d-flex align-items-center">
-                    <button class="btn btn-link text-body me-4 px-0">
+                    <!-- <button class="btn btn-link text-body me-4 px-0">
                         <span class="fa-solid fa-file-export fs-9 me-2"></span>Export
-                    </button>
+                    </button> -->
                     <a class="btn btn-primary" href="{{ route('sites.create') }}">
                         <span class="fas fa-plus me-2"></span>
                         Add Site

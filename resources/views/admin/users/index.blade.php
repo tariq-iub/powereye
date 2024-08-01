@@ -50,7 +50,7 @@
                     <th class="sort align-middle" scope="col" data-sort="role" style="width:10%;">
                         ROLE
                     </th>
-                    <th class="sort align-middle text-end" scope="col" style="width:21%;  min-width:200px;">
+                    <th class="sort align-middle text-end" scope="col" style="width:20%;  min-width:200px;">
                         ACTIONS
                     </th>
                 </tr>

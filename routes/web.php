@@ -36,6 +36,7 @@ Route::group(['middleware' => ['auth']], function () {
             Route::delete('/files/{data_file}', 'destroy')->name('delete');
             Route::get('/files/download/{data_file}', 'download')->name('download');
             Route::get('/files/data', 'getData')->name('data');
+            Route::get('/files/{data_file}', 'show')->name('show');
         });
     Route::get('/reports', function () {
         return view('reports.index');

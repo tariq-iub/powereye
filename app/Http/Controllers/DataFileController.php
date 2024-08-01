@@ -48,6 +48,25 @@ class DataFileController extends Controller
     }
 
     /**
+     * Fetch a single resource.
+     */
+    public function show($id)
+    {
+        $dataFile = DataFile::find($id);
+
+        if (!$dataFile) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+
+        return response()->json([
+            'factory_id' => $dataFile->site->factory_id,
+            'site_id' => $dataFile->site_id,
+            'component_id' => $dataFile->component_id,
+            'device_serial' => $dataFile->device->serial_number,
+        ]);
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, DataFile $dataFile)
@@ -80,7 +99,7 @@ class DataFileController extends Controller
 
             $dataFile->save();
 
-            return redirect(route('data.index'))->with('success', 'Data updated successfully.');
+            return redirect(route('files.index'))->with('success', 'Data updated successfully.');
         }
     }
 
@@ -121,10 +140,10 @@ class DataFileController extends Controller
                 ->addColumn('created_at', function ($row) {
                     return $row->created_at->diffForHumans();
                 })
-                ->addColumn('actions', function ($row) {
+                ->addColumn('action', function ($row) {
                     return view('admin.files.partial.action', compact('row'))->render();
                 })
-                ->rawColumns(['actions'])
+                ->rawColumns(['action'])
                 ->make(true);
         }
     }

@@ -75,6 +75,7 @@
                 </div>
 
             </div>
+
             <div class="col-12 col-xl-4">
                 <div class="row g-2">
                     <div class="col-12 col-xl-12">

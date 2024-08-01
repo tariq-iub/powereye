@@ -10,6 +10,7 @@
 
     <div class="mb-5">
         <h2 class="text-bold text-body-emphasis">Devices</h2>
+
         <p class="text-body-tertiary lead">
             Manage devices for sites in factories.
         </p>

@@ -19,7 +19,7 @@ class DataFileController extends Controller
      */
     public function index(Request $request)
     {
-        $files = DataFile::orderBy('id', 'asc')->paginate(100);
+        $files = DataFile::orderBy('id', 'asc')->paginate(10);
         $factories = Factory::all();
         $devices = Device::all();
         return view('admin.files.index', compact('files', 'factories', 'devices'));

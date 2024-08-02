@@ -105,31 +105,20 @@
                     @endforeach
                 </tbody>
             </table>
-            <!-- {{ $files->links() }} -->
         </div>
 
         <div class="row align-items-center justify-content-between py-2 pe-0 fs-9">
-            <div class="col-auto d-flex">
-                <p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p>
-                <a class="fw-semibold" href="#!" data-list-view="*">
-                    View all
-                    <span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span>
-                </a>
-                <a class="fw-semibold d-none" href="#!" data-list-view="less">
-                    View Less
-                    <span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span>
-                </a>
-            </div>
-            <div class="col-auto d-flex">
-                <button class="page-link" data-list-pagination="prev">
-                    <span class="fas fa-chevron-left"></span>
-                </button>
-                <ul class="mb-0 pagination"></ul>
-                <button class="page-link pe-0" data-list-pagination="next">
-                    <span class="fas fa-chevron-right"></span>
-                </button>
+            <div class="col-auto d-flex" style="display: none !important;">
+                {{ $files->links() }}
             </div>
         </div>
+        <div class="d-flex align-items-center justify-content-center">
+            {{ $files->links() }}
+        </div>
+
+
+
+
     </div>
 </div>
 @endsection

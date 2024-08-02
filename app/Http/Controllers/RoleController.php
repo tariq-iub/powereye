@@ -13,9 +13,19 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::all();
-        return $roles;
-        return view('admin.roles.index', compact('roles'));
+        $roles = Role::with('menus')->get();
+        $menus = Menu::all();
+        $parentMenus = Menu::whereNull('parent_id')->get();
+        return view('admin.roles.index', compact('roles', 'menus', 'parentMenus'));
+    }
+
+    /**
+     * Show the form for creating the specified resource.
+     */
+    public function create()
+    {
+        $menus = Menu::all();
+        return view('admin.roles.create', compact('menus'));
     }
 
     /**
@@ -23,15 +33,15 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate(request(),[
-            'title' => 'required|string',
+        $request->validate([
+            'title' => 'required|string|max:255',
         ]);
 
-        $role = new Role();
-        $role->title = $request->input('title');
-        $role->save();
+        $role = Role::create($request->only('title'));
+        // Attach menus if necessary
+        $role->menus()->sync($request->menus);
 
-        return redirect()->route('roles.index');
+        return redirect()->route('roles.index')->with('success', 'Role created successfully.');
     }
 
     /**
@@ -50,9 +60,18 @@ class RoleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Role $role)
+    public function update(Request $request, $id)
     {
-        return $request;
+        $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        $role = Role::findOrFail($id);
+        $role->update($request->only('title'));
+        // Update menus if necessary
+        $role->menus()->sync($request->menus);
+
+        return redirect()->route('roles.index')->with('success', 'Role updated successfully.');
     }
 
     /**

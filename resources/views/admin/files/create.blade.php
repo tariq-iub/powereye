@@ -75,48 +75,6 @@
                 </div>
 
             </div>
-
-            <div class="col-12 col-xl-4">
-                <div class="row g-2">
-                    <div class="col-12 col-xl-12">
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h4 class="card-title mb-4">Organize</h4>
-                                <div class="row gx-3">
-                                    <div class="col-12 col-sm-6 col-xl-12">
-                                        <div class="mb-4">
-                                            <div class="d-flex flex-wrap mb-2">
-                                                <h5 class="mb-0 text-body-highlight me-2">Role</h5>
-                                            </div>
-                                            <select class="form-select" aria-label="role" name="role_id" required>
-                                                <option value="">Select Role</option>
-                                                @foreach($roles as $row)
-                                                    <option value="{{ $row->id }}">{{ $row->title }}</option>
-                                                @endforeach
-                                            </select>
-                                            @if($errors->has('role_id'))
-                                                <div class="text-danger small">
-                                                    {{ $errors->first('role_id') }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-6 col-xl-12">
-                                        <div class="mb-4">
-                                            <div class="d-flex flex-wrap mb-2">
-                                                <h5 class="mb-0 text-body-highlight me-2">Status</h5>
-                                            </div><select class="form-select mb-3" aria-label="status" name="status" required>
-                                                <option value="1">Active</option>
-                                                <option value="0">Blocked</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </form>
 @endsection

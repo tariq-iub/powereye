@@ -31,6 +31,8 @@ Route::group(['middleware' => ['auth']], function () {
         ->as('files.')
         ->group(function () {
             Route::get('/files', 'index')->name('index');
+            Route::get('/files/create', 'create')->name('create');
+            Route::post('/files/store', 'store')->name('store');
             Route::get('/files/{data_file}/edit', 'edit')->name('edit');
             Route::put('/files/{data_file}', 'update')->name('update');
             Route::delete('/files/{data_file}', 'destroy')->name('delete');

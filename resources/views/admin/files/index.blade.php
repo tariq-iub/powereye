@@ -28,7 +28,7 @@
 
         <div class="col-auto">
             <div class="d-flex align-items-center">
-                <a class="btn btn-primary" href="#">
+                <a class="btn btn-primary" href="{{ route('files.create') }}">
                     <span class="fas fa-plus me-2"></span>
                     Add File
                 </a>
@@ -96,7 +96,7 @@
                                     <form action="#" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="dropdown-item text-danger" type="submit">Remove</button>
+                                        <button class="dropdown-item text-danger" type="submit">Archive</button>
                                     </form>
                                 </div>
                             </div>

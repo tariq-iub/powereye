@@ -28,7 +28,6 @@
         <div class="mb-3">
             <label for="site_id" class="form-label">Site</label>
             <select class="form-select " id="site_id" name="site_id">
-{{--                <option value="">None</option>--}}
                 @foreach($sites as $site)
                     <option value="{{$site->id}}">
                         {{$site->title}}
@@ -40,7 +39,6 @@
         <div class="mb-3">
             <label for="device_serial" class="form-label">Device</label>
             <select class="form-select " id="device_serial" name="device_serial">
-{{--                <option value="">None</option>--}}
                 @foreach($devices as $device)
                     <option value="{{$device->serial_number}}">
                         {{$device->serial_number}}

@@ -52,11 +52,17 @@
                     <div class="mb-3">
                         <label for="parent_id" class="form-label">Parent Menu</label>
                         <select class="form-select " id="parent_id" name="parent_id">
-                            <option value="">None</option>
+                            @if ($menu->parent_id === null)
+                                <option value="">None</option>
+                            @else
+                                <option value="{{ $menu->parent_id }}">{{ $menu->parent->title }}</option>
+                            @endif
                             @foreach($parentMenus as $pm)
+                                @if($pm->id !== $menu->id)
                                 <option value="{{$pm->id}}">
                                     {{$pm->title}}
                                 </option>
+                                @endif
                             @endforeach
                         </select>
                     </div>

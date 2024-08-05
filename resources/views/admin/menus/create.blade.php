@@ -40,21 +40,11 @@
                     <label for="parent_id" class="form-label">Parent Menu</label>
                     <select class="form-select " id="parent_id" name="parent_id">
                         <option value="">None</option>
-                        <option value="1">
-                            Home
-                        </option>
-                        <option value="2">
-                            User Management
-                        </option>
-                        <option value="6">
-                            Menu Management
-                        </option>
-                        <option value="7">
-                            Roles Management
-                        </option>
-                        <option value="8">
-                            Client Management
-                        </option>
+                        @foreach($menus as $pm)
+                            <option value="{{$pm->id}}">
+                                {{$pm->title}}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -76,7 +66,7 @@
                         <h5 class="mb-0 text-body-highlight me-2">Status</h5>
                     </div>
                     <select class="form-select " id="status" name="status">
-                        <option value="1" selected="">Active</option>
+                        <option value="1">Active</option>
                         <option value="0">Inactive</option>
                     </select>
                 </div>

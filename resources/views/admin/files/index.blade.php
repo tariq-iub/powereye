@@ -89,7 +89,7 @@
                                     </svg>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end py-2">
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="{{ route('files.edit', $file->id) }}">
                                         Edit
                                     </a>
                                     <div class="dropdown-divider"></div>

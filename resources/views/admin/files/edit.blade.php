@@ -1,97 +1,55 @@
-@extends('layouts.care')
-@section('title', 'Edit Data Files')
-@section('page-title', 'Edit Data Files')
-@section('page-message', "Edit meta-data of uploaded data files.")
+@extends('layouts.powereye')
 
 @section('content')
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="iq-card">
-                <div class="iq-card-header d-flex justify-content-between">
-                    <div class="iq-header-title">
-                        <h4 class="card-title">{{ $dataFile->file_name }}</h4>
-                    </div>
-                </div>
-                <div class="iq-card-body">
-                    <form id="posted" method="POST" action="{{ route('data.update', $dataFile->id) }}"
-                          class="needs-validation" enctype="multipart/form-data" novalidate>
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="inspection_id">Inspection</label>
-                                <select class="custom-select select2" name="inspection_id" style="width: 100%" required>
-                                    <option value="">Select Inspection</option>
-                                    @foreach($inspections as $inspection)
-                                        <option value="{{ $inspection->id }}" {{ ($dataFile->inspection->id == $inspection->id) ? 'selected' : '' }}>
-                                            {{ $inspection->title . ' (' . $inspection->type . ')' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="invalid-feedback">Select a inspection under which data file is created.</div>
-                            </div>
+    <nav class="mb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url('/files') }}">Data Files</a></li>
+            <li class="breadcrumb-item active">Edit Data File</li>
+        </ol>
+    </nav>
 
-                            <div class="form-group">
-                                <label for="factory_id">Factory</label>
-                                <select class="custom-select select2 factory" style="width: 100%" required>
-                                    <option value="">Select Factory</option>
-                                    @foreach($factories as $factory)
-                                        @php $f = $dataFile->site->factory; @endphp
-                                        <option value="{{ $factory->id }}" {{ ($f->id == $factory->id) ? 'selected' : '' }}>
-                                            {{ $factory->title }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="invalid-feedback">Select a factory name...</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="site_id">Site</label>
-                                <select class="custom-select select2 site" id="site_id" name="site_id"
-                                        style="width: 100%" required>
-                                    <option value=""></option>
-                                </select>
-                                <div class="invalid-feedback">Select a site name...</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="component_id">Component (optional)</label>
-                                <select class="custom-select select2" id="component_id" name="component_id"
-                                        style="width: 100%">
-                                    <option value="">Not Applicable</option>
-                                </select>
-                                <div class="invalid-feedback">Select a component name...</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="device_serial">Device</label>
-                                <select class="custom-select select2" id="device_serial" name="device_serial"
-                                        style="width: 100%" required>
-                                    <option value="">Select Device</option>
-                                    @foreach($devices as $device)
-                                        <option value="{{ $device->serial_number }}" {{ ($dataFile->device->id == $device->id) ? 'selected' : '' }}>
-                                            {{ $device->serial_number }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="invalid-feedback">Select a device name...</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="data-file">Data file</label>
-                                <input type="file" class="form-control-file" name="file" id="data-file" required>
-                                <div class="invalid-feedback">Data file needs to be selected.</div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Upload Data</button>
-                        </div>
-                    </form>
-                </div>
+    <form class="mb-9" method="POST" action="{{ route('files.update', $dataFile->id) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+        <div class="row g-3 flex-between-end mb-5">
+            <div class="col-auto">
+                <h2 class="mb-3">{{ $dataFile->file_name }}</h2>
+                <h5 class="text-body-tertiary fw-semibold">
+                    Edit Data File.
+                </h5>
+            </div>
+            <div class="col-auto">
+                <a href="{{ route('files.index') }}" class="btn btn-phoenix-secondary me-2 mb-2 mb-sm-0">Discard</a>
+                <button class="btn btn-primary mb-2 mb-sm-0" type="submit">Update file</button>
             </div>
         </div>
-    </div>
+
+        <div class="mb-3">
+            <label for="site_id" class="form-label">Site</label>
+            <select class="form-select " id="site_id" name="site_id">
+                <option value="">None</option>
+                @foreach($sites as $site)
+                    <option value="{{$site->id}}">
+                        {{$site->title}}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="device_serial" class="form-label">Device</label>
+            <select class="form-select " id="device_serial" name="device_serial">
+                <option value="">None</option>
+                @foreach($devices as $device)
+                    <option value="{{$device->serial_number}}">
+                        {{$device->serial_number}}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+    </form>
 @endsection
 
 @push('scripts')

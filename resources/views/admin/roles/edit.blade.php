@@ -5,7 +5,7 @@
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('roles.index') }}">Roles</a></li>
-            <li class="breadcrumb-item active">Create Role</li>
+            <li class="breadcrumb-item active">Edit Role</li>
         </ol>
     </nav>
 

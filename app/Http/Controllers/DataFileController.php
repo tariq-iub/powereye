@@ -6,6 +6,7 @@ use App\Models\DataFile;
 use App\Models\Device;
 use App\Models\Factory;
 use App\Models\SensorData;
+use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -31,8 +32,51 @@ class DataFileController extends Controller
     public function create()
     {
         $factories = Factory::all();
+        $sites = Site::all();
         $devices = Device::all();
-        return view('admin.files.create', compact('factories', 'devices'));
+        return view('admin.files.create', compact('factories', 'devices', 'sites'));
+    }
+
+    /**
+     * Store the specified resource.
+     */
+    public function store(Request $request)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|mimes:csv,txt|max:2048',
+            'site_id' => 'required|exists:sites,id',
+            'device_serial' => 'required|string|exists:devices,serial_number',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $device = Device::where('serial_number', $request->input('device_serial'))->first();
+        if (!$device) {
+            return response()->json(['message' => 'Device is not registered at system.'], 404);
+        }
+
+        if ($request->file('file')->isValid()) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('data_files', $fileName, 'public');
+
+            // Store file metadata in the database
+            $dataFile = DataFile::create([
+                'file_name' => $fileName,
+                'file_path' => $filePath,
+                'site_id' => $request->input('site_id'),
+                'device_id' => $device->id,
+            ]);
+
+            $this->process_file($dataFile);
+
+            return response()->json(['message' => 'File uploaded successfully'], 200);
+        }
+
+        return response()->json(['message' => 'Invalid file upload'], 400);
     }
 
 
@@ -43,8 +87,9 @@ class DataFileController extends Controller
     {
         $factories = Factory::all();
         $devices = Device::all();
+        $sites = Site::all();
 
-        return view('admin.data.edit', compact('dataFile', 'factories', 'devices',));
+        return view('admin.files.edit', compact('dataFile', 'factories', 'devices', 'sites',));
     }
 
     /**
@@ -73,10 +118,10 @@ class DataFileController extends Controller
     {
         // Validate the request
         $validator = Validator::make($request->all(), [
-            'file' => 'required|mimes:csv,txt|max:2048',
+//            'file' => 'required|mimes:csv,txt|max:2048',
             'site_id' => 'required|exists:sites,id',
             'device_serial' => 'required|string|exists:devices,serial_number', // Ensure device is registered
-            'inspection_id' => 'required|exists:inspections,id',
+//            'inspection_id' => 'required|exists:inspections,id',
         ]);
 
         if ($validator->fails()) {
@@ -85,22 +130,29 @@ class DataFileController extends Controller
 
         $device = Device::where('serial_number', $request->input('device_serial'))->first();
 
-        if ($request->file('file')->isValid()) {
-            $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('data_files', $fileName, 'public');
+//        if ($request->file('file')->isValid()) {
+//            $file = $request->file('file');
+//            $fileName = time() . '_' . $file->getClientOriginalName();
+//            $filePath = $file->storeAs('data_files', $fileName, 'public');
+//
+//            $dataFile->file_name = $fileName;
+///           $dataFile->file_path = $filePath;
+//            $dataFile->component_id = $request->input('component_id');
+//            $dataFile->site_id = $request->input('site_id');
+//            $dataFile->device_id = $device->id;
+//            $dataFile->inspection_id = $request->input('inspection_id');
+//
+//            $dataFile->save();
+//
+//            return redirect(route('files.index'))->with('success', 'Data updated successfully.');
+//        }
 
-            $dataFile->file_name = $fileName;
-            $dataFile->file_path = $filePath;
-            $dataFile->component_id = $request->input('component_id');
             $dataFile->site_id = $request->input('site_id');
             $dataFile->device_id = $device->id;
-            $dataFile->inspection_id = $request->input('inspection_id');
-
             $dataFile->save();
 
             return redirect(route('files.index'))->with('success', 'Data updated successfully.');
-        }
+
     }
 
     /**

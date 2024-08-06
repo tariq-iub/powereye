@@ -30,4 +30,9 @@ class Site extends Model
     {
         return $this->hasMany(Component::class);
     }
+
+    public function data_file()
+    {
+        return $this->hasMany(DataFile::class);
+    }
 }

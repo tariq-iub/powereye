@@ -3,6 +3,7 @@
 use App\Http\Controllers\DataFileController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\FactoryUserController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,3 +41,6 @@ Route::prefix('file-ota')->group(function () {
     Route::delete('/{id}', [BinFileController::class, 'destroy']);
     Route::post('/replace', [BinFileController::class, 'replace']);
 });
+
+Route::get('/get-sites-power', [HomeController::class, 'getSitesPower'])->name('api.sitesPower');
+

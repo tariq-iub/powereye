@@ -5,17 +5,26 @@
         <div class="col-md-9 col-auto">
             <h2 class="mb-2 text-body-emphasis">Real-Time View</h2>
             <h5 class="text-body-tertiary fw-semibold">Here’s what’s going on at your business right now</h5>
+
+            <form action="" class="w-25">
+                <select class="form-select" name="timeframe" onchange="this.form.submit()">
+                    @foreach($timeframeOptions as $label => $value)
+                        <option value="{{ $value }}" {{ request('timeframe') === $value ? 'selected': '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </form>
+
         </div>
     </div>
 
     <div class="mx-n4 px-4 mx-lg-n6 px-lg-6 bg-body-emphasis pt-7 pb-3 border-y">
         <div class="row">
             <div class="col-12 col-md-6">
-                <h3>Sensor Data Line Chart</h3>
+                <h3>Power Consumption</h3>
                 <div id="powerLineChart" class="h-auto" style="height: 300px;"></div>
             </div>
             <div class="col-12 col-md-6">
-                <h3>Sensor Data Pie Chart</h3>
+                <h3>Power Consumption of each site</h3>
                 <div id="sensorPieChart" class="h-auto" style="height: 320px;"></div>
             </div>
         </div>
@@ -24,11 +33,11 @@
     <div class="mx-n4 px-4 mx-lg-n6 px-lg-6 bg-body-emphasis pt-7 pb-3 border-y">
         <div class="row">
             <div class="col-12 col-md-6">
-                <h3>Sensor Data Line Chart 2</h3>
+                <h3>Energy Consumption</h3>
                 <div id="barChart" class="h-auto" style="height: 300px;"></div>
             </div>
             <div class="col-12 col-md-6">
-                <h3>Sensor Data Pie Chart 2</h3>
+                <h3>Energy consumption of each site</h3>
                 <div id="doughnutChart" class="h-auto" style="height: 320px;"></div>
             </div>
         </div>
@@ -41,15 +50,14 @@
         document.addEventListener('DOMContentLoaded', function () {
 
             const sensorData = @json($sensorsData);
+            const sitesPower = @json($sitesPower);
+            const sitesEnergy = @json($sitesEnergy);
             const latestSensorData = @json($latestSensorsData);
 
             const timestamps = latestSensorData.map(data => data.timestamp).reverse();
             const p1Data = latestSensorData.map(data => data.P1).reverse();
             const p2Data = latestSensorData.map(data => data.P2).reverse();
             const p3Data = latestSensorData.map(data => data.P3).reverse();
-            const e1Data = sensorData.map(data => data.E1).reverse();
-            const e2Data = sensorData.map(data => data.E2).reverse();
-            const e3Data = sensorData.map(data => data.E3).reverse();
 
             const formattedTimestamps = timestamps.map(timestamp =>
                 new Date(timestamp).toLocaleTimeString('en-US', {
@@ -107,29 +115,12 @@
 
             createTimeSeriesChart('#powerLineChart', ['P1 (W)', 'P2 (W)', 'P3 (W)'], 'Power (W)');
 
-            // Prepare data for the pie charts
-            const siteValues = {};
 
-            // Accumulate values for each site
-            sensorData.forEach(data => {
-                const siteTitle = data.data_file.site.title; // Get site title
-                const value = parseFloat(data.P1.toFixed(2)); // Use P1, P2, or any other relevant field
+            const pieData = sitesPower.map(site => ({
+                value: site.power,
+                name: site.title,
+            }));
 
-                // Accumulate the value
-                if (siteValues[siteTitle]) {
-                    siteValues[siteTitle] += value; // Add to existing value
-                } else {
-                    siteValues[siteTitle] = value; // Initialize if not exists
-                }
-            });
-
-            // Convert the accumulated values into pieData format
-            var pieData = [];
-            for (const site in siteValues) {
-                pieData.push({ value: siteValues[site], name: site }); // Create pie data
-            }
-
-            // Function to create pie chart
             const createPieChart = (chartDom, pieData) => {
                 const pieChart = echarts.init(chartDom);
                 const pieOption = {
@@ -142,7 +133,7 @@
                     },
                     series: [
                         {
-                            name: 'Power (kW)',
+                            name: 'Power (W)',
                             type: 'pie',
                             radius: ['40%', '70%'],
                             data: pieData,
@@ -164,23 +155,21 @@
                 pieChart.setOption(pieOption);
             };
 
-            // Create the first pie chart
             createPieChart(document.getElementById('sensorPieChart'), pieData);
 
             const energyTotals = {};
 
             sensorData.forEach(data => {
-                const timestamp = data.timestamp; // Use timestamp from sensorData
-                const totalEnergy = parseFloat((data.E1 + data.E2 + data.E3).toFixed(2)); // Calculate total energy
+                const timestamp = data.timestamp;
+                const totalEnergy = data.E1 + data.E2 + data.E3;
 
                 if (energyTotals[timestamp]) {
-                    energyTotals[timestamp] += totalEnergy; // Accumulate energy for the same timestamp
+                    energyTotals[timestamp] += totalEnergy;
                 } else {
-                    energyTotals[timestamp] = totalEnergy; // Initialize if it doesn't exist
+                    energyTotals[timestamp] = totalEnergy;
                 }
             });
 
-            // Prepare data for the bar chart and reverse the order
             const barData = Object.keys(energyTotals).reverse().map(timestamp => ({
                 name: new Date(timestamp).toLocaleTimeString('en-US', {
                     hour: '2-digit',
@@ -206,35 +195,13 @@
 
             barChart.setOption(option2);
 
-            const siteEnergy = {};
-
-// Accumulate values for each site
-            sensorData.forEach(data => {
-                const siteTitle = data.data_file.site.title; // Get site title
-                const energy = data.E1 + data.E2 + data.E3; // Sum the energies
-                const value = parseFloat(energy.toFixed(2)); // Use total energy value
-
-                // Accumulate the value
-                if (siteEnergy[siteTitle]) {
-                    siteEnergy[siteTitle] += value; // Add to existing value
-                } else {
-                    siteEnergy[siteTitle] = value; // Initialize if not exists
-                }
-            });
-
-// Convert the accumulated values into doughnut chart data format
-            const doughnutData = Object.keys(siteEnergy).map((siteTitle, index) => ({
-                value: siteEnergy[siteTitle],
-                name: siteTitle,
+            const doughnutData = sitesEnergy.map(site => ({
+                value: site.energy,
+                name: site.title,
             }));
 
-// Initialize the doughnut chart
-            const doughnutChart = echarts.init(document.getElementById('doughnutChart')); // Ensure you have a div with id "doughnutChart"
+            const doughnutChart = echarts.init(document.getElementById('doughnutChart'));
 
-// Define a color array for different sites
-            const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FF8D33', '#33FFD1', '#A133FF', '#FFC733'];
-
-// Set the options for the doughnut chart
             const option = {
                 tooltip: {
                     trigger: 'item',
@@ -247,7 +214,7 @@
                     {
                         name: 'Energy (kWh)',
                         type: 'pie',
-                        radius: ['40%', '70%'], // Inner and outer radius for the doughnut
+                        radius: ['40%', '70%'],
                         avoidLabelOverlap: false,
                         itemStyle: {
                             borderRadius: 10,
@@ -261,13 +228,11 @@
                                 shadowColor: 'rgba(0, 0, 0, 0.5)',
                             },
                         },
-                        data: doughnutData, // Use the processed doughnut data
-                        color: colors, // Set the color for each slice
+                        data: doughnutData,
                     },
                 ],
             };
-
-// Set the options and render the chart
+            console.log(sitesEnergy);
             doughnutChart.setOption(option);
         });
     </script>

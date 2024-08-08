@@ -47,6 +47,106 @@
 
 @push('scripts')
     <script>
+        const initChart = chart => echarts.init(document.querySelector(chart));
+
+        const seriesObjTS = (name, data, smooth=true) => {
+            if (!isNaN(data)) {
+                data = data.map(value => parseFloat(value.toFixed(2)));
+            }
+            return {
+                name, type: 'line', data, smooth
+            }
+        };
+
+        const seriesObjB = (name, data) => {
+            data = data.map(item => item.value);
+            return {
+                name, type: 'bar', data, emphasis: { focus: 'series' },
+            }
+        };
+
+        const seriesObjD = (name, data, itemStyle=null, emphasis=null) => {
+            if (!isNaN(data)) {
+                data = data.map(value => parseFloat(value.toFixed(2)));
+            }
+
+            if (itemStyle === null) itemStyle = {
+                borderRadius: 10,
+                borderColor: 'transparent',
+                borderWidth: 2,
+            };
+
+            if (emphasis === null) emphasis = {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)',
+                }
+            }
+
+            return {
+                name, type: 'pie', radius: ['40%', '70%'], data, itemStyle, emphasis
+            }
+        };
+
+        const createTimeSeriesChart = (chart, legends, xData, yLabel, seriesVals) => {
+            const timeSeriesChart = initChart(chart);
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data: legends
+                },
+                xAxis: {
+                    type: 'category',
+                    data: xData,
+                    axisLabel: {
+                        rotate: 30,
+                    },
+                },
+                yAxis: {
+                    type: 'value',
+                    name: yLabel,
+                },
+                series: seriesVals.map(([name, data, smooth]) => seriesObjTS(name, data, smooth)),
+            };
+            timeSeriesChart.setOption(option);
+        };
+
+        const createDoughnutChart = (chart, data, seriesName) => {
+            const doughnutChart = initChart(chart);
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                },
+                series: [seriesObjD(seriesName, data)],
+            };
+
+            doughnutChart.setOption(option);
+        };
+
+        const createBarChart = (chart, data, legend, yLabel, seriesName) => {
+            const barChart = initChart(chart);
+            const option = {
+                tooltip: { trigger: 'item' },
+                legend: { data: legend },
+                xAxis: { type: 'category', data: data.map(item => item.name) },
+                yAxis: { type: 'value', name: yLabel },
+                series: [
+                    seriesObjB(seriesName, data)
+                ],
+            };
+
+            barChart.setOption(option);
+        };
+    </script>
+
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
 
             const sensorData = @json($sensorsData);
@@ -68,94 +168,18 @@
                 })
             );
 
-            const createTimeSeriesChart = (chart, legends, y) => {
-                const lineChart = echarts.init(document.querySelector(chart));
-                const lineOption = {
-                    tooltip: {
-                        trigger: 'axis',
-                    },
-                    legend: {
-                        data: legends
-                    },
-                    xAxis: {
-                        type: 'category',
-                        data: formattedTimestamps,
-                        axisLabel: {
-                            rotate: 30,
-                        },
-                    },
-                    yAxis: {
-                        type: 'value',
-                        name: y,
-                    },
-                    series: [
-                        {
-                            name: `${legends[0]}`,
-                            type: 'line',
-                            data: p1Data.map(value => parseFloat(value.toFixed(2))),
-                            smooth: true,
-                        },
-                        {
-                            name: `${legends[1]}`,
-                            type: 'line',
-                            data: p2Data.map(value => parseFloat(value.toFixed(2))),
-                            smooth: true,
-                        },
-                        {
-                            name: `${legends[2]}`,
-                            type: 'line',
-                            data: p3Data.map(value => parseFloat(value.toFixed(2))),
-                            smooth: true,
-                        },
-                    ],
+            createTimeSeriesChart('#powerLineChart', ['P1', 'P2', 'P3'], formattedTimestamps, 'Power', [
+                ['P1', p1Data],
+                ['P2', p2Data],
+                ['P3', p3Data],
+            ]);
 
-                };
-                lineChart.setOption(lineOption);
-            };
-
-            createTimeSeriesChart('#powerLineChart', ['P1 (W)', 'P2 (W)', 'P3 (W)'], 'Power (W)');
-
-
-            const pieData = sitesPower.map(site => ({
+            const sitesPowerData = sitesPower.map(site => ({
                 value: site.power,
                 name: site.title,
             }));
 
-            const createPieChart = (chartDom, pieData) => {
-                const pieChart = echarts.init(chartDom);
-                const pieOption = {
-                    tooltip: {
-                        trigger: 'item',
-                    },
-                    legend: {
-                        orient: 'vertical',
-                        left: 'left',
-                    },
-                    series: [
-                        {
-                            name: 'Power (W)',
-                            type: 'pie',
-                            radius: ['40%', '70%'],
-                            data: pieData,
-                            itemStyle:{
-                                borderRadius: 10,
-                                borderColor: 'transparent',
-                                borderWidth: 2,
-                            },
-                            emphasis: {
-                                itemStyle: {
-                                    shadowBlur: 10,
-                                    shadowOffsetX: 0,
-                                    shadowColor: 'rgba(0, 0, 0, 0.5)',
-                                },
-                            },
-                        },
-                    ],
-                };
-                pieChart.setOption(pieOption);
-            };
-
-            createPieChart(document.getElementById('sensorPieChart'), pieData);
+            createDoughnutChart('#sensorPieChart', sitesPowerData);
 
             const energyTotals = {};
 
@@ -179,61 +203,14 @@
                 value: energyTotals[timestamp],
             }));
 
-            const barChart = echarts.init(document.getElementById('barChart'));
-            const option2 = {
-                tooltip: { trigger: 'item' },
-                legend: { data: ['Energy (kWh)'] },
-                xAxis: { type: 'category', data: barData.map(item => item.name) },
-                yAxis: { type: 'value', name: 'Energy (kWh)' },
-                series: [{
-                    name: 'Energy (kWh)',
-                    type: 'bar',
-                    data: barData.map(item => item.value),
-                    emphasis: { focus: 'series' },
-                }],
-            };
+            createBarChart('#barChart', barData ,['Energy (kWh'] ,'Energy', 'Energy');
 
-            barChart.setOption(option2);
-
-            const doughnutData = sitesEnergy.map(site => ({
+            const sitesEnergyData = sitesEnergy.map(site => ({
                 value: site.energy,
                 name: site.title,
             }));
 
-            const doughnutChart = echarts.init(document.getElementById('doughnutChart'));
-
-            const option = {
-                tooltip: {
-                    trigger: 'item',
-                },
-                legend: {
-                    orient: 'vertical',
-                    left: 'left',
-                },
-                series: [
-                    {
-                        name: 'Energy (kWh)',
-                        type: 'pie',
-                        radius: ['40%', '70%'],
-                        avoidLabelOverlap: false,
-                        itemStyle: {
-                            borderRadius: 10,
-                            borderColor: 'transparent',
-                            borderWidth: 2,
-                        },
-                        emphasis: {
-                            itemStyle: {
-                                shadowBlur: 10,
-                                shadowOffsetX: 0,
-                                shadowColor: 'rgba(0, 0, 0, 0.5)',
-                            },
-                        },
-                        data: doughnutData,
-                    },
-                ],
-            };
-            console.log(sitesEnergy);
-            doughnutChart.setOption(option);
+            createDoughnutChart('#doughnutChart', sitesEnergyData);
         });
     </script>
 @endpush

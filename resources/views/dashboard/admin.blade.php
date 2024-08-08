@@ -6,10 +6,10 @@
             <h2 class="mb-2 text-body-emphasis">Real-Time View</h2>
             <h5 class="text-body-tertiary fw-semibold">Here’s what’s going on at your business right now</h5>
 
-            <form action="" class="w-25">
-                <select class="form-select" name="timeframe" onchange="this.form.submit()">
+            <form id="timeframe-form" action="" class="w-25">
+                <select class="form-select" id="timeframe-select" name="timeframe">
                     @foreach($timeframeOptions as $label => $value)
-                        <option value="{{ $value }}" {{ request('timeframe') === $value ? 'selected': '' }}>{{ $label }}</option>
+                        <option value="{{ $value }}" {{ request('timeframe') === $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
             </form>
@@ -213,4 +213,92 @@
             createDoughnutChart('#doughnutChart', sitesEnergyData);
         });
     </script>
+
+    <script>
+        function updateCharts(latestSensorData, sitesPower, sitesEnergy) {
+            const sitesPowerData = sitesPower.map(site => ({
+                value: site.power,
+                name: site.title,
+            }));
+
+            const sitesEnergyData = sitesEnergy.map(site => ({
+                value: site.energy,
+                name: site.title,
+            }));
+
+            const timestamps = latestSensorData.map(data => data.timestamp).reverse();
+            const p1Data = latestSensorData.map(data => data.p1).reverse();
+            const p2Data = latestSensorData.map(data => data.p2).reverse();
+            const p3Data = latestSensorData.map(data => data.p3).reverse();
+
+            const formattedTimestamps = timestamps.map(timestamp =>
+                new Date(timestamp).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                })
+            );
+
+            const energyTotals = latestSensorData.reduce((acc, { timestamp, E1, E2, E3 }) => {
+                const totalEnergy = E1 + E2 + E3;
+                acc[timestamp] = (acc[timestamp] || 0) + totalEnergy;
+                return acc;
+            }, {});
+
+            const barData = Object.entries(energyTotals).reverse().map(([timestamp, totalEnergy]) => ({
+                name: new Date(timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                value: totalEnergy,
+            }));
+
+            createTimeSeriesChart('#powerLineChart', ['P1', 'P2', 'P3'], formattedTimestamps, 'Power', [
+                ['P1', p1Data],
+                ['P2', p2Data],
+                ['P3', p3Data],
+            ]);
+
+            createBarChart('#barChart', barData ,['Energy (kWh'] ,'Energy', 'Energy');
+
+            createDoughnutChart('#sensorPieChart', sitesPowerData, 'Power Consumption by Site');
+            createDoughnutChart('#doughnutChart', sitesEnergyData, 'Energy Consumption by Site');
+        }
+
+        $(document).ready(function() {
+            $('#timeframe-select').on('change', function() {
+                const timeframe = $(this).val();
+                fetchAndUpdateCharts(timeframe);
+            });
+
+            const initialTimeframe = $('#timeframe-select').val();
+            fetchAndUpdateCharts(initialTimeframe);
+        });
+
+        function fetchAndUpdateCharts(timeframe) {
+            $.when(
+                $.ajax({
+                    url: '/api/get-sites-power',
+                    method: 'GET',
+                    data: { timeframe }
+                }),
+                $.ajax({
+                    url: '/api/get-sites-energy',
+                    method: 'GET',
+                    data: { timeframe }
+                }),
+                $.ajax({
+                    url: '/api/get-sensors-power',
+                    method: 'GET',
+                    data: { timeframe }
+                })
+            ).then((powerResponse, energyResponse, sensorsPowerResponse) => {
+                const powerData = powerResponse[0];
+                const energyData = energyResponse[0];
+                const sensorsPower = sensorsPowerResponse[0];
+                updateCharts(sensorsPower, powerData, energyData);
+            });
+        }
+    </script>
+
+
+
 @endpush

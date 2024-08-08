@@ -42,5 +42,7 @@ Route::prefix('file-ota')->group(function () {
     Route::post('/replace', [BinFileController::class, 'replace']);
 });
 
+Route::get('/get-sites-energy', [HomeController::class, 'getSitesEnergy'])->name('api.sitesEnergy');
 Route::get('/get-sites-power', [HomeController::class, 'getSitesPower'])->name('api.sitesPower');
+Route::get('/get-sensors-power', [HomeController::class, 'getLatestSensorData'])->name('api.sensorsPower');
 

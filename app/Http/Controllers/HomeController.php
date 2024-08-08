@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DataFile;
 use App\Models\SensorData;
 use App\Models\Site;
 use Illuminate\Http\Request;
@@ -44,11 +43,7 @@ class HomeController extends Controller
 
                 $now = Carbon::now();
 
-                if ($timeframe === 'all') {
-                    $start = Carbon::createFromDate(0);
-                } else {
-                    $start = Carbon::now()->subDays((int)$timeframe);
-                }
+                $start = $this->mapTimeframe($request);
 
                 $sensorsData = SensorData::with('data_file.site')->whereBetween('timestamp', [$start, $now])
                     ->orderBy('timestamp', 'desc')
@@ -105,23 +100,58 @@ class HomeController extends Controller
 
     public function getSitesPower(Request $request)
     {
+        $start = $this->mapTimeframe($request);
+
         $sites = Site::with(['data_file.data' => function ($query) use ($start) {
-            $query->select('data_file_id', 'E1', 'E2', 'E3', 'timestamp')->where('timestamp', '>=', $start);
+            $query->select('data_file_id', 'P1', 'P2', 'P3', 'timestamp')
+                ->where('timestamp', '>=', $start);
+        }])->get();
+
+        $sitesPower = [];
+
+        foreach ($sites as $site) {
+            $totalP1 = $totalP2 = $totalP3 = 0;
+
+            foreach ($site->data_file as $dataFile) {
+                foreach ($dataFile->data as $data) {
+                    $totalP1 += $data->P1 ?? 0;
+                    $totalP2 += $data->P2 ?? 0;
+                    $totalP3 += $data->P3 ?? 0;
+                }
+            }
+
+            $totalPower = $totalP1 + $totalP2 + $totalP3;
+
+            if ($totalPower > 0) {
+                $sitesPower[] = [
+                    'title' => $site->title,
+                    'power' => $totalPower,
+                ];
+            }
+        }
+
+        return response()->json($sitesPower);
+    }
+
+    public function getSitesEnergy(Request $request)
+    {
+        $start = $this->mapTimeframe($request);
+
+        $sites = Site::with(['data_file.data' => function ($query) use ($start) {
+            $query->select('data_file_id', 'E1', 'E2', 'E3', 'timestamp')
+                ->where('timestamp', '>=', $start);
         }])->get();
 
         $sitesEnergy = [];
 
         foreach ($sites as $site) {
-            $totalE1 = $totalE2 = $totalE3 = 0;
+            $totalEnergy = 0;
 
             foreach ($site->data_file as $dataFile) {
                 foreach ($dataFile->data as $data) {
-                    $totalE1 += $data->E1 ?? 0;
-                    $totalE2 += $data->E2 ?? 0;
-                    $totalE3 += $data->E3 ?? 0;
+                    $totalEnergy += ($data->E1 ?? 0) + ($data->E2 ?? 0) + ($data->E3 ?? 0);
                 }
             }
-            $totalEnergy = $totalE1 + $totalE2 + $totalE3;
 
             if ($totalEnergy > 0) {
                 $sitesEnergy[] = [
@@ -131,6 +161,37 @@ class HomeController extends Controller
             }
         }
 
+        return response()->json($sitesEnergy);
     }
 
+    public function getLatestSensorData(Request $request)
+    {
+        $now = Carbon::now();
+        $start = $this->mapTimeframe($request);
+
+        $sensorsData = SensorData::with('data_file.site')
+            ->whereBetween('timestamp', [$start, $now])
+            ->orderBy('timestamp', 'desc')
+            ->select('p1', 'p2', 'p3', 'E1', 'E2', 'E3', 'data_file_id', 'timestamp')
+            ->get();
+
+        return response()->json($sensorsData);
+    }
+
+
+    private function mapTimeframe(Request $request)
+    {
+        $timeframe = $request->input('timeframe', '1');
+
+        $now = Carbon::now();
+
+        if ($timeframe === 'all') {
+            $start = Carbon::createFromDate(0);
+        } else {
+            $start = Carbon::now()->subDays((int)$timeframe);
+        }
+
+        return $start;
+    }
 }
+

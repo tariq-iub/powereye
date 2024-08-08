@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helpers;
 use App\Models\SensorData;
 use App\Models\Site;
 use Illuminate\Http\Request;
@@ -29,21 +30,11 @@ class HomeController extends Controller
     {
         if (Auth::user()) {
             if (in_array(Auth::user()->role->id, [1, 2])) {
-                $timeframeOptions = [
-                    '1 Day' => '1',
-                    '3 Days' => '3',
-                    '7 Days' => '7',
-                    '30 Days' => '30',
-                    '90 Days' => '90',
-                    '1 Year' => '365',
-                    'All' => 'all'
-                ];
-
-                $timeframe = $request->get('timeframe', '1');
+                $timeframeOptions = Helpers::getTimeFrameOptions();
 
                 $now = Carbon::now();
 
-                $start = $this->mapTimeframe($request);
+                $start = Helpers::getTimeFrame($request);
 
                 $sensorsData = SensorData::with('data_file.site')->whereBetween('timestamp', [$start, $now])
                     ->orderBy('timestamp', 'desc')
@@ -89,7 +80,7 @@ class HomeController extends Controller
                         ];
                     }
                 }
-                $latestSensorsData = $sensorsData->take(100);
+                $latestSensorsData = $sensorsData;
 
                 return view('dashboard.admin', compact('sensorsData', 'latestSensorsData', 'timeframeOptions', 'sitesEnergy', 'sitesPower'));
             } else return view('dashboard.client');
@@ -100,7 +91,7 @@ class HomeController extends Controller
 
     public function getSitesPower(Request $request)
     {
-        $start = $this->mapTimeframe($request);
+        $start = Helpers::getTimeFrame($request);
 
         $sites = Site::with(['data_file.data' => function ($query) use ($start) {
             $query->select('data_file_id', 'P1', 'P2', 'P3', 'timestamp')
@@ -135,7 +126,7 @@ class HomeController extends Controller
 
     public function getSitesEnergy(Request $request)
     {
-        $start = $this->mapTimeframe($request);
+        $start = Helpers::getTimeFrame($request);
 
         $sites = Site::with(['data_file.data' => function ($query) use ($start) {
             $query->select('data_file_id', 'E1', 'E2', 'E3', 'timestamp')
@@ -167,7 +158,7 @@ class HomeController extends Controller
     public function getLatestSensorData(Request $request)
     {
         $now = Carbon::now();
-        $start = $this->mapTimeframe($request);
+        $start = Helpers::getTimeFrame($request);
 
         $sensorsData = SensorData::with('data_file.site')
             ->whereBetween('timestamp', [$start, $now])
@@ -176,22 +167,6 @@ class HomeController extends Controller
             ->get();
 
         return response()->json($sensorsData);
-    }
-
-
-    private function mapTimeframe(Request $request)
-    {
-        $timeframe = $request->input('timeframe', '1');
-
-        $now = Carbon::now();
-
-        if ($timeframe === 'all') {
-            $start = Carbon::createFromDate(0);
-        } else {
-            $start = Carbon::now()->subDays((int)$timeframe);
-        }
-
-        return $start;
     }
 }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Helpers;
 use App\Models\SensorData;
 use App\Models\Site;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -40,47 +41,10 @@ class HomeController extends Controller
                     ->orderBy('timestamp', 'desc')
                     ->get();
 
-                $sites = Site::with(['data_file.data' => function ($query) use ($start) {
-                    $query->select('data_file_id', 'P1', 'P2', 'P3', 'E1', 'E2', 'E3', 'timestamp')->where('timestamp', '>=', $start);
-                }])->get();
-
-                $sitesPower = [];
-                $sitesEnergy = [];
-
-                foreach ($sites as $site) {
-                    $totalP1 = $totalP2 = $totalP3 = 0;
-                    $totalE1 = $totalE2 = $totalE3 = 0;
-
-                    foreach ($site->data_file as $dataFile) {
-                        foreach ($dataFile->data as $data) {
-                            $totalP1 += $data->P1 ?? 0;
-                            $totalP2 += $data->P2 ?? 0;
-                            $totalP3 += $data->P3 ?? 0;
-
-                            $totalE1 += $data->E1 ?? 0;
-                            $totalE2 += $data->E2 ?? 0;
-                            $totalE3 += $data->E3 ?? 0;
-                        }
-                    }
-
-                    $totalPower = $totalP1 + $totalP2 + $totalP3;
-                    $totalEnergy = $totalE1 + $totalE2 + $totalE3;
-
-                    if ($totalPower > 0) {
-                        $sitesPower[] = [
-                            'title' => $site->title,
-                            'power' => $totalPower,
-                        ];
-                    }
-
-                    if ($totalEnergy > 0) {
-                        $sitesEnergy[] = [
-                            'title' => $site->title,
-                            'energy' => $totalEnergy,
-                        ];
-                    }
-                }
                 $latestSensorsData = $sensorsData;
+
+                $sitesPower = Helpers::getSitesPower($request, 'array');
+                $sitesEnergy = Helpers::getSitesEnergy($request, 'array');
 
                 return view('dashboard.admin', compact('sensorsData', 'latestSensorsData', 'timeframeOptions', 'sitesEnergy', 'sitesPower'));
             } else return view('dashboard.client');
@@ -89,73 +53,17 @@ class HomeController extends Controller
         }
     }
 
-    public function getSitesPower(Request $request)
+    public function getSitesPower(Request $request, string $returnType='json'): JsonResponse|array
     {
-        $start = Helpers::getTimeFrame($request);
-
-        $sites = Site::with(['data_file.data' => function ($query) use ($start) {
-            $query->select('data_file_id', 'P1', 'P2', 'P3', 'timestamp')
-                ->where('timestamp', '>=', $start);
-        }])->get();
-
-        $sitesPower = [];
-
-        foreach ($sites as $site) {
-            $totalP1 = $totalP2 = $totalP3 = 0;
-
-            foreach ($site->data_file as $dataFile) {
-                foreach ($dataFile->data as $data) {
-                    $totalP1 += $data->P1 ?? 0;
-                    $totalP2 += $data->P2 ?? 0;
-                    $totalP3 += $data->P3 ?? 0;
-                }
-            }
-
-            $totalPower = $totalP1 + $totalP2 + $totalP3;
-
-            if ($totalPower > 0) {
-                $sitesPower[] = [
-                    'title' => $site->title,
-                    'power' => $totalPower,
-                ];
-            }
-        }
-
-        return response()->json($sitesPower);
+        return Helpers::getSitesPower($request, $returnType);
     }
 
-    public function getSitesEnergy(Request $request)
+    public function getSitesEnergy(Request $request, string $returnType='json'): JsonResponse|array
     {
-        $start = Helpers::getTimeFrame($request);
-
-        $sites = Site::with(['data_file.data' => function ($query) use ($start) {
-            $query->select('data_file_id', 'E1', 'E2', 'E3', 'timestamp')
-                ->where('timestamp', '>=', $start);
-        }])->get();
-
-        $sitesEnergy = [];
-
-        foreach ($sites as $site) {
-            $totalEnergy = 0;
-
-            foreach ($site->data_file as $dataFile) {
-                foreach ($dataFile->data as $data) {
-                    $totalEnergy += ($data->E1 ?? 0) + ($data->E2 ?? 0) + ($data->E3 ?? 0);
-                }
-            }
-
-            if ($totalEnergy > 0) {
-                $sitesEnergy[] = [
-                    'title' => $site->title,
-                    'energy' => $totalEnergy,
-                ];
-            }
-        }
-
-        return response()->json($sitesEnergy);
+        return Helpers::getSitesEnergy($request, $returnType);
     }
 
-    public function getLatestSensorData(Request $request)
+    public function getLatestSensorData(Request $request): JsonResponse
     {
         $now = Carbon::now();
         $start = Helpers::getTimeFrame($request);

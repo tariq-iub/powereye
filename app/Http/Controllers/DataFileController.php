@@ -71,6 +71,8 @@ class DataFileController extends Controller
                 'device_id' => $device->id,
             ]);
 
+            // update event
+
             $this->process_file($dataFile);
 
             return response()->json(['message' => 'File uploaded successfully'], 200);

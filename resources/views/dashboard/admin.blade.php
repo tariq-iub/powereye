@@ -155,9 +155,7 @@
             const latestSensorData = @json($latestSensorsData);
 
             const timestamps = latestSensorData.map(data => data.timestamp).reverse();
-            const p1Data = latestSensorData.map(data => data.P1).reverse();
-            const p2Data = latestSensorData.map(data => data.P2).reverse();
-            const p3Data = latestSensorData.map(data => data.P3).reverse();
+            const pData = latestSensorData.map(data => data.P1 + data.P2 + data.P3).reverse();
 
             const formattedTimestamps = timestamps.map(timestamp =>
                 new Date(timestamp).toLocaleTimeString('en-US', {
@@ -168,11 +166,7 @@
                 })
             );
 
-            createTimeSeriesChart('#powerLineChart', ['P1', 'P2', 'P3'], formattedTimestamps, 'Power', [
-                ['P1', p1Data],
-                ['P2', p2Data],
-                ['P3', p3Data],
-            ]);
+            createTimeSeriesChart('#powerLineChart', ['Total Power'], formattedTimestamps, 'Power', [['Total Power', pData],]);
 
             const sitesPowerData = sitesPower.map(site => ({
                 value: site.power,
@@ -227,9 +221,7 @@
             }));
 
             const timestamps = latestSensorData.map(data => data.timestamp).reverse();
-            const p1Data = latestSensorData.map(data => data.p1).reverse();
-            const p2Data = latestSensorData.map(data => data.p2).reverse();
-            const p3Data = latestSensorData.map(data => data.p3).reverse();
+            const pData = latestSensorData.map(data => data.p1 + data.p2 + data.p3).reverse();
 
             const formattedTimestamps = timestamps.map(timestamp =>
                 new Date(timestamp).toLocaleTimeString('en-US', {
@@ -251,11 +243,7 @@
                 value: totalEnergy,
             }));
 
-            createTimeSeriesChart('#powerLineChart', ['P1', 'P2', 'P3'], formattedTimestamps, 'Power', [
-                ['P1', p1Data],
-                ['P2', p2Data],
-                ['P3', p3Data],
-            ]);
+            createTimeSeriesChart('#powerLineChart', ['Total Power'], formattedTimestamps, 'Power', [['Total Power', pData],]);
 
             createBarChart('#barChart', barData ,['Energy (kWh'] ,'Energy', 'Energy');
 

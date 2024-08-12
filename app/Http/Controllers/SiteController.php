@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Factory;
 use App\Models\Site;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SiteController extends Controller
 {
@@ -47,7 +48,10 @@ class SiteController extends Controller
      */
     public function show(Site $site)
     {
-        return view('admin.sites.show', compact('site'));
+        if (in_array(Auth::user()->role->id, [1, 2])) {
+            return view( 'admin.sites.show', compact('site'));
+        }
+        return view( 'client.sites.show', compact('site'));
     }
 
     /**

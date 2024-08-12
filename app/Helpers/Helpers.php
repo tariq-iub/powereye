@@ -21,6 +21,8 @@ class Helpers
             $start = Carbon::now()->subDays((int)$timeframe);
         }
 
+        $start = Carbon::createFromDate(0);
+
         $end = Carbon::now();
 
         return [$start, $end];
@@ -104,12 +106,13 @@ class Helpers
             ->join('sites', 'data_files.site_id', '=', 'sites.id')
             ->join('factories', 'sites.factory_id', '=', 'factories.id')
             ->select(
-                DB::raw("DATE_FORMAT(sensor_data.timestamp, '%Y-%m-%d %H:%i:00') as time_interval"),
+//                DB::raw("DATE_FORMAT(sensor_data.timestamp, '%Y-%m-%d %H:%i:00') as time_interval"),
+                DB::raw("DATE_FORMAT(sensor_data.timestamp, '%Y-%m-%d %H:%i:00') as time"),
                 DB::raw("SUM($sum) as $alias")
             )
             ->whereBetween('sensor_data.timestamp', [$startDate, $endDate])
-            ->groupBy('time_interval')
-            ->orderBy('time_interval')
+            ->groupBy('time')
+            ->orderBy('time')
             ->get();
 
         return $json ? response()->json($data) : $data;

@@ -37,8 +37,12 @@ class HomeController extends Controller
                 $factoryID = 1;
                 $powerData = $this->getFactoryPower($request, $factoryID, false);
 
-                return view('dashboard.admin', compact('timeframeOptions', 'powerData'));
-            } else return view('dashboard.client');
+                $data = $this->getSitesPower($request, false);
+
+                return view('dashboard.admin', compact('timeframeOptions', 'powerData', 'data'));
+            } else {
+                return view('dashboard.client');
+            }
         } else {
             redirect()->route('login');
         }

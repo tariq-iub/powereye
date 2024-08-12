@@ -234,13 +234,93 @@
         }
     </script>
 
+{{--    <script>--}}
+{{--        const chart = echarts.init(document.getElementById('chart'));--}}
+
+{{--        // Initial chart configuration--}}
+{{--        const option = {--}}
+{{--            title: {--}}
+{{--                text: 'Total Power Consumption Over Time'--}}
+{{--            },--}}
+{{--            tooltip: {--}}
+{{--                trigger: 'axis',--}}
+{{--                formatter: function (params) {--}}
+{{--                    const [param] = params;--}}
+{{--                    return `${param.name}<br>Total Power: ${param.value} kWh`;--}}
+{{--                }--}}
+{{--            },--}}
+{{--            xAxis: {--}}
+{{--                type: 'category',--}}
+{{--                data: [],--}}
+{{--                axisLabel: {--}}
+{{--                    rotate: 45,--}}
+{{--                    interval: 0--}}
+{{--                }--}}
+{{--            },--}}
+{{--            yAxis: {--}}
+{{--                type: 'value',--}}
+{{--                name: 'Power (kWh)'--}}
+{{--            },--}}
+{{--            series: [{--}}
+{{--                data: [],--}}
+{{--                type: 'line',--}}
+{{--                name: 'Total Power',--}}
+{{--                smooth: true,--}}
+{{--                lineStyle: {--}}
+{{--                    color: '#ff4500'--}}
+{{--                },--}}
+{{--                itemStyle: {--}}
+{{--                    color: '#ff4500'--}}
+{{--                },--}}
+{{--                emphasis: {--}}
+{{--                    focus: 'series'--}}
+{{--                },--}}
+{{--                animationDuration: 1000--}}
+{{--            }]--}}
+{{--        };--}}
+
+{{--        chart.setOption(option);--}}
+
+{{--        function fetchData() {--}}
+{{--            fetch('/api/get-factory-power')--}}
+{{--                .then(response => {--}}
+{{--                    if (!response.ok) {--}}
+{{--                        throw new Error('Network response was not ok');--}}
+{{--                    }--}}
+{{--                    return response.json();--}}
+{{--                })--}}
+{{--                .then(data => {--}}
+{{--                    console.log(data)--}}
+{{--                    // Extract data--}}
+{{--                    const timeIntervals = data.map(item => item.time_interval);--}}
+{{--                    const totalPower = data.map(item => item.total_power);--}}
+
+{{--                    // Update chart--}}
+{{--                    chart.setOption({--}}
+{{--                        xAxis: {--}}
+{{--                            data: timeIntervals--}}
+{{--                        },--}}
+{{--                        series: [{--}}
+{{--                            data: totalPower--}}
+{{--                        }]--}}
+{{--                    });--}}
+{{--                })--}}
+{{--                .catch(error => {--}}
+{{--                    console.error('There was a problem with the fetch operation:', error);--}}
+{{--                });--}}
+{{--        }--}}
+
+{{--        fetchData();--}}
+
+{{--        setInterval(fetchData, 10000);--}}
+{{--    </script>--}}
+
     <script>
         const chart = echarts.init(document.getElementById('chart'));
 
-        // Initial chart configuration
         const option = {
             title: {
-                text: 'Total Power Consumption Over Time'
+                text: 'Total Power Consumption for the Month'
             },
             tooltip: {
                 trigger: 'axis',
@@ -290,14 +370,36 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Extract data
-                    const timeIntervals = data.map(item => item.time_interval);
-                    const totalPower = data.map(item => item.total_power);
+                    console.log('Fetched Data:', data);
+
+                    // Get current date and start of the current month
+                    const now = new Date();
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+                    // Filter data for the current month
+                    const filteredData = data.filter(item => {
+                        const itemTime = new Date(item.time);
+                        return itemTime >= startOfMonth && itemTime <= endOfMonth;
+                    });
+
+                    // Aggregate data by day
+                    const aggregatedData = filteredData.reduce((acc, item) => {
+                        const day = new Date(item.time).toISOString().slice(0, 10); // e.g., "2024-08-12"
+                        if (!acc[day]) {
+                            acc[day] = 0;
+                        }
+                        acc[day] += item.total_power;
+                        return acc;
+                    }, {});
+
+                    const days = Object.keys(aggregatedData);
+                    const totalPower = Object.values(aggregatedData);
 
                     // Update chart
                     chart.setOption({
                         xAxis: {
-                            data: timeIntervals
+                            data: days
                         },
                         series: [{
                             data: totalPower
@@ -310,15 +412,26 @@
         }
 
         fetchData();
-
-        setInterval(fetchData, 10000);
+        setInterval(fetchData, 60000); // Fetch data every minute
     </script>
 
-    <script src="{{ asset('asset/js/charts.js') }}"></script>
 
-    <script>
-         
-        doughnutChart('chart', data, 'Doughnut', 'Doughnut')
-    </script>
+
+
+
+
+
+    {{--    <script src="{{ asset('assets/js/charts.js') }}"></script>--}}
+
+{{--    <script>--}}
+{{--        const rawData = @json($data);--}}
+
+{{--        const data = rawData.map(item => ({--}}
+{{--            name: item.title,--}}
+{{--            value: parseFloat(item.power).toFixed(2)--}}
+{{--        }));--}}
+
+{{--        doughnutChart('#chart', data, 'Sites Power (kW)', 'Sites Power (kW)')--}}
+{{--    </script>--}}
 
 @endpush

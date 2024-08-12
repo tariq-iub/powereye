@@ -25,7 +25,7 @@
             </div>
             <div class="col-12 col-md-6">
                 <h3>Power Consumption of each site</h3>
-                <div id="sensorPieChart" class="h-auto" style="height: 320px;"></div>
+                <div id="sitesPowerChart" class="h-auto" style="height: 320px;"></div>
             </div>
         </div>
     </div>
@@ -43,6 +43,9 @@
         </div>
     </div>
 
+    <div id="chart" class="h-auto" style="height: 320px;"></div>
+
+
 @endsection
 
 @push('scripts')
@@ -54,14 +57,14 @@
                 data = data.map(value => parseFloat(value.toFixed(2)));
             }
             return {
-                name, type: 'line', data, smooth
+                name, type: 'line', data, smooth, animationDuration: 1000
             }
         };
 
         const seriesObjB = (name, data) => {
             data = data.map(item => item.value);
             return {
-                name, type: 'bar', data, emphasis: { focus: 'series' },
+                name, type: 'bar', data, emphasis: { focus: 'series' }, animationDuration: 1000
             }
         };
 
@@ -85,7 +88,7 @@
             }
 
             return {
-                name, type: 'pie', radius: ['40%', '70%'], data, itemStyle, emphasis
+                name, type: 'pie', radius: ['40%', '70%'], data, itemStyle, emphasis, animationDuration: 1000
             }
         };
 
@@ -147,69 +150,7 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const sensorData = @json($sensorsData);
-            const sitesPower = @json($sitesPower);
-            const sitesEnergy = @json($sitesEnergy);
-            const latestSensorData = @json($latestSensorsData);
-
-            const timestamps = latestSensorData.map(data => data.timestamp).reverse();
-            const pData = latestSensorData.map(data => data.P1 + data.P2 + data.P3).reverse();
-
-            const formattedTimestamps = timestamps.map(timestamp =>
-                new Date(timestamp).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true
-                })
-            );
-
-            createTimeSeriesChart('#powerLineChart', ['Total Power'], formattedTimestamps, 'Power', [['Total Power', pData],]);
-
-            const sitesPowerData = sitesPower.map(site => ({
-                value: site.power,
-                name: site.title,
-            }));
-
-            createDoughnutChart('#sensorPieChart', sitesPowerData);
-
-            const energyTotals = {};
-
-            sensorData.forEach(data => {
-                const timestamp = data.timestamp;
-                const totalEnergy = data.E1 + data.E2 + data.E3;
-
-                if (energyTotals[timestamp]) {
-                    energyTotals[timestamp] += totalEnergy;
-                } else {
-                    energyTotals[timestamp] = totalEnergy;
-                }
-            });
-
-            const barData = Object.keys(energyTotals).reverse().map(timestamp => ({
-                name: new Date(timestamp).toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                }),
-                value: energyTotals[timestamp],
-            }));
-
-            createBarChart('#barChart', barData ,['Energy (kWh'] ,'Energy', 'Energy');
-
-            const sitesEnergyData = sitesEnergy.map(site => ({
-                value: site.energy,
-                name: site.title,
-            }));
-
-            createDoughnutChart('#doughnutChart', sitesEnergyData);
-        });
-    </script>
-
-    <script>
-        function updateCharts(latestSensorData, sitesPower, sitesEnergy) {
+        function updateCharts(data, sitesPower, sitesEnergy) {
             const sitesPowerData = sitesPower.map(site => ({
                 value: site.power,
                 name: site.title,
@@ -220,8 +161,11 @@
                 name: site.title,
             }));
 
-            const timestamps = latestSensorData.map(data => data.timestamp).reverse();
-            const pData = latestSensorData.map(data => data.p1 + data.p2 + data.p3).reverse();
+            const timestamps = data.map(data => data.timestamp).reverse();
+            const pData = data
+                .map(data => data.p1 + data.p2 + data.p3)
+                .reverse();
+
 
             const formattedTimestamps = timestamps.map(timestamp =>
                 new Date(timestamp).toLocaleTimeString('en-US', {
@@ -232,7 +176,7 @@
                 })
             );
 
-            const energyTotals = latestSensorData.reduce((acc, { timestamp, E1, E2, E3 }) => {
+            const energyTotals = data.reduce((acc, { timestamp, E1, E2, E3 }) => {
                 const totalEnergy = E1 + E2 + E3;
                 acc[timestamp] = (acc[timestamp] || 0) + totalEnergy;
                 return acc;
@@ -247,7 +191,7 @@
 
             createBarChart('#barChart', barData ,['Energy (kWh'] ,'Energy', 'Energy');
 
-            createDoughnutChart('#sensorPieChart', sitesPowerData, 'Power Consumption by Site');
+            createDoughnutChart('#sitesPowerChart', sitesPowerData, 'Power Consumption by Site');
             createDoughnutChart('#doughnutChart', sitesEnergyData, 'Energy Consumption by Site');
         }
 
@@ -259,6 +203,9 @@
 
             const initialTimeframe = $('#timeframe-select').val();
             fetchAndUpdateCharts(initialTimeframe);
+
+            setInterval(() => fetchAndUpdateCharts(initialTimeframe), 10000);
+
         });
 
         function fetchAndUpdateCharts(timeframe) {
@@ -287,6 +234,91 @@
         }
     </script>
 
+    <script>
+        const chart = echarts.init(document.getElementById('chart'));
 
+        // Initial chart configuration
+        const option = {
+            title: {
+                text: 'Total Power Consumption Over Time'
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                    const [param] = params;
+                    return `${param.name}<br>Total Power: ${param.value} kWh`;
+                }
+            },
+            xAxis: {
+                type: 'category',
+                data: [],
+                axisLabel: {
+                    rotate: 45,
+                    interval: 0
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Power (kWh)'
+            },
+            series: [{
+                data: [],
+                type: 'line',
+                name: 'Total Power',
+                smooth: true,
+                lineStyle: {
+                    color: '#ff4500'
+                },
+                itemStyle: {
+                    color: '#ff4500'
+                },
+                emphasis: {
+                    focus: 'series'
+                },
+                animationDuration: 1000
+            }]
+        };
+
+        chart.setOption(option);
+
+        function fetchData() {
+            fetch('/api/get-factory-power')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Extract data
+                    const timeIntervals = data.map(item => item.time_interval);
+                    const totalPower = data.map(item => item.total_power);
+
+                    // Update chart
+                    chart.setOption({
+                        xAxis: {
+                            data: timeIntervals
+                        },
+                        series: [{
+                            data: totalPower
+                        }]
+                    });
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+
+        fetchData();
+
+        setInterval(fetchData, 10000);
+    </script>
+
+    <script src="{{ asset('asset/js/charts.js') }}"></script>
+
+    <script>
+         
+        doughnutChart('chart', data, 'Doughnut', 'Doughnut')
+    </script>
 
 @endpush

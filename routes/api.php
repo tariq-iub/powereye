@@ -45,4 +45,5 @@ Route::prefix('file-ota')->group(function () {
 Route::get('/get-sites-energy', [HomeController::class, 'getSitesEnergy'])->name('api.sitesEnergy');
 Route::get('/get-sites-power', [HomeController::class, 'getSitesPower'])->name('api.sitesPower');
 Route::get('/get-sensors-power', [HomeController::class, 'getLatestSensorData'])->name('api.sensorsPower');
+Route::get('/get-factory-power', [HomeController::class, 'getFactoryPower'])->name('api.factoryPower');
 

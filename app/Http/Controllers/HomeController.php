@@ -8,7 +8,9 @@ use App\Models\Site;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -32,35 +34,24 @@ class HomeController extends Controller
         if (Auth::user()) {
             if (in_array(Auth::user()->role->id, [1, 2])) {
                 $timeframeOptions = Helpers::getTimeFrameOptions();
+                $factoryID = 1;
+                $powerData = $this->getFactoryPower($request, $factoryID, false);
 
-                $now = Carbon::now();
-
-                $start = Helpers::getTimeFrame($request);
-
-                $sensorsData = SensorData::with('data_file.site')->whereBetween('timestamp', [$start, $now])
-                    ->orderBy('timestamp', 'desc')
-                    ->get();
-
-                $latestSensorsData = $sensorsData;
-
-                $sitesPower = Helpers::getSitesPower($request, 'array');
-                $sitesEnergy = Helpers::getSitesEnergy($request, 'array');
-
-                return view('dashboard.admin', compact('sensorsData', 'latestSensorsData', 'timeframeOptions', 'sitesEnergy', 'sitesPower'));
+                return view('dashboard.admin', compact('timeframeOptions', 'powerData'));
             } else return view('dashboard.client');
         } else {
             redirect()->route('login');
         }
     }
 
-    public function getSitesPower(Request $request, string $returnType='json'): JsonResponse|array
+    public function getSitesPower(Request $request, bool $json=true): JsonResponse|array
     {
-        return Helpers::getSitesPower($request, $returnType);
+        return Helpers::getSitesPower($request, $json);
     }
 
-    public function getSitesEnergy(Request $request, string $returnType='json'): JsonResponse|array
+    public function getSitesEnergy(Request $request, bool $json=true): JsonResponse|array
     {
-        return Helpers::getSitesEnergy($request, $returnType);
+        return Helpers::getSitesEnergy($request, $json);
     }
 
     public function getLatestSensorData(Request $request): JsonResponse
@@ -75,6 +66,11 @@ class HomeController extends Controller
             ->get();
 
         return response()->json($sensorsData);
+    }
+
+    public function getFactoryPower(Request $request, int $factoryID, bool $json=true): JsonResponse|Collection
+    {
+        return Helpers::getFactoryPower($request, $factoryID, $json);
     }
 }
 

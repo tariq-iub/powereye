@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DataFile;
+use App\Models\Device;
 use App\Models\Factory;
+use App\Models\SensorData;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SiteController extends Controller
 {
@@ -51,7 +55,32 @@ class SiteController extends Controller
         if (in_array(Auth::user()->role->id, [1, 2])) {
             return view( 'admin.sites.show', compact('site'));
         }
-        return view( 'client.sites.show', compact('site'));
+
+        $data = [];
+
+        $sensors = SensorData::with('data_file')->get();
+
+
+        $deviceIds = $site->data_file ? $site->data_file->pluck('device_id')->unique() : [];
+
+        $devices = Device::whereIn('id', $deviceIds)->get()->keyBy('id');
+
+        $totalsByDevice = $sensors->groupBy('data_file.device_id')->map(function ($sensorGroup) {
+            return $sensorGroup->sum(function ($sensor) {
+                return $sensor->P1 + $sensor->P2 + $sensor->P3;
+            });
+        });
+
+        foreach ($devices as $device) {
+            $deviceId = $device->id;
+            $total = $totalsByDevice->get($deviceId, 0);
+            $data[] = [
+                'title' => $device->serial_number,
+                'total' => $total,
+            ];
+        }
+
+        return view( 'client.sites.show', compact('site', 'data'));
     }
 
     /**

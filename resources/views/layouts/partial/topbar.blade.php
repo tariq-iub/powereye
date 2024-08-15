@@ -240,37 +240,37 @@
         </div>
     </div>
 </nav>
-<script>
-    var navbarTopShape = window.config.config.phoenixNavbarTopShape;
-    var navbarPosition = window.config.config.phoenixNavbarPosition;
-    var body = document.querySelector('body');
-    var navbarDefault = document.querySelector('#navbarDefault');
-    var dualNav = document.querySelector('#dualNav');
+{{--<script>--}}
+{{--    var navbarTopShape = window.config.config.phoenixNavbarTopShape;--}}
+{{--    var navbarPosition = window.config.config.phoenixNavbarPosition;--}}
+{{--    var body = document.querySelector('body');--}}
+{{--    var navbarDefault = document.querySelector('#navbarDefault');--}}
+{{--    var dualNav = document.querySelector('#dualNav');--}}
 
-    var documentElement = document.documentElement;
-    var navbarVertical = document.querySelector('.navbar-vertical');
+{{--    var documentElement = document.documentElement;--}}
+{{--    var navbarVertical = document.querySelector('.navbar-vertical');--}}
 
-    if (navbarPosition === 'dual-nav') {
-        navbarDefault?.remove();
-        navbarVertical?.remove();
-        dualNav.removeAttribute('style');
-        document.documentElement.setAttribute('data-navigation-type', 'dual');
-    }
-    else {
-        dualNav?.remove();
-        navbarDefault.removeAttribute('style');
-        navbarVertical.removeAttribute('style');
-    }
+{{--    if (navbarPosition === 'dual-nav') {--}}
+{{--        navbarDefault?.remove();--}}
+{{--        navbarVertical?.remove();--}}
+{{--        dualNav.removeAttribute('style');--}}
+{{--        document.documentElement.setAttribute('data-navigation-type', 'dual');--}}
+{{--    }--}}
+{{--    else {--}}
+{{--        dualNav?.remove();--}}
+{{--        navbarDefault.removeAttribute('style');--}}
+{{--        navbarVertical.removeAttribute('style');--}}
+{{--    }--}}
 
-    var navbarTopStyle = window.config.config.phoenixNavbarTopStyle;
-    var navbarTop = document.querySelector('.navbar-top');
-    if (navbarTopStyle === 'darker') {
-        navbarTop.setAttribute('data-navbar-appearance', 'darker');
-    }
+{{--    var navbarTopStyle = window.config.config.phoenixNavbarTopStyle;--}}
+{{--    var navbarTop = document.querySelector('.navbar-top');--}}
+{{--    if (navbarTopStyle === 'darker') {--}}
+{{--        navbarTop.setAttribute('data-navbar-appearance', 'darker');--}}
+{{--    }--}}
 
-    var navbarVerticalStyle = window.config.config.phoenixNavbarVerticalStyle;
-    var navbarVertical = document.querySelector('.navbar-vertical');
-    if (navbarVerticalStyle === 'darker') {
-        navbarVertical.setAttribute('data-navbar-appearance', 'darker');
-    }
-</script>
+{{--    var navbarVerticalStyle = window.config.config.phoenixNavbarVerticalStyle;--}}
+{{--    var navbarVertical = document.querySelector('.navbar-vertical');--}}
+{{--    if (navbarVerticalStyle === 'darker') {--}}
+{{--        navbarVertical.setAttribute('data-navbar-appearance', 'darker');--}}
+{{--    }--}}
+{{--</script>--}}

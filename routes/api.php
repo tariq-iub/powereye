@@ -46,4 +46,5 @@ Route::get('/get-sites-energy', [HomeController::class, 'getSitesEnergy'])->name
 Route::get('/get-sites-power', [HomeController::class, 'getSitesPower'])->name('api.sitesPower');
 Route::get('/get-sensors-power', [HomeController::class, 'getLatestSensorData'])->name('api.sensorsPower');
 Route::get('/get-factory-power', [HomeController::class, 'getFactoryPower'])->name('api.factoryPower');
+Route::get('/site-data/{site}', [SiteController::class, 'fetchData']);
 

@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Models\Device;
+use App\Models\SensorData;
 use App\Models\Site;
 use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
@@ -37,12 +39,11 @@ class Helpers
     {
         return [
             '1 Day' => '1',
-            '3 Days' => '3',
             '7 Days' => '7',
-            '30 Days' => '30',
-            '90 Days' => '90',
+            '1 Month' => '30',
+            '3 Months' => '90',
             '1 Year' => '365',
-            'All' => 'all'
+            'All Time' => 'all'
         ];
     }
 
@@ -127,5 +128,36 @@ class Helpers
     {
         return self::getFactoryData($request, $factoryID, 'energy', $json);
     }
+
+    public static function sitePower(Site $site, bool $json=true) {
+        $data = [];
+
+        $dataFileIds = $site->data_file ? $site->data_file->pluck('id') : [];
+
+        $sensors = SensorData::whereIn('data_file_id', $dataFileIds)->with('data_file')->get();
+
+        $deviceIds = $site->data_file ? $site->data_file->pluck('device_id')->unique() : [];
+
+        $devices = Device::whereIn('id', $deviceIds)->get()->keyBy('id');
+
+        $totalsByDevice = $sensors->groupBy('data_file.device_id')->map(function ($sensorGroup) {
+            return $sensorGroup->sum(function ($sensor) {
+                return $sensor->P1 + $sensor->P2 + $sensor->P3;
+            });
+        });
+
+        foreach ($devices as $device) {
+            $deviceId = $device->id;
+            $total = $totalsByDevice->get($deviceId, 0);
+            $data[] = [
+                'title' => $device->serial_number,
+                'total' => $total,
+            ];
+        }
+
+        return $json ? response()->json($data) : $data;
+    }
+
+    public static function fetchSitePower() {}
 
 }

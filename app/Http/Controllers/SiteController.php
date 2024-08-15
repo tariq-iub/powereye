@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helpers;
 use App\Models\DataFile;
 use App\Models\Device;
 use App\Models\Factory;
@@ -9,7 +10,6 @@ use App\Models\SensorData;
 use App\Models\Site;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class SiteController extends Controller
 {
@@ -56,31 +56,64 @@ class SiteController extends Controller
             return view( 'admin.sites.show', compact('site'));
         }
 
-        $data = [];
+        $data = Helpers::sitePower($site, false);
 
-        $sensors = SensorData::with('data_file')->get();
+        $timeFrameOptions = Helpers::getTimeFrameOptions();
 
+        return view( 'client.sites.show', compact('site', 'data', 'timeFrameOptions'));
+    }
 
-        $deviceIds = $site->data_file ? $site->data_file->pluck('device_id')->unique() : [];
+    public function fetchData(Request $request, Site $site)
+    {
+        $timeFrame = $request->query('time_frame', '1'); // Default to '1' (1 Day)
+        $today = now();
 
-        $devices = Device::whereIn('id', $deviceIds)->get()->keyBy('id');
-
-        $totalsByDevice = $sensors->groupBy('data_file.device_id')->map(function ($sensorGroup) {
-            return $sensorGroup->sum(function ($sensor) {
-                return $sensor->P1 + $sensor->P2 + $sensor->P3;
-            });
-        });
-
-        foreach ($devices as $device) {
-            $deviceId = $device->id;
-            $total = $totalsByDevice->get($deviceId, 0);
-            $data[] = [
-                'title' => $device->serial_number,
-                'total' => $total,
-            ];
+        // Define time intervals based on the time frame options
+        switch ($timeFrame) {
+            case '7':
+                $startDate = $today->subDays(7);
+                break;
+            case '30':
+                $startDate = $today->subDays(30);
+                break;
+            case '90':
+                $startDate = $today->subDays(90);
+                break;
+            case '365':
+                $startDate = $today->subDays(365);
+                break;
+            case 'all':
+                // For 'All Time', no date filtering is applied
+                $startDate = null;
+                break;
+            default:
+                $startDate = $today->subDay(); // Default to 1 Day
+                break;
         }
 
-        return view( 'client.sites.show', compact('site', 'data'));
+        $dataFileIds = $site->data_file->pluck('id');
+
+        // Aggregate data based on the selected time frame
+        $query = SensorData::whereIn('data_file_id', $dataFileIds);
+
+        if ($startDate) {
+            $query->where('timestamp', '>=', $startDate);
+        }
+
+        $powerData = $query
+            ->selectRaw("DATE_FORMAT(timestamp, '%Y-%m-%d') as period, SUM(P1 + P2 + P3) as total_power")
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+
+        $formattedData = $powerData->map(function ($item) {
+            return [
+                'timestamp' => $item->period,
+                'total_power' => $item->total_power,
+            ];
+        });
+
+        return response()->json($formattedData);
     }
 
     /**

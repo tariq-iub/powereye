@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\Device;
+use App\Models\Factory;
 use App\Models\SensorData;
 use App\Models\Site;
 use Illuminate\Support\Collection;
@@ -158,6 +159,62 @@ class Helpers
         return $json ? response()->json($data) : $data;
     }
 
+    public static function siteEnergy(Site $site, bool $json=true) {
+        $data = [];
+
+        $dataFileIds = $site->data_file ? $site->data_file->pluck('id') : [];
+
+        $sensors = SensorData::whereIn('data_file_id', $dataFileIds)->with('data_file')->get();
+
+        $deviceIds = $site->data_file ? $site->data_file->pluck('device_id')->unique() : [];
+
+        $devices = Device::whereIn('id', $deviceIds)->get()->keyBy('id');
+
+        $totalsByDevice = $sensors->groupBy('data_file.device_id')->map(function ($sensorGroup) {
+            return $sensorGroup->sum(function ($sensor) {
+                return $sensor->E1 + $sensor->E2 + $sensor->E3;
+            });
+        });
+
+        foreach ($devices as $device) {
+            $deviceId = $device->id;
+            $total = $totalsByDevice->get($deviceId, 0);
+            $data[] = [
+                'title' => $device->serial_number,
+                'total' => $total,
+            ];
+        }
+
+        return $json ? response()->json($data) : $data;
+    }
+
     public static function fetchSitePower() {}
+
+    public static function fetchFactoriesData() {
+        $factories = Factory::with(['sites.data_file.data'])->get();
+        $data = [];
+
+        foreach ($factories as $factory) {
+            $power = $energy = 0;
+
+            foreach ($factory->sites as $site) {
+                foreach ($site->data_file as $dataFile) {
+                    foreach ($dataFile->data as $sensor) {
+                        $power += $sensor->P1 + $sensor->P2 + $sensor->P3;
+                        $energy += $sensor->E1 + $sensor->E2 + $sensor->E3;
+                    }
+                }
+            }
+
+            $data[] = [
+                'title' => $factory->title,
+                'power' => $power,
+                'energy' => $energy,
+            ];
+        }
+
+        return $data;
+    }
+
 
 }

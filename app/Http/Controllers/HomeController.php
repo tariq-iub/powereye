@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,7 +29,8 @@ class HomeController extends Controller
             if (in_array(Auth::user()->role->id, [1, 2])) {
                 return view('dashboard.admin');
             } else {
-                return view('dashboard.client');
+                $data = Helpers::fetchFactoriesData();
+                return view('dashboard.client', compact('data'));
             }
         } else {
             redirect()->route('login');

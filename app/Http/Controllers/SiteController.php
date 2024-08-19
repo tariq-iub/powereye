@@ -57,18 +57,19 @@ class SiteController extends Controller
         }
 
         $data = Helpers::sitePower($site, false);
+        $dataE = Helpers::siteEnergy($site, false);
 
         $timeFrameOptions = Helpers::getTimeFrameOptions();
 
-        return view( 'client.sites.show', compact('site', 'data', 'timeFrameOptions'));
+        return view( 'client.sites.show', compact('site', 'data', 'dataE', 'timeFrameOptions'));
     }
 
     public function fetchData(Request $request, Site $site)
     {
-        $timeFrame = $request->query('time_frame', '1'); // Default to '1' (1 Day)
+        $timeFrame = $request->query('time_frame', '1');
+        $type = $request->query('type', 'power');
         $today = now();
 
-        // Define time intervals based on the time frame options
         switch ($timeFrame) {
             case '7':
                 $startDate = $today->subDays(7);
@@ -83,17 +84,15 @@ class SiteController extends Controller
                 $startDate = $today->subDays(365);
                 break;
             case 'all':
-                // For 'All Time', no date filtering is applied
                 $startDate = null;
                 break;
             default:
-                $startDate = $today->subDay(); // Default to 1 Day
+                $startDate = $today->subDay();
                 break;
         }
 
         $dataFileIds = $site->data_file->pluck('id');
 
-        // Aggregate data based on the selected time frame
         $query = SensorData::whereIn('data_file_id', $dataFileIds);
 
         if ($startDate) {
@@ -101,15 +100,19 @@ class SiteController extends Controller
         }
 
         $powerData = $query
-            ->selectRaw("DATE_FORMAT(timestamp, '%Y-%m-%d') as period, SUM(P1 + P2 + P3) as total_power")
+            ->selectRaw(
+                "DATE_FORMAT(timestamp, '%Y-%m-%d') as period,
+            SUM(P1 + P2 + P3) as total_power,
+            SUM(E1 + E2 + E3) as total_energy"
+            )
             ->groupBy('period')
             ->orderBy('period')
             ->get();
 
-        $formattedData = $powerData->map(function ($item) {
+        $formattedData = $powerData->map(function ($item) use ($type) {
             return [
                 'timestamp' => $item->period,
-                'total_power' => $item->total_power,
+                'total_value' => $type === 'power' ? $item->total_power : $item->total_energy,
             ];
         });
 

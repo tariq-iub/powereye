@@ -11,28 +11,45 @@
         </div>
     </div>
 
-
     <div class="mx-n4 px-4 mx-lg-n6 px-lg-6 bg-body-emphasis pt-7 pb-3 border-y">
         <div class="row">
             <div class="col-12 col-md-6">
                 <div class="d-flex align-items-center justify-content-between">
-                    <h3>Line Chart</h3>
-                    <select class="px-1" onchange="fetchSiteData(this.value)" id="timeframe">
+                    <h3>Energy Trends: Monitoring Power Consumption Over Time</h3>
+                    <select class="px-1" onchange="fetchSiteData(this.value, powerChartInstance)" id="p_timeframe">
                         @foreach($timeFrameOptions as $key => $value)
                             <option value="{{ $value }}">{{ $key }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div id="line" class="h-100"></div>
+                <div id="powerChart" style="width: 100%; height: 400px;"></div>
             </div>
             <div class="col-12 col-md-6">
-                <h3>Doughnut Chart</h3>
-                <div id="doughnut" class="h-auto" style="height: 320px;"></div>
+                <h3>Device Insights: Power Usage Breakdown by Equipment</h3>
+                <div id="devicesPChart" class="h-auto" style="height: 320px;"></div>
             </div>
         </div>
     </div>
 
-    <div id="chart" style="width: 600px; height: 400px;"></div>
+    <div class="mx-n4 px-4 mx-lg-n6 px-lg-6 bg-body-emphasis pt-7 pb-3 border-y">
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3>Energy Trends: Monitoring Power Consumption Over Time</h3>
+                    <select class="px-1" onchange="fetchSiteData(this.value, energyChartInstance, 'energy')" id="e_timeframe">
+                        @foreach($timeFrameOptions as $key => $value)
+                            <option value="{{ $value }}">{{ $key }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div id="energyChart" style="width: 100%; height: 400px;"></div>
+            </div>
+            <div class="col-12 col-md-6">
+                <h3>Device Insights: Power Usage Breakdown by Equipment</h3>
+                <div id="devicesEChart" class="h-auto" style="height: 320px;"></div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -41,57 +58,27 @@
     <script>
         const site = @json($site);
         const siteId = site.id;
-        let lineChartInstance;
+        let powerChartInstance, energyChartInstance;
         const fetchInterval = 10000;
 
-        function initializeLineChart() {
-            lineChartInstance = echarts.init(document.getElementById('line'));
-            const option = {
-                title: {
-                    text: 'Total Power Consumption Over Time'
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                xAxis: {
-                    type: 'category',
-                    data: [],
-                    axisLabel: {
-                        formatter: (value) => value,
-                    }
-                },
-                yAxis: {
-                    type: 'value'
-                },
-                series: [{
-                    data: [],
-                    type: 'line',
-                    smooth: true,
-                    name: 'Total Power'
-                }]
-            };
-            lineChartInstance.setOption(option);
-        }
-
-        async function fetchSiteData(timeFrame) {
+        async function fetchSiteData(timeFrame, instance, type = 'power') {
             try {
-                const response = await fetch(`/api/site-data/${siteId}?time_frame=${timeFrame}`); // Default to 1 day for real-time
+                type = (type === 'energy') ? 'energy' : 'power';
+                const response = await fetch(`/api/site-data/${siteId}?time_frame=${timeFrame}&type=${type}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
 
-                // Process data for the chart
                 const timestamps = data.map(entry => entry.timestamp);
-                const totalPower = data.map(entry => entry.total_power);
+                const totalValue = data.map(entry => entry.total_value);
 
-                // Update chart with new data
-                lineChartInstance.setOption({
+                instance && instance.setOption({
                     xAxis: {
                         data: timestamps
                     },
                     series: [{
-                        data: totalPower
+                        data: totalValue
                     }]
                 });
 
@@ -101,57 +88,27 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const timeframe = document.getElementById('timeframe')
-            initializeLineChart();
-            fetchSiteData(timeframe.value); // Initial fetch
+            const pTimeframe = document.getElementById('p_timeframe');
+            const eTimeframe = document.getElementById('e_timeframe');
 
-            // Set up interval to fetch data periodically
-            setInterval(() => { fetchSiteData(timeframe.value) }, fetchInterval);
+            powerChartInstance = lineChart('#powerChart', [], [lineSeries([], 'Total Power')]);
+            energyChartInstance = barChart('#energyChart', [], [barSeries([], 'Total Energy')]);
+
+            fetchSiteData(pTimeframe.value, powerChartInstance);
+            fetchSiteData(eTimeframe.value, energyChartInstance, 'energy');
+
+            setInterval(() => {
+                fetchSiteData(pTimeframe.value, powerChartInstance);
+                fetchSiteData(eTimeframe.value, energyChartInstance, 'energy');
+            }, fetchInterval);
+
+            let devicesP = @json($data);
+            let devicesE = @json($dataE);
+            doughnutChart('#devicesPChart', [doughnutSeries('Devices', devicesP)])
+            doughnutChart('#devicesEChart', [doughnutSeries('Devices', devicesE)])
         });
     </script>
 
-{{--    <script>--}}
-{{--        const site = @json($site);--}}
-{{--        const siteId = site.id;--}}
-
-
-{{--        async function fetchSiteData(timeFrame) {--}}
-{{--            try {--}}
-{{--            const response = await fetch(`/api/site-data/${siteId}?time_frame=${timeFrame}`);--}}
-{{--            if (!response.ok) {--}}
-{{--            throw new Error(`HTTP error! status: ${response.status}`);--}}
-{{--        }--}}
-{{--            const data = await response.json();--}}
-
-{{--            // Process data for the chart--}}
-{{--            const timestamps = data.map(entry => entry.timestamp);--}}
-{{--            const totalPower = data.map(entry => entry.total_power);--}}
-
-{{--            lineChart('#line', timestamps, [lineSeries(totalPower, 'Total Power')]);--}}
-
-{{--        } catch (error) {--}}
-{{--            console.error('Error fetching data:', error);--}}
-{{--        }--}}
-{{--        }--}}
-
-{{--            document.addEventListener('DOMContentLoaded', () => {--}}
-{{--            const defaultTimeFrame = document.querySelector('select').value;--}}
-{{--            fetchSiteData(defaultTimeFrame);--}}
-{{--        });--}}
-
-{{--            document.querySelector('select').addEventListener('change', function () {--}}
-{{--            fetchSiteData(this.value);--}}
-{{--        });--}}
-{{--    </script>--}}
-
-
-    <script>
-
-        const data = @json($data);
-
-        doughnutChart('#doughnut', [doughnutSeries('Power', formatData(data))], 'Doughnut');
-
-    </script>
 @endpush
 
 {{--@extends('layouts.powereye')--}}

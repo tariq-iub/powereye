@@ -21,15 +21,23 @@ const lineSeries = (data, name = '', smooth = true) => {
     };
 };
 
-const doughnutSeries = (name, data) => {
+const doughnutSeries = (name, data, format = true) => {
+    data = format && formatData(data);
     return {
         name, type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false,
         itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-        data,
+        data
     };
 };
 
-const barSeries = () => {};
+const barSeries = (data, name) => {
+    return {
+        name,
+        type: 'bar',
+        data,
+        barWidth: '60%',
+    }
+};
 
 const lineChart = (selector, xData, series, title = null, colors = [], showTooltip = true, gridOptions = {}, showDataLabels = false) => {
 
@@ -39,6 +47,7 @@ const lineChart = (selector, xData, series, title = null, colors = [], showToolt
                 formatter: (value) => value,
             }},
         yAxis: { type: 'value' },
+        legend: { show: 'true' },
         grid: {
             left: gridOptions.left || '3%',
             right: gridOptions.right || '4%',
@@ -69,7 +78,7 @@ const lineChart = (selector, xData, series, title = null, colors = [], showToolt
 };
 
 
-const doughnutChart = (selector, series, title=null) => {
+const doughnutChart = (selector, series, title = null) => {
     const option = {
         tooltip: { trigger: 'item' },
         legend: { top: '5%', left: 'center' },
@@ -80,6 +89,43 @@ const doughnutChart = (selector, series, title=null) => {
 
     return eChart(selector, option);
 };
+
+const barChart = (selector, xData, series, title = null, hoverEffect = true) => {
+    option = {
+        tooltip: hoverEffect && {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        legend: { show: 'true' },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [
+            {
+                type: 'category',
+                data: xData,
+                axisTick: {
+                    alignWithLabel: true
+                }
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value'
+            }
+        ],
+        series
+    };
+
+    setTitle(title, option);
+
+    return eChart(selector, option);
+}
 
 function formatData(data) {
     return data.map(item => ({

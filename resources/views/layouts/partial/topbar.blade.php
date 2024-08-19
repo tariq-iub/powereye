@@ -206,7 +206,7 @@
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle lh-1" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
-                        <span class="uil fs-8 me-2 uil-cube"></span>Clients
+                        <span class="uil fs-8 me-2 uil-cube"></span>Localities
                     </a>
                     <ul class="dropdown-menu navbar-dropdown-caret">
                         @foreach($factories as $row)

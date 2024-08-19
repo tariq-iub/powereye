@@ -1,12 +1,9 @@
 @include('layouts.partial.admin_head')
 
 <main class="main" id="top">
-    @if (in_array(Auth::user()->role->id, [1, 2])):
-        @include('layouts.partial.sidebar')
-        @include('layouts.partial.navbar')
-    @else
-        @include('layouts.partial.topbar');
-    @endif
+    @include('layouts.partial.sidebar')
+    @include('layouts.partial.navbar')
+
 
     <div class="content">
         @yield('content')

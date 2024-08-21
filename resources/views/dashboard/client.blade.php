@@ -8,7 +8,37 @@
                 <!-- Cards Column (8 cols) -->
                 <div class="col-md-8">
                     <div class="row">
-                        <h2>{{ $factory->title  }}</h2>
+                        <div class="d-flex justify-content-between">
+                            <h2>{{ $factory->title  }}</h2>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>
+                                <span class="badge badge-phoenix badge-phoenix-warning rounded-pill fs-9 ms-2">
+                                   <span class="badge-label">Total Power:
+                                       {{ $factory->sites->flatMap(function ($site) {
+                                            return $site->data_file->flatMap(function ($dataFile) {
+                                                return $dataFile->data;
+                                            });
+                                        })->sum(function ($data) {
+                                            return round($data->P1 + $data->P2 + $data->P3, 8);
+                                        }) }} Kw
+                                   </span>
+                                </span>
+                                </h5>
+                                <h5>
+                                <span class="badge badge-phoenix badge-phoenix-success rounded-pill fs-9 ms-2">
+                                   <span class="badge-label">Total Energy:
+                                       {{ $factory->sites->flatMap(function ($site) {
+                                            return $site->data_file->flatMap(function ($dataFile) {
+                                                return $dataFile->data;
+                                            });
+                                        })->sum(function ($data) {
+                                            return round($data->E1 + $data->E2 + $data->E3, 8);
+                                        }) }} Kwh
+                                   </span>
+                                </span>
+                                </h5>
+                            </div>
+                        </div>
                     </div>
                     <div class="row g-3"> <!-- Row with gutter for spacing -->
                         @foreach($factory->sites as $site)
@@ -17,33 +47,26 @@
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between">
                                             <div>
-                                                <h5 class="mb-1">Total orders
-                                                    <span class="badge badge-phoenix badge-phoenix-warning rounded-pill fs-9 ms-2">
-                                                        <span class="badge-label">-6.8%</span>
-                                                    </span>
+                                                <h5 class="mb-1">
+                                                    <a href="{{ route('sites.show', $site->id) }}">{{ $site->title }}</a>
                                                 </h5>
-                                                <h6 class="text-body-tertiary">Last 7 days</h6>
-                                            </div>
-                                            <h4>16,247</h4>
-                                        </div>
-                                        <div class="d-flex justify-content-center px-4 py-6">
-                                            <div class="echart-total-orders" style="height: 85px; width: 115px; user-select: none;">
-                                                <div style="position: relative; width: 115px; height: 85px;">
-                                                    <canvas data-zr-dom-id="zr_0" width="115" height="85" style="position: absolute; left: 0px; top: 0px;"></canvas>
-                                                </div>
-                                                <div class=""></div>
                                             </div>
                                         </div>
+
                                         <div class="mt-2">
                                             <div class="d-flex align-items-center mb-2">
-                                                <div class="bullet-item bg-primary me-2"></div>
-                                                <h6 class="text-body fw-semibold flex-1 mb-0">Completed</h6>
-                                                <h6 class="text-body fw-semibold mb-0">52%</h6>
+                                                <h6>Power:
+                                                    <span class="text-body fw-semibold mb-0">
+                                                        {{ $site->data_file->flatMap->data->sum(function ($data) { return round($data->P1 + $data->P2 + $data->P3, 2); }) }} Kw
+                                                    </span>
+                                                </h6>
                                             </div>
                                             <div class="d-flex align-items-center">
-                                                <div class="bullet-item bg-primary-subtle me-2"></div>
-                                                <h6 class="text-body fw-semibold flex-1 mb-0">Pending payment</h6>
-                                                <h6 class="text-body fw-semibold mb-0">48%</h6>
+                                                <h6>Energy:
+                                                    <span class="text-body fw-semibold mb-0">
+                                                        {{ $site->data_file->flatMap->data->sum(function ($data) { return round($data->E1 + $data->E2 + $data->E3, 8); }) }} Kwh
+                                                    </span>
+                                                </h6>
                                             </div>
                                         </div>
                                     </div>
@@ -84,67 +107,7 @@
 
 @push('scripts')
     <script>
-        // Doughnut Chart 1
-        var doughnutChart1 = echarts.init(document.getElementById('doughnutChart1'));
-        doughnutChart1.setOption({
-            series: [{
-                type: 'pie',
-                radius: ['50%', '70%'],
-                data: [
-                    { value: 45, name: 'P1' },
-                    { value: 25, name: 'P2' },
-                    { value: 15, name: 'P3' },
-                    { value: 15, name: 'P4' }
-                ]
-            }]
-        });
 
-        // Doughnut Chart 2
-        var doughnutChart2 = echarts.init(document.getElementById('doughnutChart2'));
-        doughnutChart2.setOption({
-            series: [{
-                type: 'pie',
-                radius: ['50%', '70%'],
-                data: [
-                    { value: 30, name: 'P5' },
-                    { value: 30, name: 'P6' },
-                    { value: 20, name: 'P7' },
-                    { value: 20, name: 'P8' }
-                ]
-            }]
-        });
-
-        // Bar Chart
-        var barChart = echarts.init(document.getElementById('barChart'));
-        barChart.setOption({
-            xAxis: {
-                type: 'category',
-                data: ['1hr', '2hr', '3hr', '4hr', '5hr']
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [{
-                data: [10, 20, 15, 25, 30],
-                type: 'bar'
-            }]
-        });
-
-        // Line Chart
-        var lineChart = echarts.init(document.getElementById('lineChart'));
-        lineChart.setOption({
-            xAxis: {
-                type: 'category',
-                data: ['1day', '2day', '3day', '4day', '5day']
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [{
-                data: [150, 200, 180, 220, 260],
-                type: 'line'
-            }]
-        });
     </script>
 @endpush
 

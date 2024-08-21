@@ -32,12 +32,30 @@ class HomeController extends Controller
                 return view('dashboard.admin');
             } else {
                 $userID = Auth::id();
-                $factories = Factory::with('sites')->get();
+                $factories = Factory::with('sites.data_file.data')->get();
+                $factories->each(function($factory) {
+                    $factory->sitesPower = $this->getSitesPower($factory);
+                });
                 return view('dashboard.client', compact('factories'));
             }
         } else {
             redirect()->route('login');
         }
     }
+
+    private function getSitesPower($factory)
+    {
+        return $factory->sites->map(function($site) {
+            $totalPower = $site->data_file->flatMap->data->sum(function ($data) {
+                return round($data->P1 + $data->P2 + $data->P3, 2);
+            });
+
+            if ($totalPower > 0) {
+                return ['name' => $site->title, 'value' => $totalPower];
+            }
+        })->filter()->toArray();
+    }
+
+
 }
 

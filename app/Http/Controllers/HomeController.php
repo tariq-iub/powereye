@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helpers;
 use App\Models\Factory;
+use App\Models\FactoryUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,6 +32,7 @@ class HomeController extends Controller
                 return view('dashboard.admin');
             } else {
                 $userID = Auth::id();
+                $factories = Factory::with('sites')->get();
                 return view('dashboard.client', compact('factories'));
             }
         } else {

@@ -5,7 +5,6 @@
     <div class="pb-5 container-fluid">
         @foreach($factories as $factory)
             <div class="row">
-                <!-- Cards Column (8 cols) -->
                 <div class="col-md-8">
                     <div class="row">
                         <div class="d-flex justify-content-between">
@@ -40,10 +39,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row g-3"> <!-- Row with gutter for spacing -->
+                    <div class="row g-3">
                         @foreach($factory->sites as $site)
-                            <div class="col-md-3"> <!-- Each card takes 3 columns -->
-                                <div class="card h-100"> <!-- Ensures equal height for cards -->
+                            <div class="col-md-3">
+                                <div class="card h-100">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between">
                                             <div>
@@ -75,28 +74,28 @@
                         @endforeach
                     </div>
                 </div>
-                <!-- Charts Column (4 cols) -->
+
                 <div class="col-md-4">
                     <div class="row">
-                        <!-- Doughnut Chart 1 -->
-                        <div class="col-md-6">
-                            <div id="doughnutChart1" style="width: 100%; height: 400px"></div>
-                        </div>
-                        <!-- Doughnut Chart 2 -->
-                        <div class="col-md-6">
-                            <div id="doughnutChart2" style="width: 100%; height: 400px"></div>
+                        <div class="col-md-12">
+                            <h4 class="text-center">{{$factory->title}} Power Distribution</h4>
+                            <div id="sitesPower-{{ $factory->id }}" style="width: 100%; height: 250px"></div>
                         </div>
                     </div>
                     <div class="row mt-3">
-                        <!-- Bar Chart -->
                         <div class="col-md-12">
-                            <div id="barChart" style="width: 100%; height: 400px"></div>
+                            <div id="sensorsPower-{{ $factory->id }}" style="width: 100%; height: 300px"></div>
                         </div>
                     </div>
                     <div class="row mt-3">
-                        <!-- Line Chart -->
                         <div class="col-md-12">
-                            <div id="lineChart" style="width: 100%; height: 400px"></div>
+                            <h4 class="text-center">{{$factory->title}} Energy Distribution</h4>
+                            <div id="sitesEnergy-{{ $factory->id }}" style="width: 100%; height: 250px"></div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div id="sensors-Energy-{{ $factory->id }}" style="width: 100%; height: 250px"></div>
                         </div>
                     </div>
                 </div>
@@ -107,8 +106,107 @@
 
 @push('scripts')
     <script>
+        const fetchData = async url => {
+            try {
+                const uri = `/api/${url}`;
+                const response = await fetch(uri);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        const formatData = (data, decimal=2) => Object.keys(data).map(key => {
+            key = data[key];
+            const name = key.name;
+            const value = parseFloat(key.value).toFixed(decimal);
+            return { name, value }
+        });
+    </script>
+
+    <script>
+        const factories = @json($factories);
+
+        factories.forEach(async factory => {
+            const factoryId = factory.id;
+
+            const sitesPowerData = await fetchData(`sites-power/${factoryId}`);
+
+            if (sitesPowerData) {
+                const data = formatData(sitesPowerData);
+
+                const sitesPowerChart = initEChart(`#sitesPower-${factoryId}`);
+
+                sitesPowerChart.setOption({
+                    tooltip: { trigger: 'item' },
+                    series: [
+                        {
+                            name: 'Power (Kw)',
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            data: data
+                        }
+                    ]
+                });
+            } else {
+                console.error('No data found for factory:', factoryId);
+            }
+
+            const sitesEnergyData = await fetchData(`sites-energy/${factoryId}`);
+
+            if (sitesEnergyData) {
+                const data = formatData(sitesEnergyData, 8);
+
+                const sitesEnergyChart = initEChart(`#sitesEnergy-${factoryId}`);
+
+                sitesEnergyChart.setOption({
+                    tooltip: { trigger: 'item' },
+                    series: [
+                        {
+                            name: 'Energy (Kwh)',
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            data: data
+                        }
+                    ]
+                });
+            } else {
+                console.error('No data found for factory:', factoryId);
+            }
+
+            const sensorsPowerData = await fetchData(`sensors-power/${factoryId}`);
+
+            const timestamp = sensorsPowerData.map(entry => entry.timestamp);
+            const total_power = sensorsPowerData.map(entry => entry.total_power);
+
+            const sensorsPowerChart = echarts.init(document.getElementById(`sensorsPower-${factoryId}`));
+
+            option = {
+                xAxis: {
+                    type: 'category',
+                    data: timestamp
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        data: total_power,
+                        type: 'line',
+                        smooth: true
+                    }
+                ]
+            };
+
+            sensorsPowerChart.setOption(option);
+        });
 
     </script>
+
+
 @endpush
 
 {{--    <div class="pb-5">--}}

@@ -21,8 +21,7 @@ const lineSeries = (data, name = '', smooth = true) => {
     };
 };
 
-const doughnutSeries = (name, data, format = true) => {
-    data = format && formatData(data);
+const doughnutSeries = (name, data) => {
     return {
         name, type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false,
         itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
@@ -125,12 +124,5 @@ const barChart = (selector, xData, series, title = null, hoverEffect = true) => 
     setTitle(title, option);
 
     return eChart(selector, option);
-}
-
-function formatData(data) {
-    return data.map(item => ({
-        value: item.total,
-        name: item.title
-    }));
 }
 

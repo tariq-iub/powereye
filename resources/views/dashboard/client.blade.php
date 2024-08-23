@@ -53,19 +53,20 @@
                                         </div>
 
                                         <div class="mt-2">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <h6>Power:
-                                                    <span class="text-body fw-semibold mb-0">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h6 class="mb-2">Power:
+                                                        <span class="text-body fw-semibold mb-0">
                                                         {{ $site->data_file->flatMap->data->sum(function ($data) { return round($data->P1 + $data->P2 + $data->P3, 2); }) }} Kw
                                                     </span>
-                                                </h6>
-                                            </div>
-                                            <div class="d-flex align-items-center">
-                                                <h6>Energy:
-                                                    <span class="text-body fw-semibold mb-0">
+                                                    </h6>
+                                                    <h6>Energy:
+                                                        <span class="text-body fw-semibold mb-0">
                                                         {{ $site->data_file->flatMap->data->sum(function ($data) { return round($data->E1 + $data->E2 + $data->E3, 8); }) }} Kwh
                                                     </span>
-                                                </h6>
+                                                    </h6>
+                                                </div>
+                                                <div id="siteGauge-{{ $site->id }}" style="width:100px; height: 100px"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -131,6 +132,17 @@
         const factories = @json($factories);
 
         factories.forEach(async factory => {
+
+            const sites = factory.sites;
+
+            sites.forEach(async site => {
+                const chart = initEChart(`#siteGauge-${site.id}`);
+
+                option = {};
+
+                chart.setOption(option);
+            });
+
             const factoryId = factory.id;
 
             const sitesPowerData = await fetchData(`sites-power/${factoryId}`);

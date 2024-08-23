@@ -55,13 +55,7 @@ class SiteController extends Controller
         if (in_array(Auth::user()->role->id, [1, 2])) {
             return view( 'admin.sites.show', compact('site'));
         }
-
-        $data = Helpers::sitePower($site, false);
-        $dataE = Helpers::siteEnergy($site, false);
-
-        $timeFrameOptions = Helpers::getTimeFrameOptions();
-
-        return view( 'client.sites.show', compact('site', 'data', 'dataE', 'timeFrameOptions'));
+        return view( 'client.sites.show', compact('site'));
     }
 
     public function fetchData(Request $request, Site $site)

@@ -45,3 +45,4 @@ Route::prefix('file-ota')->group(function () {
 Route::get('sites-power/{factoryId}', [HomeController::class, 'getSitesPower']);
 Route::get('sites-energy/{factoryId}', [HomeController::class, 'getSitesEnergy']);
 Route::get('sensors-power/{factoryId}', [HomeController::class, 'getSensorsPower']);
+Route::get('factory-power/{factoryId}', [HomeController::class, 'getFactoryPower']);

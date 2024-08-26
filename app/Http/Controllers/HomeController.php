@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Factory;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -123,6 +124,25 @@ class HomeController extends Controller
         return response()->json($data->values());
     }
 
+    public function getFactoryPower(int $factoryID): JsonResponse
+    {
+        $factory = Factory::with(['sites.data_file.data' => function ($query) {
+            $query->select('P1', 'P2', 'P3', 'data_file_id');
+        }])->find($factoryID);
 
+        if (!$factory) {
+            return response()->json(['error' => 'Factory not found'], 404);
+        }
+
+        $factoryPower = $factory->sites->flatMap(function ($site) {
+            return $site->data_file->flatMap(function ($dataFile) {
+                return $dataFile->data;
+            });
+        })->sum(function ($data) {
+            return round($data->P1 + $data->P2 + $data->P3, 8);
+        });
+
+        return response()->json($factoryPower);
+    }
 }
 

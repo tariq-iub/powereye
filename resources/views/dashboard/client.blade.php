@@ -13,7 +13,7 @@
                                 <h5>
                                 <span class="badge badge-phoenix badge-phoenix-warning rounded-pill fs-9 ms-2">
                                    <span class="badge-label">Total Power:
-                                       {{ $factory->sites->flatMap(function ($site) {
+                                        {{ $factory->sites->flatMap(function ($site) {
                                             return $site->data_file->flatMap(function ($dataFile) {
                                                 return $dataFile->data;
                                             });
@@ -41,7 +41,7 @@
                     </div>
                     <div class="row g-3">
                         @foreach($factory->sites as $site)
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between">
@@ -66,7 +66,7 @@
                                                     </span>
                                                     </h6>
                                                 </div>
-                                                <div id="siteGauge-{{ $site->id }}" style="width:100px; height: 100px"></div>
+                                                <div id="siteGauge-{{ $site->id }}" style="width:200px; height: 100px"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -79,19 +79,17 @@
                 <div class="col-md-4">
                     <div class="row">
                         <div class="col-md-12">
-                            <h4 class="text-center">{{$factory->title}} Power Distribution</h4>
-                            <div id="sitesPower-{{ $factory->id }}" style="width: 100%; height: 250px"></div>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-12">
                             <div id="sensorsPower-{{ $factory->id }}" style="width: 100%; height: 300px"></div>
                         </div>
                     </div>
                     <div class="row mt-3">
-                        <div class="col-md-12">
+                        <div class="col-md-6">
+                            <h4 class="text-center">{{$factory->title}} Power Distribution</h4>
+                            <div id="sitesPower-{{ $factory->id }}" style="width: 100%; height: 150px"></div>
+                        </div>
+                        <div class="col-md-6">
                             <h4 class="text-center">{{$factory->title}} Energy Distribution</h4>
-                            <div id="sitesEnergy-{{ $factory->id }}" style="width: 100%; height: 250px"></div>
+                            <div id="sitesEnergy-{{ $factory->id }}" style="width: 100%; height: 150px"></div>
                         </div>
                     </div>
                     <div class="row mt-3">
@@ -138,7 +136,79 @@
             sites.forEach(async site => {
                 const chart = initEChart(`#siteGauge-${site.id}`);
 
-                option = {};
+                var option = {
+                    series: [
+                        {
+                            name: 'Energy',
+                            type: 'gauge',
+                            startAngle: 180,
+                            endAngle: 0,
+                            radius: '100%',
+                            min: 0,
+                            max: 100,
+                            splitNumber: 5,
+                            axisLine: {
+                                lineStyle: {
+                                    width: 20,
+                                    color: [
+                                        [0.3, '#FF6E76'],
+                                        [0.7, '#FDDD60'],
+                                        [1, '#58D9F9']
+                                    ]
+                                }
+                            },
+                            pointer: {
+                                icon: 'path://M16.09,2.72L0.64,23.64l4.91,4.35L17.13,8.54,16.09,2.72Z',
+                                length: '60%',
+                                width: 6,
+                                offsetCenter: [0, '-60%'],
+                                itemStyle: {
+                                    color: 'auto'
+                                }
+                            },
+                            axisTick: {
+                                distance: -30,
+                                length: 8,
+                                lineStyle: {
+                                    color: '#fff',
+                                    width: 2
+                                }
+                            },
+                            splitLine: {
+                                distance: -30,
+                                length: 20,
+                                lineStyle: {
+                                    color: '#fff',
+                                    width: 5
+                                }
+                            },
+                            axisLabel: {
+                                distance: -20,
+                                color: '#fff',
+                                fontSize: 12
+                            },
+                            title: {
+                                textStyle: {
+                                    fontSize: 14,
+                                    fontWeight: 'bold',
+                                    color: '#000'
+                                },
+                                offsetCenter: [0, '85%']
+                            },
+                            detail: {
+                                valueAnimation: true,
+                                fontSize: 14,
+                                offsetCenter: [0, '60%'],
+                                formatter: '{value} Kwh',
+                                color: 'auto'
+                            },
+                            data: [{
+                                value: 330,
+                                name: 'Energy'
+                            }]
+                        }
+                    ]
+                };
 
                 chart.setOption(option);
             });

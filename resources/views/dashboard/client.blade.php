@@ -12,19 +12,15 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5>
                                 <span class="badge badge-phoenix badge-phoenix-warning rounded-pill fs-9 ms-2">
-                                   <span class="badge-label" id="factory-power-{{$factory->id}}"></span>
+                                   <span class="badge-label">
+                                       Total Power: <span id="factory-power-{{$factory->id}}">{{ $factory->totalPower }}</span> kW
+                                   </span>
                                 </span>
                                 </h5>
                                 <h5>
                                 <span class="badge badge-phoenix badge-phoenix-success rounded-pill fs-9 ms-2">
-                                   <span class="badge-label">Total Energy:
-                                       {{ $factory->sites->flatMap(function ($site) {
-                                            return $site->data_file->flatMap(function ($dataFile) {
-                                                return $dataFile->data;
-                                            });
-                                        })->sum(function ($data) {
-                                            return round($data->E1 + $data->E2 + $data->E3, 8);
-                                        }) }} Kwh
+                                   <span class="badge-label">
+                                       Total Energy: <span id="factory-energy-{{$factory->id}}">{{ $factory->totalEnergy }}</span> kWh
                                    </span>
                                 </span>
                                 </h5>
@@ -49,16 +45,16 @@
                                                 <div>
                                                     <h6 class="mb-2">Power:
                                                         <span class="text-body fw-semibold mb-0">
-                                                        {{ $site->data_file->flatMap->data->sum(function ($data) { return round($data->P1 + $data->P2 + $data->P3, 2); }) }} Kw
-                                                    </span>
+                                                            <span id="site-power-{{ $site->id }}">{{ $site->totalPower }}</span> kW
+                                                        </span>
                                                     </h6>
                                                     <h6>Energy:
                                                         <span class="text-body fw-semibold mb-0">
-                                                        {{ $site->data_file->flatMap->data->sum(function ($data) { return round($data->E1 + $data->E2 + $data->E3, 8); }) }} Kwh
-                                                    </span>
+                                                            <span id="site-energy-{{ $site->id }}">{{ $site->totalEnergy }}</span> kWh
+                                                        </span>
                                                     </h6>
                                                 </div>
-                                                <div id="siteGauge-{{ $site->id }}" style="width:200px; height: 100px"></div>
+                                                <div id="siteGaugeChart-{{ $site->id }}" class="chart" style="width:200px; height: 100px"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -71,22 +67,17 @@
                 <div class="col-md-4">
                     <div class="row">
                         <div class="col-md-12">
-                            <div id="sensorsPower-{{ $factory->id }}" style="width: 100%; height: 300px"></div>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <h4 class="text-center">{{$factory->title}} Power Distribution</h4>
-                            <div id="sitesPower-{{ $factory->id }}" style="width: 100%; height: 150px"></div>
-                        </div>
-                        <div class="col-md-6">
-                            <h4 class="text-center">{{$factory->title}} Energy Distribution</h4>
-                            <div id="sitesEnergy-{{ $factory->id }}" style="width: 100%; height: 150px"></div>
+                            <div id="factoryLineChart-{{ $factory->id }}" class="chart" style="width: 100%; height: 300px"></div>
                         </div>
                     </div>
                     <div class="row mt-3">
                         <div class="col-md-12">
-                            <div id="sensorsEnergy-{{ $factory->id }}" style="width: 100%; height: 250px"></div>
+                            <div id="factoryDoughnutChart-{{ $factory->id }}" class="chart" style="width: 100%; height: 250px"></div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div id="factoryBarChart-{{ $factory->id }}" class="chart" style="width: 100%; height: 250px"></div>
                         </div>
                     </div>
                 </div>
@@ -97,7 +88,8 @@
 
 @push('scripts')
     <script>
-        const fetchData = async url => {
+        // Function to fetch data from a URL
+        const fetchData = async (url) => {
             try {
                 const uri = `/api/${url}`;
                 const response = await fetch(uri);
@@ -108,217 +100,89 @@
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
-        }
+        };
 
-        const formatData = (data, decimal=2) => Object.keys(data).map(key => {
-            key = data[key];
-            const name = key.name;
-            const value = parseFloat(key.value).toFixed(decimal);
-            return { name, value }
-        });
-    </script>
+        // Function to determine chart type from chartId
+        const getChartType = (chartId) => {
+            if (chartId.includes('LineChart')) return 'line';
+            if (chartId.includes('BarChart')) return 'bar';
+            if (chartId.includes('DoughnutChart')) return 'doughnut';
+            if (chartId.includes('GaugeChart')) return 'gauge';
+        };
 
-    <script>
-        const data = fetchData('factory-power/1').then((data)=>{
-            console.log(data);
-        })
-    </script>
+        // Initialize charts and attach them to their containers
+        const initializeCharts = (factories) => {
+            let charts = {};
 
-    <script>
-        const fetchPower = async (factoryID) => await fetchData(`factory-power/${factoryID}`);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const factories = @json($factories);
-
-            factories.forEach(async factory => {
-
-                const factoryPowerSpan = document.querySelector(`#factory-power-${factory.id}`);
-
-                // const factoryPower = fetchData(`factory-power/${factory.id}`).then((data)=>{
-                //     factoryPowerSpan.textContent = `Total Power: ${data} kw`;
-                // })
-
-                factoryPowerSpan.textContent = await fetchPower(factory.id);
-
-                const sites = factory.sites;
-
-                sites.forEach(site => {
-                    const chart = initEChart(`#siteGauge-${site.id}`);
-
-                    var option = {
-                        series: [
-                            {
-                                name: 'Energy',
-                                type: 'gauge',
-                                startAngle: 180,
-                                endAngle: 0,
-                                radius: '100%',
-                                min: 0,
-                                max: 100,
-                                splitNumber: 5,
-                                axisLine: {
-                                    lineStyle: {
-                                        width: 20,
-                                        color: [
-                                            [0.3, '#FF6E76'],
-                                            [0.7, '#FDDD60'],
-                                            [1, '#58D9F9']
-                                        ]
-                                    }
-                                },
-                                pointer: {
-                                    icon: 'path://M16.09,2.72L0.64,23.64l4.91,4.35L17.13,8.54,16.09,2.72Z',
-                                    length: '60%',
-                                    width: 6,
-                                    offsetCenter: [0, '-60%'],
-                                    itemStyle: {
-                                        color: 'auto'
-                                    }
-                                },
-                                axisTick: {
-                                    distance: -30,
-                                    length: 8,
-                                    lineStyle: {
-                                        color: '#fff',
-                                        width: 2
-                                    }
-                                },
-                                splitLine: {
-                                    distance: -30,
-                                    length: 20,
-                                    lineStyle: {
-                                        color: '#fff',
-                                        width: 5
-                                    }
-                                },
-                                axisLabel: {
-                                    distance: -20,
-                                    color: '#fff',
-                                    fontSize: 12
-                                },
-                                title: {
-                                    textStyle: {
-                                        fontSize: 14,
-                                        fontWeight: 'bold',
-                                        color: '#000'
-                                    },
-                                    offsetCenter: [0, '85%']
-                                },
-                                detail: {
-                                    valueAnimation: true,
-                                    fontSize: 14,
-                                    offsetCenter: [0, '60%'],
-                                    formatter: '{value} Kwh',
-                                    color: 'auto'
-                                },
-                                data: [{
-                                    value: 75,
-                                    name: 'Energy'
-                                }]
-                            }
-                        ]
-                    };
-
-                    chart.setOption(option);
+            factories.forEach(factory => {
+                // Line Chart
+                const lineChart = echarts.init(document.getElementById(`factoryLineChart-${factory.id}`));
+                lineChart.setOption({
+                    title: { text: `${factory.title} Power Usage` },
+                    xAxis: { type: 'category', data: factory.chartData.dates },
+                    yAxis: { type: 'value' },
+                    series: [{ data: factory.chartData.powers, type: 'line' }]
                 });
+                charts[`factoryLineChart-${factory.id}`] = lineChart;
 
-                const factoryId = factory.id;
+                // Doughnut Chart
+                const doughnutChart = echarts.init(document.getElementById(`factoryDoughnutChart-${factory.id}`));
+                doughnutChart.setOption({
+                    title: { text: `${factory.title} Energy Distribution`, left: 'center' },
+                    tooltip: { trigger: 'item' },
+                    series: [{
+                        name: 'Energy',
+                        type: 'pie',
+                        radius: ['50%', '70%'],
+                        avoidLabelOverlap: false,
+                        data: factory.chartData.energyBreakdown
+                    }]
+                });
+                charts[`factoryDoughnutChart-${factory.id}`] = doughnutChart;
 
-                const sitesPowerData = await fetchData(`sites-power/${factoryId}`);
+                // Bar Chart
+                const barChart = echarts.init(document.getElementById(`factoryBarChart-${factory.id}`));
+                barChart.setOption({
+                    title: { text: `${factory.title} Site Comparison` },
+                    xAxis: { type: 'category', data: factory.chartData.siteNames },
+                    yAxis: { type: 'value' },
+                    series: [{ data: factory.chartData.sitePowers, type: 'bar' }]
+                });
+                charts[`factoryBarChart-${factory.id}`] = barChart;
 
-                if (sitesPowerData) {
-                    const data = formatData(sitesPowerData);
-
-                    const sitesPowerChart = initEChart(`#sitesPower-${factoryId}`);
-
-                    sitesPowerChart.setOption({
-                        tooltip: { trigger: 'item' },
-                        series: [
-                            {
-                                name: 'Power (Kw)',
-                                type: 'pie',
-                                radius: ['40%', '70%'],
-                                data: data
-                            }
-                        ]
+                // Gauge Charts for Sites
+                factory.sites.forEach(site => {
+                    const gaugeChart = echarts.init(document.getElementById(`siteGaugeChart-${site.id}`));
+                    gaugeChart.setOption({
+                        title: { text: `${site.title} Energy Usage`, left: 'center' },
+                        series: [{
+                            type: 'gauge',
+                            radius: '80%',
+                            center: ['50%', '60%'],
+                            min: 0,
+                            max: 1,
+                            data: [{ value: site.totalEnergy }],
+                            axisLine: {
+                                lineStyle: { color: [[0.2, 'green'], [0.8, 'yellow'], [1, 'red']], width: 10 }
+                            },
+                            pointer: { width: 5 },
+                            detail: { formatter: '{value} kWh', fontSize: 16 }
+                        }]
                     });
-                } else {
-                    console.error('No data found for factory:', factoryId);
-                }
-
-                const sitesEnergyData = await fetchData(`sites-energy/${factoryId}`);
-
-                if (sitesEnergyData) {
-                    const data = formatData(sitesEnergyData, 8);
-
-                    const sitesEnergyChart = initEChart(`#sitesEnergy-${factoryId}`);
-
-                    sitesEnergyChart.setOption({
-                        tooltip: { trigger: 'item' },
-                        series: [
-                            {
-                                name: 'Energy (Kwh)',
-                                type: 'pie',
-                                radius: ['40%', '70%'],
-                                data: data
-                            }
-                        ]
-                    });
-                } else {
-                    console.error('No data found for factory:', factoryId);
-                }
-
-                const sensorsPowerData = await fetchData(`sensors-power/${factoryId}`);
-
-                const timestamp = sensorsPowerData.map(entry => entry.timestamp);
-                const total_power = sensorsPowerData.map(entry => entry.total_power);
-
-                const sensorsPowerChart = echarts.init(document.getElementById(`sensorsPower-${factoryId}`));
-
-                option = {
-                    xAxis: {
-                        type: 'category',
-                        data: timestamp
-                    },
-                    yAxis: {
-                        type: 'value'
-                    },
-                    series: [
-                        {
-                            data: total_power,
-                            type: 'line',
-                            smooth: true
-                        }
-                    ]
-                };
-
-                sensorsPowerChart.setOption(option);
-
-                const sensorsEnergyChart = echarts.init(document.getElementById(`sensorsEnergy-${factoryId}`));
-
-                option = {
-                    xAxis: {
-                        type: 'category',
-                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                    },
-                    yAxis: {
-                        type: 'value'
-                    },
-                    series: [
-                        {
-                            data: [120, 200, 150, 80, 70, 110, 130],
-                            type: 'bar'
-                        }
-                    ]
-                };
-
-                sensorsEnergyChart.setOption(option);
+                    charts[`siteGaugeChart-${site.id}`] = gaugeChart;
+                });
             });
 
-        })
+            // Resize charts on window resize
+            window.addEventListener('resize', () => {
+                Object.values(charts).forEach(chart => chart.resize());
+            });
+        };
+
+        // Fetch data and initialize charts
+        const factories = @json($factories); // Replace this with actual data fetching if needed
+        initializeCharts(factories);
     </script>
-
-
 @endpush
 
 {{--    <div class="pb-5">--}}

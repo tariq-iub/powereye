@@ -48,21 +48,56 @@ const barChartOption = (xData, series, title = null) => {
 };
 
 const doughnutChartOption = (name, seriesData, title = null) => {
+    // const option = {
+    //     tooltip: {
+    //         trigger: 'item',
+    //         formatter: function(params) {
+    //             return `
+    //                 <div style="font-weight: bold;">Energy Distribution</div>
+    //                 ${params.name}: ${params.value} kWh (${params.percent}%)
+    //             `;
+    //         }
+    //     },
+    //     legend: {
+    //         top: '5%',
+    //         left: 'center'
+    //     },
+    //
+    //     series: [
+    //         {
+    //             name,
+    //             type: 'pie',
+    //             radius: ['40%', '70%'],
+    //             avoidLabelOverlap: false,
+    //             label: {
+    //                 show: false,
+    //                 position: 'center'
+    //             },
+    //             emphasis: {
+    //                 show: false,
+    //             },
+    //             labelLine: {
+    //                 show: false
+    //             },
+    //             data: seriesData
+    //         }
+    //     ]
+    // };
     const option = {
         tooltip: {
             trigger: 'item',
             formatter: function(params) {
                 return `
-                    <div style="font-weight: bold;">Energy Distribution</div>
-                    ${params.name}: ${params.value} kWh (${params.percent}%)
-                `;
+                <div style="font-weight: bold;">Energy Distribution</div>
+                ${params.name}: ${params.value} kWh (${params.percent}%)
+            `;
             }
         },
         legend: {
+            show: false,
             top: '5%',
             left: 'center'
         },
-
         series: [
             {
                 name,
@@ -70,19 +105,26 @@ const doughnutChartOption = (name, seriesData, title = null) => {
                 radius: ['40%', '70%'],
                 avoidLabelOverlap: false,
                 label: {
-                    show: false,
-                    position: 'center'
+                    show: true,
+                    position: 'outside',
+                    formatter: '{b}',
+                    alignTo: 'labelLine',
+                    padding: [0, 5]
+                },
+                labelLine: {
+                    show: true,
+                    length: 15,
+                    length2: 10,
+                    smooth: true
                 },
                 emphasis: {
                     show: false,
-                },
-                labelLine: {
-                    show: false
                 },
                 data: seriesData
             }
         ]
     };
+
 
     if (title) {
         option.title = { text: title };
@@ -119,7 +161,7 @@ const gaugeChartOption = (value, name, title = null) => {
                     width: 5,
                     length: '80%',
                     itemStyle: {
-                        color: 'auto',
+                        color: '#555',
                         shadowBlur: 3
                     }
                 },

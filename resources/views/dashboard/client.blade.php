@@ -3,9 +3,9 @@
 @section('content')
     <div class="pb-5 container-fluid">
         @foreach($factories as $factory)
-            <div class="row">
+            <div class="row my-2 p-4 rounded border shadow-sm">
                 <div class="col-md-8">
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="d-flex justify-content-between">
                             <h2>{{ $factory->title  }}</h2>
                             <div class="d-flex justify-content-between align-items-center">
@@ -67,11 +67,11 @@
                     <div class="row">
                         <div class="col-md-12 d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ $factory->title }} Power Usage</h5>
-                            <div class="col-6 col-sm-3">
-                                <select class="form-select form-select-sm" id="select-gross-revenue-month">
-                                    <option>Last 24 hours</option>
-                                    <option>Last Week</option>
-                                    <option>All Time</option>
+                            <div class="col-8 col-sm-4">
+                                <select class="form-select form-select-sm" id="factoryLineTimeframe-{{ $factory->id }}">
+                                    @foreach($timeframeOptions as $label => $value)
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -84,7 +84,7 @@
 
                     <div class="row mt-3">
                         <div class="col-md-12">
-                            <h5 class="mb-0 text-end">Energy Distribution</h5>
+                            <h5 class="mb-0">Energy Distribution</h5>
                             <div id="factoryDoughnutChart-{{ $factory->id }}" class="chart" style="width: 100%; height: 250px"></div>
                         </div>
                     </div>
@@ -92,11 +92,11 @@
                     <div class="row mt-3">
                         <div class="col-md-12 d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">{{ $factory->title }} Energy Usage</h5>
-                            <div class="col-6 col-sm-3">
-                                <select class="form-select form-select-sm" id="select-gross-revenue-month">
-                                    <option>Last 24 hours</option>
-                                    <option>Last Week</option>
-                                    <option>All Time</option>
+                            <div class="col-8 col-sm-4">
+                                <select class="form-select form-select-sm" id="factoryBarTimeframe-{{ $factory->id }}">
+                                    @foreach($timeframeOptions as $label => $value)
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -115,29 +115,206 @@
 
 @push('scripts')
     <script>
-        const initializeCharts = (factories) => {
-
-            factories.forEach(factory => {
-
-                const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([1, 2, 3], [ { data: [2, 4, 6], type: 'line' } ]));
-
-                const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy', factory.chartData.energyBreakdown));
-
-                const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([1, 2, 3],  [{data: [10, 20, 5]}] ));
-
-                factory.sites.forEach(site => {
-                    const gaugeChart = initChart(`siteGaugeChart-${site.id}`, gaugeChartOption(site.totalEnergy || 0, site.title));
-                });
-            });
-
-        };
-
         document.addEventListener('DOMContentLoaded', () => {
+            const initializeCharts =(factories) => {
+                factories.forEach(async (factory) => {
+                    const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([], [ { data: [], type: 'line' } ]));
+                    const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy', factory.chartData.energyBreakdown));
+                    const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([1, 2, 3],  [{data: [10, 20, 5]}] ));
+
+                    factory.sites.forEach(site => {
+                        const gaugeChart = initChart(`siteGaugeChart-${site.id}`, gaugeChartOption(site.totalEnergy || 0, site.title));
+                    });
+
+                    const updateCharts = async (timeframe) => {
+                        const sensorData = await fetchData(`sensor-data/${factory.id}/${timeframe}`);
+
+                        const timestamps = [];
+                        const powerData = [];
+
+                        sensorData.forEach(dataPoint => {
+                            const date = new Date(dataPoint.timestamp);
+                            timestamps.push(date.toLocaleTimeString('en-GB'));
+                            powerData.push(dataPoint.power);
+                        });
+
+                        updateChart(lineChart, lineChartOption(timestamps, [ { data: powerData } ]));
+                    };
+
+                    const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
+                    if (lineTimeframeSelect) {
+                        lineTimeframeSelect.addEventListener('change', () => {
+                            const timeframe = lineTimeframeSelect.value;
+                            updateCharts(timeframe);
+                        });
+                    }
+
+                    const initialTimeframe = lineTimeframeSelect ? lineTimeframeSelect.value : '1d';
+                    await updateCharts(initialTimeframe);
+                });
+            };
+
             const factories = @json($factories);
             initializeCharts(factories);
         });
     </script>
 @endpush
+
+
+{{--@push('scripts')--}}
+{{--    <script>--}}
+{{--        // Function to initialize charts for each factory and site--}}
+{{--        const initializeCharts = factories => {--}}
+{{--            factories.forEach(async factory => {--}}
+{{--                // Initialize charts with default options--}}
+{{--                const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([], [ { data: [], type: 'line' } ]));--}}
+{{--                const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy', factory.chartData.energyBreakdown));--}}
+{{--                const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([1, 2, 3],  [{data: [10, 20, 5]}] ));--}}
+
+{{--                // Initialize site gauge charts--}}
+{{--                factory.sites.forEach(site => {--}}
+{{--                    const gaugeChart = initChart(`siteGaugeChart-${site.id}`, gaugeChartOption(site.totalEnergy || 0, site.title));--}}
+{{--                });--}}
+
+{{--                // Handle chart updates when timeframes change--}}
+{{--                const updateCharts = async (timeframe) => {--}}
+{{--                    console.log(`Updating charts for factory ${factory.id} with timeframe: ${timeframe}`);--}}
+{{--                    const sensorData = await fetchData(`sensor-data/${factory.id}/${timeframe}`);--}}
+
+{{--                    const timestamps = [];--}}
+{{--                    const powerData = [];--}}
+
+{{--                    sensorData.forEach(dataPoint => {--}}
+{{--                        const date = new Date(dataPoint.timestamp);--}}
+{{--                        timestamps.push(date.toLocaleTimeString('en-GB'));--}}
+{{--                        powerData.push(dataPoint.power);--}}
+{{--                    });--}}
+
+{{--                    updateChart(lineChart, lineChartOption(timestamps, [ { data: powerData } ]));--}}
+{{--                    // You may want to update the bar chart and doughnut chart here as well--}}
+{{--                };--}}
+
+{{--                // Set up event listener for timeframe select--}}
+{{--                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);--}}
+{{--                if (lineTimeframeSelect) {--}}
+{{--                    lineTimeframeSelect.addEventListener('change', () => {--}}
+{{--                        const timeframe = lineTimeframeSelect.value;--}}
+{{--                        console.log(`Select value changed to: ${timeframe}`);--}}
+{{--                        updateCharts(timeframe);--}}
+{{--                    });--}}
+{{--                } else {--}}
+{{--                    console.error(`Select element with ID factoryLineTimeframe-${factory.id} not found.`);--}}
+{{--                }--}}
+
+{{--                // Initialize charts with default timeframe--}}
+{{--                const initialTimeframe = lineTimeframeSelect ? lineTimeframeSelect.value : '1d';--}}
+{{--                await updateCharts(initialTimeframe);--}}
+{{--            });--}}
+{{--        };--}}
+
+{{--        document.addEventListener('DOMContentLoaded', () => {--}}
+{{--            const factories = @json($factories);--}}
+{{--            initializeCharts(factories);--}}
+{{--        });--}}
+{{--    </script>--}}
+{{--@endpush--}}
+
+
+{{--@push('scripts')--}}
+{{--    <script>--}}
+{{--        // Function to initialize charts for each factory and site--}}
+{{--        const initializeCharts = factories => {--}}
+{{--            factories.forEach(async factory => {--}}
+{{--                // Initialize charts with default options--}}
+{{--                const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([], [ { data: [], type: 'line' } ]));--}}
+{{--                const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy', factory.chartData.energyBreakdown));--}}
+{{--                const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([1, 2, 3],  [{data: [10, 20, 5]}] ));--}}
+
+{{--                // Initialize site gauge charts--}}
+{{--                factory.sites.forEach(site => {--}}
+{{--                    const gaugeChart = initChart(`siteGaugeChart-${site.id}`, gaugeChartOption(site.totalEnergy || 0, site.title));--}}
+{{--                });--}}
+
+{{--                // Handle chart updates when timeframes change--}}
+{{--                const updateCharts = async (timeframe) => {--}}
+{{--                    const sensorData = await fetchData(`sensor-data/${factory.id}/${timeframe}`);--}}
+
+{{--                    const timestamps = [];--}}
+{{--                    const powerData = [];--}}
+
+{{--                    sensorData.forEach(dataPoint => {--}}
+{{--                        const date = new Date(dataPoint.timestamp);--}}
+{{--                        timestamps.push(date.toLocaleTimeString('en-GB'));--}}
+{{--                        powerData.push(dataPoint.power);--}}
+{{--                    });--}}
+
+{{--                    updateChart(lineChart, lineChartOption(timestamps, [ { data: powerData } ]));--}}
+{{--                    // You may want to update the bar chart and doughnut chart here as well--}}
+{{--                };--}}
+
+{{--                // Set up event listener for timeframe select--}}
+{{--                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);--}}
+{{--                lineTimeframeSelect.addEventListener('change', () => {--}}
+{{--                    const timeframe = lineTimeframeSelect.value;--}}
+{{--                    updateCharts(timeframe);--}}
+{{--                    console.log(timeframe);--}}
+{{--                });--}}
+
+{{--                // Initialize charts with default timeframe--}}
+{{--                const initialTimeframe = lineTimeframeSelect.value;--}}
+{{--                await updateCharts(initialTimeframe);--}}
+{{--            });--}}
+{{--        };--}}
+
+{{--        document.addEventListener('DOMContentLoaded', () => {--}}
+{{--            const factories = @json($factories);--}}
+{{--            initializeCharts(factories);--}}
+{{--        });--}}
+{{--    </script>--}}
+{{--@endpush--}}
+
+
+{{--@push('scripts')--}}
+{{--    <script>--}}
+{{--        const initializeCharts = factories => {--}}
+
+{{--            factories.forEach(async factory => {--}}
+
+{{--                const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([], [ { data: [], type: 'line' } ]));--}}
+
+{{--                const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy', factory.chartData.energyBreakdown));--}}
+
+{{--                const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([1, 2, 3],  [{data: [10, 20, 5]}] ));--}}
+
+{{--                factory.sites.forEach(site => {--}}
+{{--                    const gaugeChart = initChart(`siteGaugeChart-${site.id}`, gaugeChartOption(site.totalEnergy || 0, site.title));--}}
+{{--                });--}}
+
+{{--                const timeframe = document.getElementById(`factoryLineTimeframe-${factory.id}`).value;--}}
+
+{{--                const sensorData = await fetchData(`sensor-data/${factory.id}/${timeframe}`);--}}
+
+{{--                const timestamps = [];--}}
+{{--                const powerData = [];--}}
+
+{{--                sensorData.forEach(dataPoint => {--}}
+{{--                    const date = new Date(dataPoint.timestamp);--}}
+{{--                    timestamps.push(date.toLocaleTimeString('en-GB'));--}}
+{{--                    powerData.push(dataPoint.power);--}}
+{{--                });--}}
+
+
+{{--                updateChart(lineChart, lineChartOption(timestamps, [ { data: powerData } ]));--}}
+{{--            });--}}
+
+{{--        };--}}
+
+{{--        document.addEventListener('DOMContentLoaded', () => {--}}
+{{--            const factories = @json($factories);--}}
+{{--            initializeCharts(factories);--}}
+{{--        });--}}
+{{--    </script>--}}
+{{--@endpush--}}
 
 {{--    <div class="pb-5">--}}
 {{--        <div class="row g-4">--}}

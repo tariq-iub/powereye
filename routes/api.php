@@ -44,3 +44,4 @@ Route::prefix('file-ota')->group(function () {
 
 Route::get('factory/{factoryId}/{type}', [HomeController::class, 'getFactoryData']);
 Route::get('site/{siteId}/{type}', [HomeController::class, 'getSiteData']);
+Route::get('sensor-data/{factoryId}/{timeframe}', [HomeController::class, 'fetchSensorData']);

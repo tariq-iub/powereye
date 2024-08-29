@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Factory;
+use App\Models\SensorData;
 use App\Models\Site;
 use App\Models\User;
 use Carbon\Carbon;
@@ -36,11 +37,43 @@ class HomeController extends Controller
             } else {
                 $userID = Auth::id();
                 $factories = $this->loadFactories($request, $userID);
-                return view('dashboard.client', compact('factories'));
+                $timeframeOptions = $this->getTimeframeOption();
+                return view('dashboard.client', compact('factories', 'timeframeOptions'));
             }
         } else {
             redirect()->route('login');
         }
+    }
+
+    public function fetchSensorData(Request $request, int $factoryId, string $timeframe = '24hr', bool $json = true): JsonResponse|array
+    {
+        $sensorData = [];
+
+        $startDate = $this->mapTimeframe($timeframe);
+
+        $sensors = SensorData::whereHas('data_file.site.factory', function ($query) use ($factoryId) {
+            $query->where('id', $factoryId);
+        })
+            ->when($timeframe !== 'all', function ($query) use ($startDate) {
+                $query->where('timestamp', '>=', $startDate);
+            })
+            ->with('data_file.site.factory')
+            ->get();
+
+        foreach ($sensors as $sensor) {
+            $p = $sensor->P1 + $sensor->P2 + $sensor->P3;
+            $e = $sensor->E1 + $sensor->E2 + $sensor->E3;
+
+            $sensorData[] = [
+                'timestamp' => $sensor->timestamp,
+                'power' => $p,
+                'energy' => $e,
+                'site_id' => $sensor->data_file->site->id,
+                'factory_id' => $sensor->data_file->site->factory->id,
+            ];
+        }
+
+        return $json ? response()->json($sensorData) : $sensorData;
     }
 
     public function loadFactories(Request $request, int $userID): Collection|array
@@ -90,7 +123,6 @@ class HomeController extends Controller
         return $factories;
     }
 
-
     public function getFactoryData(Request $request, int $factoryID, string $type, bool $json = true, int $precisionVal = 2): array|float|JsonResponse
     {
         return $this->fetchData(Factory::class, $factoryID, $type, $request, $json, $precisionVal);
@@ -99,6 +131,30 @@ class HomeController extends Controller
     public function getSiteData(Request $request, int $siteID, string $type, bool $json = true, int $precisionVal = 2): array|float|JsonResponse
     {
         return $this->fetchData(Site::class, $siteID, $type, $request, $json, $precisionVal);
+    }
+
+    private function mapTimeframe(string $timeframe) {
+        $currentDate = Carbon::now();
+        $startDate = clone $currentDate;
+
+        return match (strtolower($timeframe)) {
+            '1d' => $startDate->subDay(),
+            '1w' => $startDate->subWeek(),
+            '1m' => $startDate->subMonth(),
+            '1y' => $startDate->subYear(),
+            'all' => $currentDate->copy()->subDays(0),
+            default => $startDate->subHours(24),
+        };
+    }
+
+    private function getTimeframeOption(): array {
+        return [
+            'Last 24 hours' => '1d',
+            'Last 7 Days' => '1w',
+            'Last 30 Days' => '1m',
+            'Last 12 Months' => '1y',
+            'All Time' => 'all',
+        ];
     }
 
     private function fetchData(string $model, int $id, string $type, Request $request, bool $json = true, int $precisionVal = 2): array|float|JsonResponse

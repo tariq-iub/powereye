@@ -64,11 +64,13 @@ class HomeController extends Controller
                 $site->totalPower = $siteTotalPower;
                 $site->totalEnergy = $siteTotalEnergy;
 
-                $powerData[] = $siteTotalPower;
-                $energyData[] = $siteTotalEnergy;
-                $siteNames[] = $site->title;
-                $sitePowers[] = $siteTotalPower;
-                $siteEnergies[] = $siteTotalEnergy;
+                if ($siteTotalPower > 0 && $siteTotalEnergy > 0) {
+                    $powerData[] = $siteTotalPower;
+                    $energyData[] = $siteTotalEnergy;
+                    $siteNames[] = $site->title;
+                    $sitePowers[] = $siteTotalPower;
+                    $siteEnergies[] = $siteTotalEnergy;
+                }
             }
 
             $factory->totalPower = $factoryTotalPower;

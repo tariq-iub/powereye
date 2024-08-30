@@ -1,9 +1,18 @@
 @extends('layouts.client')
 
 @section('content')
-    <div class="pb-5 container-fluid">
+    <style>
+        .factory:first-child{
+            margin-top: 0;
+        }
+
+        .factory:last-child{
+            margin-bottom: 0;
+        }
+    </style>
+    <div class="pb-5 container-fluid client">
         @foreach($factories as $factory)
-            <div class="row my-2 p-4 rounded border shadow-sm">
+            <div class="row my-4 p-4 rounded border shadow-sm factory">
                 <div class="col-md-8">
                     <div class="row mb-3">
                         <div class="d-flex justify-content-between">
@@ -28,33 +37,96 @@
                     </div>
                     <div class="row g-3">
                         @foreach($factory->sites as $site)
-                            <div class="col-md-4">
-                                <div class="card h-100 shadow-sm">
-                                    <div class="card-body">
+{{--                            <div class="col-md-4">--}}
+{{--                                <div class="card h-100 shadow-sm">--}}
+{{--                                    <div class="card-body">--}}
+{{--                                        <div class="d-flex justify-content-between">--}}
+{{--                                            <div>--}}
+{{--                                                <h5 class="mb-1">--}}
+{{--                                                    <a href="{{ route('sites.show', $site->id) }}">{{ $site->title }}</a>--}}
+{{--                                                </h5>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+
+{{--                                        <div class="mt-2">--}}
+{{--                                            <div class="d-flex align-items-center justify-content-between">--}}
+{{--                                                <div>--}}
+{{--                                                    <h6 class="mb-2">Power:--}}
+{{--                                                        <span class="text-body fw-semibold mb-0">--}}
+{{--                                                            <span id="site-power-{{ $site->id }}">{{ $site->totalPower }}</span> kW--}}
+{{--                                                        </span>--}}
+{{--                                                    </h6>--}}
+{{--                                                    <h6>Energy:--}}
+{{--                                                        <span class="text-body fw-semibold mb-0">--}}
+{{--                                                            <span id="site-energy-{{ $site->id }}">{{ $site->totalEnergy }}</span> kWh--}}
+{{--                                                        </span>--}}
+{{--                                                    </h6>--}}
+{{--                                                </div>--}}
+{{--                                                <div id="siteGaugeChart-{{ $site->id }}" class="chart" style="width:120px; height: 100px"></div>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+
+{{--                            <div class="col-md-4">--}}
+{{--                                <div class="card h-100 shadow-sm border-0">--}}
+{{--                                    <div class="card-body p-4">--}}
+{{--                                        <div class="d-flex justify-content-between align-items-center">--}}
+{{--                                            <h5 class="mb-1 fw-bold">--}}
+{{--                                                <a href="{{ route('sites.show', $site->id) }}" class="text-primary text-decoration-none">{{ $site->title }}</a>--}}
+{{--                                            </h5>--}}
+{{--                                        </div>--}}
+
+{{--                                        <div class="mt-3">--}}
+{{--                                            <div class="d-flex align-items-center justify-content-between">--}}
+{{--                                                <div>--}}
+{{--                                                    <h6 class="mb-2 text-muted">--}}
+{{--                                                        <i class="bi bi-lightning-charge-fill me-2 text-primary"></i> Power:--}}
+{{--                                                        <span class="text-dark fw-bold">--}}
+{{--                                <span id="site-power-{{ $site->id }}">{{ $site->totalPower }}</span> kW--}}
+{{--                            </span>--}}
+{{--                                                    </h6>--}}
+{{--                                                    <h6 class="text-muted">--}}
+{{--                                                        <i class="bi bi-battery-half me-2 text-success"></i> Energy:--}}
+{{--                                                        <span class="text-dark fw-bold">--}}
+{{--                                <span id="site-energy-{{ $site->id }}">{{ $site->totalEnergy }}</span> kWh--}}
+{{--                            </span>--}}
+{{--                                                    </h6>--}}
+{{--                                                </div>--}}
+{{--                                                <div id="siteGaugeChart-{{ $site->id }}" class="chart" style="width:140px; height: 120px;"></div>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+
+                            <div class="col-md-4 col-3">
+                                <div class="card h-100 shadow-sm border-0">
+                                    <div class="card-body p-4">
                                         <div class="d-flex justify-content-between">
                                             <div>
-                                                <h5 class="mb-1">
-                                                    <a href="{{ route('sites.show', $site->id) }}">{{ $site->title }}</a>
+                                                <h5 class="mb-1 fw-bold">
+                                                    <a href="{{ route('sites.show', $site->id) }}" class="text-primary">
+                                                        {{ $site->title }}
+                                                    </a>
                                                 </h5>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-2">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div>
-                                                    <h6 class="mb-2">Power:
-                                                        <span class="text-body fw-semibold mb-0">
+                                                <div class="mt-4">
+                                                    <h6 class="mb-2 text-muted">
+                                                        Power:
+                                                        <span class="text-dark fw-bold">
                                                             <span id="site-power-{{ $site->id }}">{{ $site->totalPower }}</span> kW
                                                         </span>
                                                     </h6>
-                                                    <h6>Energy:
-                                                        <span class="text-body fw-semibold mb-0">
+                                                    <h6 class="text-muted">
+                                                        Energy:
+                                                        <span class="text-dark fw-bold">
                                                             <span id="site-energy-{{ $site->id }}">{{ $site->totalEnergy }}</span> kWh
                                                         </span>
                                                     </h6>
                                                 </div>
-                                                <div id="siteGaugeChart-{{ $site->id }}" class="chart" style="width:120px; height: 100px"></div>
                                             </div>
+                                            <div id="siteGaugeChart-{{ $site->id }}" class="chart" style="width:140px; height: 120px;"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -118,39 +190,50 @@
         document.addEventListener('DOMContentLoaded', () => {
             const initializeCharts =(factories) => {
                 factories.forEach(async (factory) => {
-                    const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([], [ { data: [], type: 'line' } ]));
+                    const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([], [ { name: 'Power Usage (kW)', data: [], type: 'line', smooth: true } ]));
                     const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy', factory.chartData.energyBreakdown));
-                    const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([1, 2, 3],  [{data: [10, 20, 5]}] ));
+                    const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([],  [{data: []}] ));
 
                     factory.sites.forEach(site => {
                         const gaugeChart = initChart(`siteGaugeChart-${site.id}`, gaugeChartOption(site.totalEnergy || 0, site.title));
                     });
 
-                    const updateCharts = async (timeframe) => {
-                        const sensorData = await fetchData(`sensor-data/${factory.id}/${timeframe}`);
+                    const updateChartData = (timeframe, chartType) => {
+                        return fetchData(`sensor-data/${factory.id}/${timeframe}`).then(sensorData => {
+                            const timestamps = sensorData.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
+                            const energyTimestamps = sensorData.map(dataPoint =>  formatTimestamp(new Date(dataPoint.energy_timestamp), timeframe));
+                            const powerData = sensorData.map(dataPoint => dataPoint.power);
+                            const energyData = sensorData.map(dataPoint => dataPoint.energy);
 
-                        const timestamps = [];
-                        const powerData = [];
-
-                        sensorData.forEach(dataPoint => {
-                            const date = new Date(dataPoint.timestamp);
-                            timestamps.push(date.toLocaleTimeString('en-GB'));
-                            powerData.push(dataPoint.power);
+                            if (chartType === 'line') {
+                                updateChart(lineChart, lineChartOption(timestamps, [{ data: powerData }]));
+                            } else if (chartType === 'bar') {
+                                updateChart(barChart, lineChartOption(energyTimestamps, [{ data: energyData }]));
+                            }
                         });
-
-                        updateChart(lineChart, lineChartOption(timestamps, [ { data: powerData } ]));
                     };
 
                     const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
                     if (lineTimeframeSelect) {
                         lineTimeframeSelect.addEventListener('change', () => {
                             const timeframe = lineTimeframeSelect.value;
-                            updateCharts(timeframe);
+                            updateChartData(timeframe, 'line');
                         });
                     }
 
-                    const initialTimeframe = lineTimeframeSelect ? lineTimeframeSelect.value : '1d';
-                    await updateCharts(initialTimeframe);
+                    const initialLineTimeframe = lineTimeframeSelect ? lineTimeframeSelect.value : '1d';
+                    await updateChartData(initialLineTimeframe, 'line');
+
+                    const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
+                    if (barTimeframeSelect) {
+                        barTimeframeSelect.addEventListener('change', () => {
+                            const timeframe = barTimeframeSelect.value;
+                            updateChartData(timeframe, 'bar');
+                        });
+                    }
+
+                    const initialBarTimeframe = barTimeframeSelect ? barTimeframeSelect.value : '1d';
+                    await updateChartData(initialBarTimeframe, 'bar');
                 });
             };
 

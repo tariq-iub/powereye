@@ -60,21 +60,106 @@ class HomeController extends Controller
             ->with('data_file.site.factory')
             ->get();
 
-        foreach ($sensors as $sensor) {
-            $p = $sensor->P1 + $sensor->P2 + $sensor->P3;
-            $e = $sensor->E1 + $sensor->E2 + $sensor->E3;
+        $groupedData = $sensors->groupBy(function($sensor) {
+            return Carbon::parse($sensor->timestamp)->format('Y-m-d H:00:00');
+        });
 
-            $sensorData[] = [
-                'timestamp' => $sensor->timestamp,
-                'power' => $p,
-                'energy' => $e,
-                'site_id' => $sensor->data_file->site->id,
-                'factory_id' => $sensor->data_file->site->factory->id,
-            ];
+        foreach ($groupedData as $hour => $group) {
+            $totalEnergy = $group->sum(function($sensor) {
+                return $sensor->E1 + $sensor->E2 + $sensor->E3;
+            });
+
+            foreach ($group as $sensor) {
+                $sensorData[] = [
+                    'timestamp' => $sensor->timestamp,
+                    'energy_timestamp' => $hour,
+                    'power' => round($sensor->P1 + $sensor->P2 + $sensor->P3, 2),
+                    'energy' => round($totalEnergy, 8),
+                    'factory_id' => $factoryId,
+                ];
+            }
         }
 
         return $json ? response()->json($sensorData) : $sensorData;
     }
+
+
+//    public function fetchSensorData(Request $request, int $factoryId, string $timeframe = '24hr', bool $json = true): JsonResponse|array
+//    {
+//        $sensorData = [];
+//
+//        $startDate = $this->mapTimeframe($timeframe);
+//
+//        // Fetch sensors data within the given timeframe
+//        $sensors = SensorData::whereHas('data_file.site.factory', function ($query) use ($factoryId) {
+//            $query->where('id', $factoryId);
+//        })
+//            ->when($timeframe !== 'all', function ($query) use ($startDate) {
+//                $query->where('timestamp', '>=', $startDate);
+//            })
+//            ->with('data_file.site.factory')
+//            ->get();
+//
+//        // Group the data by hourly intervals for energy calculation
+//        $groupedData = $sensors->groupBy(function($sensor) {
+//            return Carbon::parse($sensor->timestamp)->format('Y-m-d H:00:00');
+//        });
+//
+//        foreach ($groupedData as $hour => $group) {
+//            $totalPower = $group->sum(function($sensor) {
+//                return $sensor->P1 + $sensor->P2 + $sensor->P3;
+//            });
+//
+//            $totalEnergy = $group->sum(function($sensor) {
+//                return $sensor->E1 + $sensor->E2 + $sensor->E3;
+//            });
+//
+//            foreach ($group as $sensor) {
+//                $sensorData[] = [
+//                    'timestamp' => $sensor->timestamp,  // Original timestamp for power
+//                    'energy_timestamp' => $hour,        // Hourly timestamp for energy
+//                    'power' => round($totalPower, 2),
+//                    'energy' => round($totalEnergy, 8),
+//                    'factory_id' => $factoryId,
+//                ];
+//            }
+//        }
+//
+//        return $json ? response()->json($sensorData) : $sensorData;
+//    }
+
+
+
+//    public function fetchSensorData(Request $request, int $factoryId, string $timeframe = '24hr', bool $json = true): JsonResponse|array
+//    {
+//        $sensorData = [];
+//
+//        $startDate = $this->mapTimeframe($timeframe);
+//
+//        $sensors = SensorData::whereHas('data_file.site.factory', function ($query) use ($factoryId) {
+//            $query->where('id', $factoryId);
+//        })
+//            ->when($timeframe !== 'all', function ($query) use ($startDate) {
+//                $query->where('timestamp', '>=', $startDate);
+//            })
+//            ->with('data_file.site.factory')
+//            ->get();
+//
+//        foreach ($sensors as $sensor) {
+//            $p = round($sensor->P1 + $sensor->P2 + $sensor->P3, 2);
+//            $e = round($sensor->E1 + $sensor->E2 + $sensor->E3, 8);
+//
+//            $sensorData[] = [
+//                'timestamp' => $sensor->timestamp,
+//                'power' => $p,
+//                'energy' => $e,
+//                'site_id' => $sensor->data_file->site->id,
+//                'factory_id' => $sensor->data_file->site->factory->id,
+//            ];
+//        }
+//
+//        return $json ? response()->json($sensorData) : $sensorData;
+//    }
 
     public function loadFactories(Request $request, int $userID): Collection|array
     {
@@ -84,10 +169,7 @@ class HomeController extends Controller
             $factoryTotalPower = $this->getFactoryData($request, $factory->id, 'power', false);
             $factoryTotalEnergy = $this->getFactoryData($request, $factory->id, 'energy', false, 8);
 
-            $powerData = [];
-            $energyData = [];
             $siteNames = [];
-            $sitePowers = [];
             $siteEnergies = [];
 
             foreach ($factory->sites as $site) {
@@ -98,10 +180,7 @@ class HomeController extends Controller
                 $site->totalEnergy = $siteTotalEnergy;
 
                 if ($siteTotalPower > 0 && $siteTotalEnergy > 0) {
-                    $powerData[] = $siteTotalPower;
-                    $energyData[] = $siteTotalEnergy;
                     $siteNames[] = $site->title;
-                    $sitePowers[] = $siteTotalPower;
                     $siteEnergies[] = $siteTotalEnergy;
                 }
             }
@@ -110,13 +189,9 @@ class HomeController extends Controller
             $factory->totalEnergy = $factoryTotalEnergy;
 
             $factory->chartData = [
-                'dates' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                'powers' => $powerData,
                 'energyBreakdown' => array_map(function ($name, $energy) {
                     return ['value' => $energy, 'name' => $name];
                 }, $siteNames, $siteEnergies),
-                'siteNames' => $siteNames,
-                'sitePowers' => $sitePowers,
             ];
         }
 

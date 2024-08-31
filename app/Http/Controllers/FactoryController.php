@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Factory;
 use App\Models\User;
+use App\Services\FactoryService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
 class FactoryController extends Controller
@@ -111,5 +113,9 @@ class FactoryController extends Controller
             if ($data) return response()->json($data, 200);
             else return response()->json(['message' => 'No factories registered in the system.'], 404);
         }
+    }
+
+    public function fetchData(Request $request, int $siteId, string $type, bool $json = true, $precisionVal = 2) {
+        return app(FactoryService::class)->fetchData($request, $siteId, $type, $json, $precisionVal);
     }
 }

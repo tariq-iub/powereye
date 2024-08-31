@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SensorData;
+use App\Services\SensorDataService;
 use Illuminate\Http\Request;
 
 class SensorDataController extends Controller
@@ -61,5 +62,10 @@ class SensorDataController extends Controller
     public function destroy(SensorData $sensorData)
     {
         //
+    }
+
+    public function fetch($factoryId, $timeframe)
+    {
+        return app(SensorDataService::class)->fetchSensorData($factoryId, $timeframe);
     }
 }

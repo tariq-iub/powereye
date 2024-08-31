@@ -8,6 +8,7 @@ use App\Models\Device;
 use App\Models\Factory;
 use App\Models\SensorData;
 use App\Models\Site;
+use App\Services\SiteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -50,67 +51,13 @@ class SiteController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Site $site)
+    public function show(Request $request, Site $site)
     {
         if (in_array(Auth::user()->role->id, [1, 2])) {
             return view( 'admin.sites.show', compact('site'));
         }
+
         return view( 'client.sites.show', compact('site'));
-    }
-
-    public function fetchData(Request $request, Site $site)
-    {
-        $timeFrame = $request->query('time_frame', '1');
-        $type = $request->query('type', 'power');
-        $today = now();
-
-        switch ($timeFrame) {
-            case '7':
-                $startDate = $today->subDays(7);
-                break;
-            case '30':
-                $startDate = $today->subDays(30);
-                break;
-            case '90':
-                $startDate = $today->subDays(90);
-                break;
-            case '365':
-                $startDate = $today->subDays(365);
-                break;
-            case 'all':
-                $startDate = null;
-                break;
-            default:
-                $startDate = $today->subDay();
-                break;
-        }
-
-        $dataFileIds = $site->data_file->pluck('id');
-
-        $query = SensorData::whereIn('data_file_id', $dataFileIds);
-
-        if ($startDate) {
-            $query->where('timestamp', '>=', $startDate);
-        }
-
-        $powerData = $query
-            ->selectRaw(
-                "DATE_FORMAT(timestamp, '%Y-%m-%d') as period,
-            SUM(P1 + P2 + P3) as total_power,
-            SUM(E1 + E2 + E3) as total_energy"
-            )
-            ->groupBy('period')
-            ->orderBy('period')
-            ->get();
-
-        $formattedData = $powerData->map(function ($item) use ($type) {
-            return [
-                'timestamp' => $item->period,
-                'total_value' => $type === 'power' ? $item->total_power : $item->total_energy,
-            ];
-        });
-
-        return response()->json($formattedData);
     }
 
     /**
@@ -162,5 +109,9 @@ class SiteController extends Controller
             if ($data) return response()->json($data, 200);
             else return response()->json(['message' => 'No sites registered in the system.'], 404);
         }
+    }
+
+    public function fetchData(Request $request, int $siteId, string $type, bool $json = true, $precisionVal = 2) {
+        return app(SiteService::class)->fetchData($request, $siteId, $type, $json, $precisionVal);
     }
 }

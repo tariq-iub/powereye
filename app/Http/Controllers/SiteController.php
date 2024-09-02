@@ -8,12 +8,19 @@ use App\Models\Device;
 use App\Models\Factory;
 use App\Models\SensorData;
 use App\Models\Site;
+use App\Services\SensorDataService;
 use App\Services\SiteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SiteController extends Controller
 {
+    protected  SensorDataService  $sensorDataService;
+    public function __construct(SensorDataService  $sensorDataService)
+    {
+        $this->sensorDataService = $sensorDataService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -56,6 +63,15 @@ class SiteController extends Controller
         if (in_array(Auth::user()->role->id, [1, 2])) {
             return view( 'admin.sites.show', compact('site'));
         }
+
+        $type = 'energy';
+
+        $site->energy = $this->fetchData($request, $site->id, $type, 'all', false);
+        $site->e8h = $this->fetchData($request, $site->id, $type, '8h', false);
+        $site->e1w = $this->fetchData($request, $site->id, $type, '1w', false);
+        $site->e1m = $this->fetchData($request, $site->id, $type, '1m', false);
+
+        $this->sensorDataService->fetchSensorData($request, $site->id, 'site', false, '30/5/24', '1/7/24');
 
         return view( 'client.sites.show', compact('site'));
     }
@@ -111,7 +127,7 @@ class SiteController extends Controller
         }
     }
 
-    public function fetchData(Request $request, int $siteId, string $type, bool $json = true, $precisionVal = 2) {
-        return app(SiteService::class)->fetchData($request, $siteId, $type, $json, $precisionVal);
+    public function fetchData(Request $request, int $siteId, string $type, string $timeframe = 'all', bool $json = true, $precisionVal = 2) {
+        return app(SiteService::class)->fetchData($request, $siteId, $type, $timeframe, $json, $precisionVal);
     }
 }

@@ -5,19 +5,31 @@ namespace App\Services;
 use App\Models\SensorData;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SensorDataService
 {
-    public function fetchSensorData(int $factoryId, string $timeframe = '24hr', bool $json = true): array|JsonResponse
+    public function fetchSensorData(Request $request, int $entityId, string $entityType = 'factory', bool $json = true, $start = null, $end = null): array|JsonResponse
     {
-        $sensorData = [];
-        $startDate = mapTimeframe($timeframe);
+        $startDate = $request->get('startDate', '1d');
+        $endDate = $request->get('endDate');
 
-        $sensors = SensorData::whereHas('data_file.site.factory', function ($query) use ($factoryId) {
-            $query->where('id', $factoryId);
+        $sensors = SensorData::when($entityType === 'site', function ($query) use ($entityId) {
+            $query->whereHas('data_file.site', function ($query) use ($entityId) {
+                $query->where('id', $entityId);
+            });
+        }, function ($query) use ($entityId) {
+            $query->whereHas('data_file.site.factory', function ($query) use ($entityId) {
+                $query->where('id', $entityId);
+            });
         })
-            ->when($timeframe !== 'all', function ($query) use ($startDate) {
-                $query->where('timestamp', '>=', $startDate);
+            ->when($endDate === null && $startDate !== 'all', function ($query) use ($startDate) {
+                $query->where('timestamp', '>=', mapTimeframe($startDate));
+            })
+            ->when($endDate !== null, function ($query) use ($startDate, $endDate) {
+                $startDate = Carbon::createFromFormat('d/m/y', $startDate)->format('Y-m-d 00:00:00');
+                $endDate = Carbon::createFromFormat('d/m/y', $endDate)->format('Y-m-d 23:59:59');
+                $query->whereBetween('timestamp', [$startDate, $endDate]);
             })
             ->with('data_file.site.factory')
             ->get();
@@ -36,8 +48,10 @@ class SensorDataService
                     'timestamp' => $sensor->timestamp,
                     'energy_timestamp' => $hour,
                     'power' => round($sensor->P1 + $sensor->P2 + $sensor->P3, 2),
-                    'energy' => round($totalEnergy, 8),
-                    'factory_id' => $factoryId,
+                    'energy' => round($sensor->E1 + $sensor->E2 + $sensor->E3, 8),
+                    'total_energy' => round($totalEnergy, 8),
+                    'factory_id' => $sensor->data_file->site->factory->id ?? null,
+                    'site_id' => $sensor->data_file->site->id ?? null,
                 ];
             }
         }

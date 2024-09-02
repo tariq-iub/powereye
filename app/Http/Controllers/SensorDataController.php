@@ -64,8 +64,8 @@ class SensorDataController extends Controller
         //
     }
 
-    public function fetch($factoryId, $timeframe)
+    public function fetch(Request $request, string $entityType, int $entityId, bool $json = true)
     {
-        return app(SensorDataService::class)->fetchSensorData($factoryId, $timeframe);
+        return app(SensorDataService::class)->fetchSensorData($request, $entityId, $entityType, $json);
     }
 }

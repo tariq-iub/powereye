@@ -28,8 +28,8 @@ class FactoryService
             $siteEnergies = [];
 
             foreach ($factory->sites as $site) {
-                $siteTotalPower = $this->siteService->fetchData($request, $site->id, 'power', false);
-                $siteTotalEnergy = $this->siteService->fetchData($request, $site->id, 'energy', false, 5);
+                $siteTotalPower = $this->siteService->fetchData($request, $site->id, 'power', 'all', false);
+                $siteTotalEnergy = $this->siteService->fetchData($request, $site->id, 'energy', 'all', false, 5);
 
                 $site->totalPower = $siteTotalPower;
                 $site->totalEnergy = $siteTotalEnergy;

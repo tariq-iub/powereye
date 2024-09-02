@@ -33,6 +33,24 @@ if (!function_exists('getTimeframeOptions')) {
     }
 }
 
+if (!function_exists('getTimeRange')) {
+    function getTimeRange(string $startDate, string|null $endDate = null): array {
+        if ($endDate === null) {
+            $timeframe = $startDate;
+
+            $timeframe = mapTimeframe($timeframe);
+
+            return [$timeframe, null];
+        }
+
+        $startDate = Carbon::createFromFormat('d/m/y', $startDate);
+        $endDate = Carbon::createFromFormat('d/m/y', $endDate);
+
+        return [$startDate, $endDate];
+    }
+}
+
+
 if (!function_exists('validateAndPrepareData')) {
     function validateAndPrepareData(string $type, Request $request, int $precisionVal): array|JsonResponse
     {

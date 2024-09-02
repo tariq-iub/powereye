@@ -29,6 +29,7 @@
 <script src="{{ asset('assets/js/ecommerce-dashboard.js') }}"></script>
 <script src="{{ asset('assets/js/utils.js') }}"></script>
 <script src="{{ asset('assets/js/charts.js') }}"></script>
+<script src="{{ asset('assets/vendors/flatpickr/flatpickr.min.js') }}"></script>
 
 <!-- Stacking JavaScript -->
 @stack('scripts')

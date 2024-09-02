@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class SiteService
 {
-    public function fetchData(Request $request, int $siteId, string $type, bool $json = true, int $precisionVal = 2): array|float|JsonResponse
+    public function fetchData(Request $request, int $siteId, string $type, string $timeframe = 'all', bool $json = true, int $precisionVal = 2): array|float|JsonResponse
     {
         $validationResult = validateAndPrepareData($type, $request, $precisionVal);
         if ($validationResult instanceof JsonResponse) {
@@ -19,11 +19,17 @@ class SiteService
         $precision = $validationResult['precision'];
 
         try {
-            $site = Site::with([
-                'data_file.data' => function ($query) use ($columns) {
-                    $query->select(array_merge($columns, ['data_file_id']));
-                }
-            ])->find($siteId);
+
+            $startDate = mapTimeframe($timeframe);
+
+            $site = Site::with(['data_file.data' => function ($query) use ($columns, $startDate, $timeframe) {
+                $query->select(array_merge($columns, ['data_file_id']))
+                    ->when($timeframe !== 'all', function ($query) use ($startDate) {
+                        $query->where('timestamp', '>=', $startDate);
+                    });
+            }])
+                ->find($siteId);
+
 
             if (!$site) {
                 $errorResponse = ['error' => 'Site not found'];

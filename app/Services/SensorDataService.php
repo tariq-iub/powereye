@@ -14,6 +14,8 @@ class SensorDataService
         $startDate = $request->get('startDate', '1d');
         $endDate = $request->get('endDate');
 
+        $sensorData = [];
+
         $sensors = SensorData::when($entityType === 'site', function ($query) use ($entityId) {
             $query->whereHas('data_file.site', function ($query) use ($entityId) {
                 $query->where('id', $entityId);

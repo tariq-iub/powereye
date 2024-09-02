@@ -1023,16 +1023,12 @@
 @push('scripts')
     <script>
         const handleTimeRange = (selector, cb, mode = 'range', dateFormat = 'd/m/y', disableMobile = true) => {
-            let count = 0;
-
             flatpickr(selector, {
                 mode,
                 dateFormat,
                 disableMobile,
                 onChange: (selectedDates, datesStr) => {
-                    count++;
-
-                    if (count === 2) {
+                    if (selectedDates.length === 2) {
                         cb(selectedDates, datesStr);
                     }
                 },
@@ -1066,11 +1062,11 @@
             await fetchDataAndUpdateChart('1d');
 
             handleTimeRange('#timepicker', async (selectedDates, datesStr) => {
-                const [startDate, endDate] = datesStr.split('to');
+                const [startDate, endDate] = datesStr.split(' to ');
 
-                await fetchDataAndUpdateChart(startDate, endDate);
+                await fetchDataAndUpdateChart(startDate.trim(), endDate ? endDate.trim() : null);
+
             });
         });
-
     </script>
 @endpush

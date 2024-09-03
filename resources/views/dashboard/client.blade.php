@@ -199,16 +199,18 @@
                     });
 
                     const updateChartData = (timeframe, chartType) => {
-                        return fetchData(`sensor-data/factory/${factory.id}/?startDate=${timeframe}`).then(sensorData => {
-                            const timestamps = sensorData.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                            const energyTimestamps = sensorData.map(dataPoint =>  formatTimestamp(new Date(dataPoint.energy_timestamp), timeframe));
-                            const powerData = sensorData.map(dataPoint => dataPoint.power);
-                            const energyData = sensorData.map(dataPoint => dataPoint.total_energy);
+                        let uri = chartType === 'line' ? '' : 'energy'
+                        let url = `sensor-data/factory/${factory.id}/${uri}?startDate=${timeframe}`;
 
+                        return fetchData(url).then(sensorData => {
                             if (chartType === 'line') {
+                                const timestamps = sensorData.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
+                                const powerData = sensorData.map(dataPoint => dataPoint.power);
                                 updateChart(lineChart, lineChartOption(timestamps, [{ data: powerData }]));
                             } else if (chartType === 'bar') {
-                                updateChart(barChart, lineChartOption(energyTimestamps, [{ data: energyData }]));
+                                const timestamps = sensorData.map(dataPoint => dataPoint.timestamp);
+                                const energy = sensorData.map(dataPoint => dataPoint.energy)
+                                updateChart(barChart, lineChartOption(timestamps, [{ data: energy }]));
                             }
                         });
                     };

@@ -46,3 +46,4 @@ Route::prefix('file-ota')->group(function () {
 Route::get('factory/{factoryId}/{type}', [FactoryController::class, 'fetchData']);
 Route::get('site/{siteId}/{type}', [SiteController::class, 'fetchData']);
 Route::get('sensor-data/{entityType}/{entityId}/', [SensorDataController::class, 'fetch']);
+Route::get('sensor-data/{entityType}/{entityId}/energy', [SensorDataController::class, 'fetchEnergyData']);

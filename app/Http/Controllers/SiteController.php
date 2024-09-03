@@ -71,8 +71,6 @@ class SiteController extends Controller
         $site->e1w = $this->fetchData($request, $site->id, $type, '1w', false);
         $site->e1m = $this->fetchData($request, $site->id, $type, '1m', false);
 
-        $this->sensorDataService->fetchSensorData($request, $site->id, 'site', false, '30/5/24', '1/7/24');
-
         return view( 'client.sites.show', compact('site'));
     }
 

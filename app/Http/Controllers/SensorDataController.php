@@ -68,4 +68,9 @@ class SensorDataController extends Controller
     {
         return app(SensorDataService::class)->fetchSensorData($request, $entityId, $entityType, $json);
     }
+
+    public function fetchEnergyData(Request $request, string $entityType, int $entityId, bool $json = true)
+    {
+        return app(SensorDataService::class)->fetchEnergyData($request, $entityId, $entityType, $json);
+    }
 }

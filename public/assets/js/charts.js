@@ -56,15 +56,46 @@ const lineChartOption = (xData, series, title = null, gridOptions = {}, showTool
     return option;
 };
 
-const barChartOption = (xData, series, title = null) => {
+const barChartOption = (xData, series, title = null, gridOptions = {}, showTooltip = true, showDataLabels = false) => {
     const option = {
-        xAxis: { type: 'category', data: xData },
-        yAxis: { type: 'value' },
-        series: series.map(s => ({ ...s, type: 'bar' }))
+        xAxis: {
+            type: 'category',
+            data: xData,
+            axisLabel: { formatter: (value) => value }
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: { formatter: (value) => value }
+        },
+        legend: {
+            show: true,
+        },
+        grid: {
+            left: gridOptions.left || '3%',
+            right: gridOptions.right || '4%',
+            bottom: gridOptions.bottom || '3%',
+            containLabel: true
+        },
+        series: series.map((s) => ({
+            ...s,
+            type: 'bar',
+            label: {
+                show: showDataLabels,
+                position: 'top'
+            }
+        })),
+        tooltip: showTooltip ? {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        } : null
     };
+
     setTitle(option, title);
     return option;
 };
+
 
 const doughnutChartOption = (name, seriesData, title = null) => {
     const option = {

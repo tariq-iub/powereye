@@ -31,7 +31,7 @@ const formatTimestamp = (date, timeframe) => {
             return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 
         default:
-            return date.toLocaleDateString('en-GB');
+            return date.toLocaleString('en-GB');
     }
 };
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\DataFileController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\FactoryUserController;
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
@@ -43,4 +44,5 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/reports', function () {
         return view('reports.index');
     })->name('reports');
+    Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 });

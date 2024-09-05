@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Factory;
+use App\Models\FactoryUser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,9 @@ class FactoryService
 
     public function load(Request $request, int $userID): Collection|array
     {
-        $factories = Factory::with('sites.data_file.data')->get();
+        $factories = Factory::whereHas('users', function ($query) use ($userID) {
+            $query->where('user_id', $userID);
+        })->with('sites.data_file.data')->get();
 
         foreach ($factories as $factory) {
             $factoryTotalPower = $this->fetchData($request, $factory->id, 'power', false);

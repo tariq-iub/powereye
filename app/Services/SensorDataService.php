@@ -37,11 +37,11 @@ class SensorDataService
         $timeFrame = $request->get('startDate', '1d');
 
         $groupedData = match ($timeFrame) {
-            '1h' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('Y-m-d H:00:00')),
-            '1d' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('Y-m-d')),
-            '1w' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->startOfWeek()->format('Y-m-d')),
-            '1m' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('Y-m')),
-            '1y' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('Y-m')),
+            '1d' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('H:00')),
+            '1w' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('l')),
+            '1m' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('d M')),
+            '1y' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('M')),
+            'all' => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('M Y')),
             default => $sensors->groupBy(fn($sensor) => Carbon::parse($sensor->timestamp)->format('Y-m-d H:i:s')),
         };
 
@@ -58,35 +58,6 @@ class SensorDataService
 
         return $json ? response()->json($sensorData) : $sensorData;
     }
-
-
-//    public function fetchEnergyData(Request $request, int $entityId, string $entityType = 'factory', bool $json = true): array|JsonResponse
-//    {
-//        $sensorData = [];
-//
-//        $sensors = $this->getSensors($request, $entityId, $entityType);
-//
-//        $groupedData = $sensors->groupBy(function ($sensor) {
-//            return Carbon::parse($sensor->timestamp)->format('Y-m-d H:00:00');
-//        });
-//
-//        foreach ($groupedData as $hour => $group) {
-//            $totalEnergy = $group->sum(function ($sensor) {
-//                return $sensor->E1 + $sensor->E2 + $sensor->E3;
-//            });
-//
-//            foreach ($group as $sensor) {
-//                $sensorData[] = [
-//                    'energy_timestamp' => $hour,
-//                    'total_energy' => round($totalEnergy, 8),
-//                    'site_id' => $sensor->data_file->site->id ?? null,
-//                    'factory_id' => $sensor->data_file->site->factory->id ?? null,
-//                ];
-//            }
-//        }
-//
-//        return $json ? response()->json($sensorData) : $sensorData;
-//    }
 
     private function getSensors(Request $request, $entityId, $entityType) {
         $startDate = $request->get('startDate', '1d');

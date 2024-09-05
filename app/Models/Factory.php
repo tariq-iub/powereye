@@ -19,4 +19,11 @@ class Factory extends Model
     {
         return $this->hasMany(Site::class);
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'factory_user')
+            ->withPivot('access_level') // You might want to access the access_level in some cases
+            ->withTimestamps();
+    }
 }

@@ -3,7 +3,6 @@
 use App\Http\Controllers\DataFileController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\FactoryUserController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SensorDataController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Http\Request;
@@ -47,3 +46,5 @@ Route::get('factory/{factoryId}/{type}', [FactoryController::class, 'fetchData']
 Route::get('site/{siteId}/{type}', [SiteController::class, 'fetchData']);
 Route::get('sensor-data/{entityType}/{entityId}/', [SensorDataController::class, 'fetch']);
 Route::get('sensor-data/{entityType}/{entityId}/energy', [SensorDataController::class, 'fetchEnergyData']);
+
+Route::get('factoryData/{factory}', [FactoryController::class, 'fetchFactoryData']);

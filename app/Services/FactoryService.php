@@ -11,10 +11,12 @@ use Illuminate\Http\Request;
 class FactoryService
 {
     protected SiteService $siteService;
+    protected SensorDataService $sensorDataService;
 
-    public function __construct(SiteService $siteService)
+    public function __construct(SiteService $siteService, SensorDataService $sensorDataService)
     {
         $this->siteService = $siteService;
+        $this->sensorDataService = $sensorDataService;
     }
 
     public function load(Request $request, int $userID): Collection|array
@@ -94,5 +96,65 @@ class FactoryService
             $errorResponse = ['error' => 'Data processing error'];
             return $json ? response()->json($errorResponse, 500) : $errorResponse;
         }
+    }
+
+    public function energyDistributionBySite(Request $request, Factory $factory)
+    {
+        $siteNames = [];
+        $siteEnergies = [];
+
+        foreach ($factory->sites as $site) {
+            $siteTotalPower = $this->siteService->fetchData($request, $site->id, 'power', 'all', false);
+            $siteTotalEnergy = $this->siteService->fetchData($request, $site->id, 'energy', 'all', false, 5);
+
+            $site->totalPower = $siteTotalPower;
+            $site->totalEnergy = $siteTotalEnergy;
+
+            if ($siteTotalPower > 0 && $siteTotalEnergy > 0) {
+                $siteNames[] = $site->title;
+                $siteEnergies[] = $siteTotalEnergy;
+            }
+        }
+
+        $data = [
+            'distribution' => array_map(function ($name, $energy) {
+                return ['value' => $energy, 'name' => $name];
+            }, $siteNames, $siteEnergies),
+        ];
+
+        return $data;
+    }
+
+    public function fetchFactoryData(Request $request, Factory $factory)
+    {
+        $totalPower = $this->fetchData($request, $factory->id, 'power', false);
+        $totalEnergy = $this->fetchData($request, $factory->id, 'energy', false, 8);
+        $sensorData = $this->sensorDataService->fetchSensorData($request, $factory->id, 'factory', false);
+        $energyData = $this->sensorDataService->fetchEnergyData($request, $factory->id, 'factory', false);
+
+        $siteData = $factory->sites->map(function ($site) use ($request) {
+            $sitePower = $this->siteService->fetchData($request, $site->id, 'power', 'all', false);
+            $siteEnergy = $this->siteService->fetchData($request, $site->id, 'energy', 'all', false, 5);
+            return [
+                'siteId' => $site->id,
+                'siteName' => $site->title,
+                'totalPower' => $sitePower,
+                'totalEnergy' => $siteEnergy,
+            ];
+        });
+
+        $factoryMetrics = [
+            'totalPower' => $totalPower,
+            'totalEnergy' => $totalEnergy,
+            'sites' => $siteData,
+            'sensorData' => $sensorData,
+            'energyData' => $energyData,
+            'energyBreakdown' => $this->energyDistributionBySite($request, $factory),
+        ];
+
+        return response()->json([
+            'factory' => $factory,
+            'factoryMetrics' => $factoryMetrics,
+        ]);
     }
 }

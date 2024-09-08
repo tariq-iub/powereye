@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Factory;
 use App\Models\User;
 use App\Services\FactoryService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
 class FactoryController extends Controller
@@ -94,7 +93,6 @@ class FactoryController extends Controller
     {
         $factory->delete();
         return redirect()->route('factories.index')->with('message', 'Factory deleted successfully.');
-
     }
 
     public function fetch(Request $request)
@@ -115,7 +113,13 @@ class FactoryController extends Controller
         }
     }
 
-    public function fetchData(Request $request, int $siteId, string $type, bool $json = true, $precisionVal = 2) {
+    public function fetchData(Request $request, int $siteId, string $type, bool $json = true, $precisionVal = 2)
+    {
         return app(FactoryService::class)->fetchData($request, $siteId, $type, $json, $precisionVal);
+    }
+
+    public function fetchFactoryData(Request $request, Factory $factory)
+    {
+        return app(FactoryService::class)->fetchFactoryData($request, $factory);
     }
 }

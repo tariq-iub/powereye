@@ -167,7 +167,7 @@ const gaugeChartOption = (value, name, title = null) => {
     const option = {
         tooltip: {
             formatter: function (params) {
-                return `<strong>${params.seriesName}</strong><br/>${params.name}: ${params.value} kWh`;
+                return `<strong>${params.seriesName}</strong><br/>${name}: ${params.value} kWh`;
             },
         },
         series: [

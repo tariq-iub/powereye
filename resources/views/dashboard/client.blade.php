@@ -121,7 +121,6 @@
 @endsection
 
 @push('scripts')
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -151,7 +150,12 @@
                     type: 'line',
                     smooth: true
                 }]));
-                const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy Distribution', []));
+
+                const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy Distribution', factory.chartData.energyBreakdown.map(entry => ({
+                    value: entry.value,
+                    name: entry.name
+                }))));
+
                 const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([], [{
                     data: [],
                     name: 'Energy Usage (kWh)'
@@ -159,12 +163,8 @@
 
 
                 factory.sites.forEach(site => {
-                    initChart(`siteChart-${site.id}`, gaugeChartOption(0, site.title));
+                    initChart(`siteChart-${site.id}`, gaugeChartOption(site.totalEnergy, site.title));
                 });
-
-
-                await updateFactoryAndSiteData(factory, doughnutChart);
-
 
                 await setupTimeframeSelectors(factory, lineChart, barChart);
 

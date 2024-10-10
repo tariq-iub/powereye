@@ -5,40 +5,37 @@
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ url('/home') }}">Home</a></li>
             <li class="breadcrumb-item"><a href="{{ route('roles.index') }}">Roles</a></li>
-            <li class="breadcrumb-item active">Edit Role</li>
+            <li class="breadcrumb-item active">Edit Menu</li>
         </ol>
     </nav>
 
     <div class="mb-5">
         <h2 class="text-bold text-body-emphasis">Edit Role</h2>
         <p class="text-body-tertiary lead">
-            Edit a previous user role.
+            Update the role details.
         </p>
     </div>
 
     <form action="{{ route('roles.update', $role->id) }}" method="POST">
         @csrf
-        @method('put')
+        @method('PUT')
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" value="{{ old('title', $role->title) }}" required>
+                    @error('title')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
 
-        <div class="mb-5">
-            <div class="form-group">
-                <label for="title">Role Title</label>
-                <input type="text" class="form-control" id="title" name="title"
-                       value="{{ $role->title }}" required>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Update Role</button>
+                    <a href="{{ route('roles.index') }}" class="btn btn-secondary">Cancel</a>
+                </div>
             </div>
-        </div>
-
-        <div class="mb-5">
-            <label for="menus">Attach Menus</label>
-
-            <select class="form-select" id="menus" name="menus[]" data-choices="data-choices" multiple="multiple" data-options='{"removeItemButton":true,"placeholder":true}'>
-                <option value="">Select Menu...</option>
-                @foreach($menus as $menu)
-                    <option value="{{ $menu->id }}" {{ $role->menus->contains($menu->id) ? 'selected' : '' }} data-custom-properties="[object Object]">{{ $menu->title }}</option>
-                @endforeach
-            </select>
-
-            <button type="submit" class="btn btn-primary mt-3">Update Role</button>
         </div>
     </form>
 @endsection

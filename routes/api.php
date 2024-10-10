@@ -3,6 +3,8 @@
 use App\Http\Controllers\DataFileController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\FactoryUserController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SensorDataController;
 use App\Http\Controllers\SiteController;
 use Illuminate\Http\Request;
@@ -23,6 +25,10 @@ use App\Http\Controllers\BinFileController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/roles/attach_menus/{role}', [RoleController::class, 'attachModalBody']);
+Route::get('/roles/detach_menus/{role}', [RoleController::class, 'detachModalBody']);
+Route::post('/menus/update_order', [MenuController::class, 'updateOrder']);
 
 Route::post('/data/upload', [DataFileController::class, 'upload'])->name('upload');
 Route::post('/data/edit', [DataFileController::class, 'edit'])->name('edit');

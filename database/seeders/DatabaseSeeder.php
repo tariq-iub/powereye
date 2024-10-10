@@ -12,14 +12,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(SensorDataSeeder::class);
         //
-//       $this->call([
-//           RolesTableSeeder::class,
-//           UsersTableSeeder::class,
-//           FactoryTableSeeder::class,
-//           DeviceTableSeeder::class,
-//           DataFileSeeder::class,
-//       ]);
+        $this->call([
+            RolesTableSeeder::class,
+            UsersTableSeeder::class,
+            FactoryTableSeeder::class,
+            SitesTableSeeder::class,
+            DeviceTableSeeder::class,
+        ]);
     }
 }

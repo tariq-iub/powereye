@@ -13,14 +13,13 @@ class MenuController extends Controller
      */
     public function index()
     {
-        // Fetch all menus
-        $menus = Menu::with('parent')->get();
-
-        // Fetch all users
+        $menus = Menu::orderBy('display_order')->paginate(50);
         $users = User::all();
 
-        // Pass both menus and users to the view
-        return view('admin.menus.index', compact('menus', 'users'));
+        return view(
+            'admin.menus.index',
+            compact('menus', 'users')
+        );
     }
 
     /**
@@ -28,41 +27,35 @@ class MenuController extends Controller
      */
     public function create()
     {
-        $menus = Menu::whereNull('parent_id')->get(); // Fetch parent menus
+        // Fetch parent menus
+        $menus = Menu::whereNull('parent_id')->get();
         return view('admin.menus.create', compact('menus'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
-        // Validate the request
         $request->validate([
             'title' => 'required|string|unique:menus',
             'icon' => 'nullable|string',
-            'url' => 'nullable|string',
             'route' => 'nullable|string',
             'parent_id' => 'nullable|exists:menus,id',
             'display_order' => 'nullable|integer',
-            'level' => 'required|in:admin,client',
             'status' => 'required|boolean',
         ]);
 
-        // Create a new menu
         Menu::create([
             'title' => $request->input('title'),
             'icon' => $request->input('icon'),
-            'url' => $request->input('url'),
             'route' => $request->input('route'),
             'parent_id' => $request->input('parent_id'),
             'display_order' => $request->input('display_order', 0),
-            'level' => $request->input('level'),
             'status' => $request->input('status'),
         ]);
 
-        // Redirect to the index route
-        return redirect()->route('menus.index')->with('success', 'Menu created successfully.');
+        return redirect()
+            ->route('menus.index')
+            ->with('message', 'Menu created successfully.');
     }
 
     /**
@@ -71,8 +64,10 @@ class MenuController extends Controller
     public function edit(Menu $menu)
     {
         $parentMenus = (new Menu())->parentsOnly();
-        $menus = Menu::whereNull('parent_id')->get();
-        return view('admin.menus.edit', compact('menu','menus', 'parentMenus'));
+        return view(
+            'admin.menus.edit',
+            compact('menu', 'parentMenus')
+        );
     }
 
     /**
@@ -80,33 +75,28 @@ class MenuController extends Controller
      */
     public function update(Request $request, Menu $menu)
     {
-        // Validate the request
         $request->validate([
             'title' => 'required|string',
             'icon' => 'nullable|string',
-            'url' => 'nullable|string',
             'route' => 'nullable|string',
             'parent_id' => 'nullable|exists:menus,id',
             'display_order' => 'nullable|integer',
-            'level' => 'required|in:admin,client',
             'status' => 'required|boolean',
         ]);
 
-        // Update the menu fields
         $menu->title = $request->input('title');
         $menu->icon = $request->input('icon');
-        $menu->url = $request->input('url');
         $menu->route = $request->input('route');
         $menu->parent_id = $request->input('parent_id');
-        $menu->display_order = $request->input('display_order', 0);
-        $menu->level = $request->input('level');
+        $menu->display_order = $request->input('display_order');
         $menu->status = (bool) $request->input('status');
 
-        // Save the changes
         $menu->save();
 
         // Redirect to the index route
-        return redirect()->route('menus.index')->with('success', 'Menu updated successfully.');
+        return redirect()
+            ->route('menus.index')
+            ->with('message', 'Menu updated successfully.');
     }
 
 
@@ -116,7 +106,18 @@ class MenuController extends Controller
     public function destroy(Menu $menu)
     {
         $menu->delete();
-        return redirect()->route('menus.index');
+        return redirect()
+            ->route('menus.index')
+            ->with('message', 'Menu deleted successfully.');
+    }
+
+    public function statusToggle(Menu $menu)
+    {
+        $menu->status = !$menu->status;
+        $menu->save();
+        return redirect()
+            ->route('menus.index')
+            ->with('message', 'Menu status has changed successfully.');
     }
 
     public function linkUser(Request $request)
@@ -124,13 +125,20 @@ class MenuController extends Controller
         $validated = $request->validate([
             'menu_id' => 'required|exists:menus,id',
             'user_id' => 'required|exists:users,id',
-            'access_level' => 'required|in:owner,employee',
         ]);
 
         $menu = Menu::findOrFail($validated['menu_id']);
         $user = User::findOrFail($validated['user_id']);
         $menu->users()->attach($user, ['access_level' => $validated['access_level']]);
 
+        return response()->json(['success' => true]);
+    }
+
+    public function updateOrder(Request $request)
+    {
+        $menu = Menu::find($request->input('id'));
+        $menu->display_order = $request->input('value');
+        $menu->save();
         return response()->json(['success' => true]);
     }
 }

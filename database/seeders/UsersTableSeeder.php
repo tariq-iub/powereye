@@ -44,6 +44,33 @@ class UsersTableSeeder extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
+            [
+                'name' => 'Muhammad Hanzala',
+                'email' => 'sayhi.hanzla@gmail.com',
+                'password' => '$2y$12$L2KOuUpth.QzPslprcBoRu0nVbcNJIAbruP4h7BmhGiAFTpxmr5KK',
+                'status' => true,
+                'role_id' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Muhammad Shafique',
+                'email' => 'engineer.m.shafique@gmail.com',
+                'password' => '$2y$12$L2KOuUpth.QzPslprcBoRu0nVbcNJIAbruP4h7BmhGiAFTpxmr5KK',
+                'status' => true,
+                'role_id' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Client 1 Factory 1',
+                'email' => 'client1@gmail.com',
+                'password' => '$2y$12$L2KOuUpth.QzPslprcBoRu0nVbcNJIAbruP4h7BmhGiAFTpxmr5KK',
+                'status' => true,
+                'role_id' => 3,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ]);
     }
 }

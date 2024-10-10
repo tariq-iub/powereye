@@ -1,0 +1,135 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class MenusTableSeeder extends Seeder
+{
+    public function run()
+    {
+        DB::table('menus')->insert([
+            [
+                'title' => 'Home',
+                'icon' => 'pie-chart',
+                'url' => null,
+                'route' => 'home',
+                'parent_id' => null,
+                'display_order' => 0,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'User Management',
+                'icon' => 'users',
+                'url' => null,
+                'route' => null,
+                'parent_id' => null,
+                'display_order' => 1,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'Users List',
+                'icon' => null,
+                'url' => null,
+                'route' => 'users.index',
+                'parent_id' => 2,
+                'display_order' => 2,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'Add User',
+                'icon' => null,
+                'url' => null,
+                'route' => 'users.create',
+                'parent_id' => 2,
+                'display_order' => 3,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'User Logs',
+                'icon' => null,
+                'url' => null,
+                'route' => 'users.index',
+                'parent_id' => 2,
+                'display_order' => 4,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'Menu Management',
+                'icon' => 'layout',
+                'url' => null,
+                'route' => 'menus.index',
+                'parent_id' => null,
+                'display_order' => 5,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'Roles Management',
+                'icon' => 'tool',
+                'url' => null,
+                'route' => 'roles.index',
+                'parent_id' => null,
+                'display_order' => 6,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'Client Management',
+                'icon' => 'server',
+                'url' => null,
+                'route' => null,
+                'parent_id' => null,
+                'display_order' => 7,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'Factories',
+                'icon' => 'grid',
+                'url' => null,
+                'route' => 'factories.index',
+                'parent_id' => 8,
+                'display_order' => 8,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ], [
+                'title' => 'Sites',
+                'icon' => 'grid',
+                'url' => null,
+                'route' => 'sites.index',
+                'parent_id' => 8,
+                'display_order' => 9,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'title' => 'Uploaded File',
+                'icon' => 'file-text',
+                'url' => null,
+                'route' => 'files.index',
+                'parent_id' => 8,
+                'display_order' => 10,
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+    }
+}

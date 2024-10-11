@@ -30,6 +30,8 @@ Route::get('/roles/attach_menus/{role}', [RoleController::class, 'attachModalBod
 Route::get('/roles/detach_menus/{role}', [RoleController::class, 'detachModalBody']);
 Route::post('/menus/update_order', [MenuController::class, 'updateOrder']);
 
+Route::post('/data/send', [SensorDataController::class, 'storeSensorData']);
+
 Route::post('/data/upload', [DataFileController::class, 'upload'])->name('upload');
 Route::post('/data/edit', [DataFileController::class, 'edit'])->name('edit');
 Route::post('/data/replace', [DataFileController::class, 'replace'])->name('replace');

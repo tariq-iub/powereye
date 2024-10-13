@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\SensorData;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -58,36 +59,8 @@ class SensorDataService
         return $json ? response()->json($sensorData) : $sensorData;
     }
 
-
-//    public function fetchEnergyData(Request $request, int $entityId, string $entityType = 'factory', bool $json = true): array|JsonResponse
-//    {
-//        $sensorData = [];
-//
-//        $sensors = $this->getSensors($request, $entityId, $entityType);
-//
-//        $groupedData = $sensors->groupBy(function ($sensor) {
-//            return Carbon::parse($sensor->timestamp)->format('Y-m-d H:00:00');
-//        });
-//
-//        foreach ($groupedData as $hour => $group) {
-//            $totalEnergy = $group->sum(function ($sensor) {
-//                return $sensor->E1 + $sensor->E2 + $sensor->E3;
-//            });
-//
-//            foreach ($group as $sensor) {
-//                $sensorData[] = [
-//                    'energy_timestamp' => $hour,
-//                    'total_energy' => round($totalEnergy, 8),
-//                    'site_id' => $sensor->data_file->site->id ?? null,
-//                    'factory_id' => $sensor->data_file->site->factory->id ?? null,
-//                ];
-//            }
-//        }
-//
-//        return $json ? response()->json($sensorData) : $sensorData;
-//    }
-
-    private function getSensors(Request $request, $entityId, $entityType) {
+    private function getSensors(Request $request, $entityId, $entityType)
+    {
         $startDate = $request->get('startDate', '1d');
         $endDate = $request->get('endDate');
 
@@ -111,4 +84,46 @@ class SensorDataService
             ->with('data_file.site.factory')
             ->get();
     }
+
+    public function fetchDataForReport(string $type, int $entityId, $startDate, $endDate)
+    {
+        if ($type === 'site') {
+            $relation = 'data_file.site';
+            $entity = 'site';
+        } else {
+            $relation = 'data_file.site.factory';
+            $entity = 'factory';
+        }
+
+        $lastNDays = convertToLastNDays($startDate, $endDate);
+        $days = $lastNDays['days'];
+
+        if ($days === 1) {
+            $groupBy = "DATE_FORMAT(timestamp, '%Y-%m-%d %H:00:00')";
+        } elseif ($days > 1 && $days <= 30) {
+            $groupBy = "DATE_FORMAT(timestamp, '%Y-%m-%d')";
+        } elseif ($days > 30 && $days <= 90) {
+            $groupBy = "WEEK(timestamp)";
+        } elseif ($days > 90 && $days <= 365) {
+            $groupBy = "DATE_FORMAT(timestamp, '%Y-%m')";
+        } else {
+            $groupBy = "YEAR(timestamp)";
+        }
+
+        return SensorData::with($relation)
+            ->whereHas($relation, function ($query) use ($entity, $entityId) {
+                $foreignKey = $entity . '_id';
+                $query->where($foreignKey, $entityId);
+            })
+            ->whereBetween('timestamp', [$startDate, $endDate])
+            ->selectRaw("
+        ROUND(SUM(P1 + P2 + P3), 2) as total_power,
+        ROUND(SUM(E1 + E2 + E3), 2) as total_energy,
+        MAX(timestamp) as timestamp,
+        $groupBy as time_bucket")
+            ->groupBy('time_bucket')
+            ->orderBy('timestamp')
+            ->get();
+    }
+
 }

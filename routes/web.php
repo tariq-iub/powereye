@@ -7,6 +7,7 @@ use App\Http\Controllers\FactoryUserController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;
@@ -50,9 +51,8 @@ Route::group(['middleware' => ['auth']], function () {
             Route::get('/files/{data_file}', 'show')->name('show');
         });
 
-    Route::get('/reports', function () {
-        return view('reports.index');
-    })->name('reports');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports');
+    Route::get('/reports/download/{type}/{entityId}/{startDate}/{endDate}', [ReportController::class, 'download'])->name('reports.download');
 
     Route::get('/faq', [FaqController::class, 'index'])->name('faq');
 });

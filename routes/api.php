@@ -40,7 +40,6 @@ Route::get('/sites', [SiteController::class, 'fetch']);
 
 Route::post('/factory-users', [FactoryUserController::class, 'store'])->name('api.factory-users.store');
 
-
 Route::prefix('file-ota')->group(function () {
     Route::get('/', [BinFileController::class, 'index']);
     Route::post('/', [BinFileController::class, 'upload']);

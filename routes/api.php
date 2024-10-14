@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\DataFileController;
+use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\DeviceManagementController;
 use App\Http\Controllers\FactoryController;
 use App\Http\Controllers\FactoryUserController;
 use App\Http\Controllers\MenuController;
@@ -55,3 +57,5 @@ Route::get('sensor-data/{entityType}/{entityId}/', [SensorDataController::class,
 Route::get('sensor-data/{entityType}/{entityId}/energy', [SensorDataController::class, 'fetchEnergyData']);
 
 Route::get('factoryData/{factory}', [FactoryController::class, 'fetchFactoryData']);
+
+Route::get('device/get-datetime', [DeviceManagementController::class, 'getDateTime']);

@@ -31,12 +31,14 @@ class HomeController extends Controller
             if (in_array(Auth::user()->role->id, [1, 2])) {
                 return view('dashboard.admin');
             } else {
-                $userID = Auth::id();
-
-                $factories = $this->factoryService->load($request, 6);
-                dd($factories);
-                $timeframeOptions = getTimeframeOption();
+//                $userID = Auth::id();
+//
+//                $factories = $this->factoryService->load($request, 6);
+//                dd($factories);
+//                $timeframeOptions = getTimeframeOption();
 //                dd($factories, Auth::user(), $timeframeOptions);
+                $factories = [];
+                $timeframeOptions = [];
                 return view('dashboard.client', compact('factories', 'timeframeOptions'));
             }
         } else {

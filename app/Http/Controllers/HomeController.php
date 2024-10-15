@@ -18,7 +18,6 @@ class HomeController extends Controller
     {
         $this->middleware('auth');
         $this->factoryService = $factoryService;
-
     }
 
     /**
@@ -35,7 +34,8 @@ class HomeController extends Controller
                 $userID = Auth::id();
                 $factories = $this->factoryService->load($request, $userID);
                 $timeframeOptions = getTimeframeOption();
-                return view('dashboard.client', compact('factories', 'timeframeOptions'));
+                dd($factories, Auth::user(), $timeframeOptions);
+//                return view('dashboard.client', compact('factories', 'timeframeOptions'));
             }
         } else {
             redirect()->route('login');

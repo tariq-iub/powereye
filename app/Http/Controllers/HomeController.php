@@ -32,8 +32,9 @@ class HomeController extends Controller
                 return view('dashboard.admin');
             } else {
                 $userID = Auth::id();
-                dd($userID);
-                $factories = $this->factoryService->load($request, 5);
+
+                $factories = $this->factoryService->load($request, 6);
+                dd($factories);
                 $timeframeOptions = getTimeframeOption();
 //                dd($factories, Auth::user(), $timeframeOptions);
                 return view('dashboard.client', compact('factories', 'timeframeOptions'));

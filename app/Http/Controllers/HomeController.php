@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    protected FactoryService  $factoryService;
+    protected FactoryService $factoryService;
+
     /**
      * Create a new controller instance.
      *
@@ -31,14 +32,14 @@ class HomeController extends Controller
             if (in_array(Auth::user()->role->id, [1, 2])) {
                 return view('dashboard.admin');
             } else {
-                $userID = Auth::id();
                 try {
+                    $userID = Auth::id();
                     $factories = $this->factoryService->load($request, $userID);
+                    $timeframeOptions = getTimeframeOption();
+                    return view('dashboard.client', compact('factories', 'timeframeOptions'));
                 } catch (\Exception $e) {
                     return $e;
                 }
-                $timeframeOptions = getTimeframeOption();
-                return view('dashboard.client', compact('factories', 'timeframeOptions'));
             }
         } else {
             redirect()->route('login');

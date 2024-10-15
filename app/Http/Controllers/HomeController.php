@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FactoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -38,7 +39,8 @@ class HomeController extends Controller
                     $timeframeOptions = getTimeframeOption();
                     return view('dashboard.client', compact('factories', 'timeframeOptions'));
                 } catch (\Exception $e) {
-                    return $e;
+                    Log::error($e->getMessage());
+                    return $e->getMessage();
                 }
             }
         } else {

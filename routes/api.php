@@ -56,6 +56,8 @@ Route::get('site/{siteId}/{type}', [SiteController::class, 'fetchData']);
 Route::get('sensor-data/{entityType}/{entityId}/', [SensorDataController::class, 'fetch']);
 Route::get('sensor-data/{entityType}/{entityId}/energy', [SensorDataController::class, 'fetchEnergyData']);
 
+Route::get('sensors/fetch/{type}/{id}', [SensorDataController::class, 'f']);
+
 Route::get('factoryData/{factory}', [FactoryController::class, 'fetchFactoryData']);
 
 Route::get('device/get-datetime', [DeviceManagementController::class, 'getDateTime']);

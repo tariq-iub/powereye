@@ -1,124 +1,194 @@
 @extends('layouts.client')
 
+@push('css')
+    <style>
+        .chart {
+            width: 100%;
+        }
+
+        .factory-chart {
+            height: 200px;
+        }
+
+        .site-chart {
+            width: 150px;
+            height: 150px;
+            position: relative;
+        }
+    </style>
+@endpush
+
 @section('content')
-    <div class="container-fluid client">
+    @if($factories->count() > 0)
         @foreach($factories as $factory)
-            <div class="row py-4 mb-4 border shadow rounded-md factory">
-                <div class="col-md-8">
-                    <div class="row mb-3">
-                        <div class="d-flex justify-content-between">
-                            <h2>{{ $factory->title  }}</h2>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5>
-                            <span class="badge badge-phoenix badge-phoenix-warning rounded-pill fs-9 ms-2">
-                                <span class="badge-label">
-                                    Total Power: <span
-                                        id="factory-power-{{$factory->id}}">{{ $factory->totalPower }}</span> kW
-                                </span>
+            @php
+                $hasSites = $factory->sites->count() > 0;
+            @endphp
+
+            <div class="mx-n4 px-4 py-3 mx-lg-n6 px-lg-6 bg-body-emphasis border-top">
+
+                <div class="row align-items-center">
+                    <div class="col-2 col-md-1 d-flex align-items-center justify-content-center p-2">
+                        <img
+                            src="https://imgs.search.brave.com/SusKZ3EBBMQidIwheCCF_lnece2VYmF2BX3XJxkRUUU/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9icmFu/ZGxvZ292ZWN0b3Iu/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDIyLzA2L0lVQi1M/b2dvLnBuZw"
+                            alt="{{ $factory->title }}'s logo"
+                            class="rounded-circle border object-fit-cover w-100 h-100 w-md-70 h-md-70"
+                        >
+                    </div>
+                    <div class="col-10 col-md-11">
+                        <div class="row">
+                            <h3 class="col">
+                                {{ $factory->title }}
+                            </h3>
+                            <div
+                                class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-warning d-flex align-items-center justify-content-center">
+                            <span class="fw-bold">
+                                Total Power: <span>{{ $factory->totalPower }}</span> kW
                             </span>
-                                </h5>
-                                <h5>
-                            <span class="badge badge-phoenix badge-phoenix-success rounded-pill fs-9 ms-2">
-                                <span class="badge-label">
-                                    Total Energy: <span
-                                        id="factory-energy-{{$factory->id}}">{{ $factory->totalEnergy }}</span> kWh
-                                </span>
+                            </div>
+                            <div
+                                class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 ms-md-2 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-success d-flex align-items-center justify-content-center">
+                            <span class="fw-bold">
+                                Total Energy: <span>{{ $factory->totalEnergy }}</span> kWh
                             </span>
-                                </h5>
                             </div>
                         </div>
+                        <p class="text-body-tertiary mb-2 m-md-0 mt-md-2 lh-sm">{{ $factory->address }}</p>
+                        <div
+                            class="d-block d-md-none col-12 w-max-content my-0 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-warning d-flex align-items-center justify-content-center">
+                        <span class="fw-bold">
+                            Total Power: <span>{{ $factory->totalPower }}</span> kW
+                        </span>
+                        </div>
+                        <div
+                            class="d-block d-md-none col-12 w-max-content mt-1 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-success d-flex align-items-center justify-content-center">
+                        <span class="fw-bold">
+                            Total Energy: <span>{{ $factory->totalEnergy }}</span> kWh
+                        </span>
+                        </div>
                     </div>
-                    <div class="row g-3">
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col row justify-content-center justify-content-md-start">
                         @foreach($factory->sites as $site)
-                            <div class="col-md-4 col-3">
-                                <div class="card h-100 shadow-sm border-0">
-                                    <div class="card-body p-4">
-                                        <div class="d-flex justify-content-between">
+                            @php
+                                $hasData = $site->totalPower > 0 && $site->totalEnergy > 0;
+                            @endphp
+
+                            <div class="{{ $hasSites ? '' : 'd-none' }} site-card-{{ $site->id }} col-12 col-md-6 pb-3">
+                                <div class="card h-100 shadow border rounded">
+                                    <div
+                                        class="pb-2 card-header border-0 d-flex justify-content-between align-items-start">
+                                        <h4 class="mb-0">
+                                            <a {{ $hasData ? 'href=' . route('sites.show', $site->id) : '' }} class="{{ $hasData ? '' : 'disabled' }} text-decoration-none">
+                                                {{ $site->title }}
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div class="card-body row py-1">
+                                        <div class="{{ $hasData ? "d-none": "" }} ">
+                                            No data to display
+                                        </div>
+
+                                        <div
+                                            class="{{ $hasData ? "": "d-none" }} pt-3 col d-flex flex-column justify-content-between">
                                             <div>
-                                                <h5 class="mb-1 fw-bold">
-                                                    <a href="{{ route('sites.show', $site->id) }}" class="text-primary">
-                                                        {{ $site->title }}
-                                                    </a>
-                                                </h5>
-                                                <div class="mt-4">
-                                                    <h6 class="mb-2 text-muted">
-                                                        Power:
-                                                        <span class="text-dark fw-bold">
-                                                <span
-                                                    id="site-power-{{ $site->id }}">{{ $site->totalPower }}</span> kW
-                                            </span>
-                                                    </h6>
-                                                    <h6 class="text-muted">
-                                                        Energy:
-                                                        <span class="text-dark fw-bold">
-                                                <span
-                                                    id="site-energy-{{ $site->id }}">{{ $site->totalEnergy }}</span> kWh
-                                            </span>
-                                                    </h6>
-                                                </div>
+                                                <h6 class="mb-2 text-secondary">
+                                                    Power: <strong class="text-dark">
+                                                        <span>{{ $site->totalPower }}</span>
+                                                        kW</strong>
+                                                </h6>
+                                                <h6 class="mb-2 text-secondary">
+                                                    Energy: <strong class="text-dark">
+                                                        <span>{{ $site->totalEnergy }}</span>
+                                                        kWh</strong>
+                                                </h6>
                                             </div>
-                                            <div id="siteChart-{{ $site->id }}" class="chart"
-                                                 style="width:140px; height: 120px;"></div>
+                                        </div>
+                                        <div
+                                            class="{{ $hasData ? '' : 'd-none' }} col d-flex align-items-center justify-content-center m-0 p-0">
+                                            <div class="chart site-chart p-0 m-0" id="siteGauge-{{ $site->id }}"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
-                    </div>
-                </div>
 
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-md-12 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">{{ $factory->title }} Power Usage</h5>
-                            <div class="col-8 col-sm-4">
-                                <select class="form-select form-select-sm" id="factoryLineTimeframe-{{ $factory->id }}">
-                                    @foreach($timeframeOptions as $label => $value)
-                                        <option value="{{ $value }}">{{ $label }}</option>
-                                    @endforeach
-                                </select>
+                        <div class="{{ $hasSites ? 'd-none' : '' }} no-site-{{ $site->id }} ms-2">No site to display
+                        </div>
+                    </div>
+
+                    <div class="vr p-0 bg-body-tertiary d-none d-md-block"></div>
+
+                    <div class="col-12 col-md-4">
+                        @php
+                            $hasFactoryData = $factory->totalPower > 0 && $factory->totalEnergy > 0;
+                        @endphp
+
+                        <div class="{{ $hasFactoryData ? '' : 'd-none' }} line-{{ $factory->id }} row pb-6 pt-2">
+                            <div class="col-12 row pb-5">
+                                <div class="col">
+                                    <h4>Power Usage</h4>
+                                </div>
+                                <div class="col">
+                                    <select class="form-select form-select-sm"
+                                            id="factoryLineTimeframe-{{ $factory->id }}">
+                                        @foreach($timeframeOptions as $label => $value)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
+                            <div id="factoryPowerLine-{{ $factory->id }}" class="chart factory-chart"></div>
                         </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <div id="factoryLineChart-{{ $factory->id }}" class="chart"
-                                 style="width: 100%; height: 300px"></div>
-                        </div>
-                    </div>
 
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <h5 class="mb-0">Energy Distribution</h5>
-                            <div id="factoryDoughnutChart-{{ $factory->id }}" class="chart"
-                                 style="width: 100%; height: 250px"></div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-md-12 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">{{ $factory->title }} Energy Usage</h5>
-                            <div class="col-8 col-sm-4">
-                                <select class="form-select form-select-sm" id="factoryBarTimeframe-{{ $factory->id }}">
-                                    @foreach($timeframeOptions as $label => $value)
-                                        <option value="{{ $value }}">{{ $label }}</option>
-                                    @endforeach
-                                </select>
+                        <div class="{{ $hasFactoryData ? '' : 'd-none' }} dough-{{ $factory->id }} row pb-6">
+                            <div class="col-12 row pb-5">
+                                <h4>Energy Distribution among sites</h4>
                             </div>
+                            <div id="sitesEnergyDough-{{ $factory->id }}" class="chart factory-chart"></div>
                         </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <div id="factoryBarChart-{{ $factory->id }}" class="chart"
-                                 style="width: 100%; height: 250px"></div>
+
+                        <div class="{{ $hasFactoryData ? '' : 'd-none' }} bar-{{ $factory->id }} row">
+                            <div class="col-12 row pb-5">
+                                <div class="col">
+                                    <h4>Energy Usage</h4>
+                                </div>
+                                <div class="col">
+                                    <select class="form-select form-select-sm"
+                                            id="factoryLineTimeframe-{{ $factory->id }}">
+                                        @foreach($timeframeOptions as $label => $value)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="factoryEnergyBar-{{ $factory->id }}" class="chart factory-chart"></div>
+                        </div>
+
+                        <div class="{{ $hasFactoryData ? 'd-none' : '' }} no-chart-{{ $factory->id }} ms-2">No data to
+                            display
                         </div>
                     </div>
                 </div>
 
             </div>
         @endforeach
-    </div>
+    @else
+        <div>No localities to display</div>
+    @endif
 @endsection
+
+@push('scripts')
+    <script>
+        async function log() {
+            const data = await
+        }
+    </script>
+@endpush
 
 @push('scripts')
     <script>
@@ -144,33 +214,33 @@
 
             const initializeFactoryCharts = async (factory) => {
 
-                const lineChart = initChart(`factoryLineChart-${factory.id}`, lineChartOption([], [{
+                const lineChart = initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{
                     name: 'Power Usage (kW)',
                     data: [],
                     type: 'line',
                     smooth: true
                 }]));
 
-                const doughnutChart = initChart(`factoryDoughnutChart-${factory.id}`, doughnutChartOption('Energy Distribution', factory.chartData.energyBreakdown.map(entry => ({
+                const doughnutChart = initChart(`sitesEnergyDough-${factory.id}`, doughnutOption('Energy Distribution', factory.chartData.energyBreakdown.map(entry => ({
                     value: entry.value,
                     name: entry.name
                 }))));
 
-                const barChart = initChart(`factoryBarChart-${factory.id}`, barChartOption([], [{
-                    data: [],
+                const barChart = initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{
+                    data: [1, 2, 3],
                     name: 'Energy Usage (kWh)'
                 }]));
 
 
                 factory.sites.forEach(site => {
-                    initChart(`siteChart-${site.id}`, gaugeChartOption(site.totalEnergy, site.title));
+                    initChart(`siteGauge-${site.id}`, gaugeOption("#0f0", "#0ff", site.totalEnergy, "kWh"));
                 });
 
                 await setupTimeframeSelectors(factory, lineChart, barChart);
 
 
                 setInterval(async () => {
-                    await updateFactoryAndSiteData(factory, doughnutChart);
+                    // await updateFactoryAndSiteData(factory, doughnutChart);
                     await updateLineChart(lineChart, factory.id);
                     await updateBarChart(barChart, factory.id);
                 }, 10000);
@@ -200,18 +270,19 @@
                     updateFactoryTotals(factory.id, factoryMetrics.totalPower, factoryMetrics.totalEnergy);
 
 
-                    updateSiteTotalsAndCharts(factoryMetrics.sites);
+                    // updateSiteTotalsAndCharts(factoryMetrics.sites);
 
 
                     const doughnutChartData = factoryMetrics.energyBreakdown.distribution.map(entry => ({
                         value: entry.value,
                         name: entry.name
                     }));
-                    updateChart(doughnutChart, doughnutChartOption('Energy Distribution', doughnutChartData));
+                    updateChart(doughnutChart, doughnutOption('Energy Distribution', doughnutChartData));
                 }
             };
 
             const updateFactoryTotals = (factoryId, totalPower, totalEnergy) => {
+                return;
                 const factoryPower = document.getElementById(`factory-power-${factoryId}`);
                 const factoryEnergy = document.getElementById(`factory-energy-${factoryId}`);
                 animateValue(factoryPower, parseFloat(factoryPower.innerText), totalPower, 1000, 2);
@@ -231,7 +302,7 @@
 
 
                     if (siteChart) {
-                        siteChart.setOption(gaugeChartOption(site.totalEnergy || 0, site.title));
+                        siteChart.setOption(gaugeOption("#0f0", "#0ff", site.totalEnergy || 0, "kWh"));
                     }
                 });
             };
@@ -242,12 +313,12 @@
                     const dataField = chartType === 'line' ? 'power' : 'energy';
                     const data = sensorData.map(dataPoint => dataPoint[dataField]);
 
-                    updateChart(chart, chartType === 'line' ? lineChartOption(timestamps, [{
+                    updateChart(chart, chartType === 'line' ? lineOption(timestamps, [{
                         data,
                         name: 'Power Usage (kW)',
                         type: 'line',
                         smooth: true,
-                    }]) : barChartOption(timestamps, [{data}]));
+                    }]) : barOption(timestamps, [{data, type: 'bar'}]));
                 }
             };
 

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\SensorData;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -124,6 +123,14 @@ class SensorDataService
             ->groupBy('time_bucket')
             ->orderBy('timestamp')
             ->get();
+    }
+
+    public function f(string $entityType, int $entityId)
+    {
+        if ($entityType === 'site') $relation = 'data_file.site';
+        else $relation = 'data_file.site.factory';
+
+        return SensorData::with($relation)->get();
     }
 
 }

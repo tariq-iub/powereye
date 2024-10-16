@@ -13,13 +13,15 @@ const updateChart = (chart, option) => {
 
 const setTitle = (option, title) => {
     if (title) {
-        option.title = { text: title };
+        option.title = {text: title};
     }
 };
 
-const lineChartOption = (
+const lineOption = (
     xData,
     series,
+    min = 0,
+    max = 100,
     title = null,
     gridOptions = {},
     showTooltip = true,
@@ -29,11 +31,11 @@ const lineChartOption = (
         xAxis: {
             type: "category",
             data: xData,
-            axisLabel: { formatter: (value) => value },
+            axisLabel: {formatter: (value) => value},
         },
         yAxis: {
             type: "value",
-            axisLabel: { formatter: (value) => value },
+            axisLabel: {formatter: (value) => value},
         },
         legend: {
             show: true,
@@ -46,6 +48,8 @@ const lineChartOption = (
         },
         series: series.map((s) => ({
             ...s,
+            min,
+            max,
             label: {
                 show: showDataLabels,
                 position: "top",
@@ -53,11 +57,11 @@ const lineChartOption = (
         })),
         tooltip: showTooltip
             ? {
-                  trigger: "axis",
-                  axisPointer: {
-                      type: "cross",
-                  },
-              }
+                trigger: "axis",
+                axisPointer: {
+                    type: "cross",
+                },
+            }
             : null,
     };
 
@@ -65,7 +69,7 @@ const lineChartOption = (
     return option;
 };
 
-const barChartOption = (
+const barOption = (
     xData,
     series,
     title = null,
@@ -77,11 +81,11 @@ const barChartOption = (
         xAxis: {
             type: "category",
             data: xData,
-            axisLabel: { formatter: (value) => value },
+            axisLabel: {formatter: (value) => value},
         },
         yAxis: {
             type: "value",
-            axisLabel: { formatter: (value) => value },
+            axisLabel: {formatter: (value) => value},
         },
         legend: {
             show: true,
@@ -102,11 +106,11 @@ const barChartOption = (
         })),
         tooltip: showTooltip
             ? {
-                  trigger: "axis",
-                  axisPointer: {
-                      type: "shadow",
-                  },
-              }
+                trigger: "axis",
+                axisPointer: {
+                    type: "shadow",
+                },
+            }
             : null,
     };
 
@@ -114,7 +118,7 @@ const barChartOption = (
     return option;
 };
 
-const doughnutChartOption = (name, seriesData, title = null) => {
+const doughnutOption = (name, seriesData, title = null) => {
     const option = {
         tooltip: {
             trigger: "item",
@@ -158,97 +162,70 @@ const doughnutChartOption = (name, seriesData, title = null) => {
     };
 
     if (title) {
-        option.title = { text: title };
+        option.title = {text: title};
     }
     return option;
 };
 
-const gaugeChartOption = (value, name, title = null) => {
-    const option = {
-        tooltip: {
-            formatter: function (params) {
-                return `<strong>${params.seriesName}</strong><br/>${name}: ${params.value} kWh`;
-            },
-        },
+const gaugeOption = (lightColor, darkColor, value, unit, min = 0, max = 100, splitNumber = 10) => {
+    return {
         series: [
             {
-                name: "Energy Consumption",
-                type: "gauge",
-                radius: "90%",
-                startAngle: 180,
-                endAngle: 0,
-                splitNumber: 4,
-                min: 0,
-                max: 1,
+                type: 'gauge',
+                min,
+                max,
+                progress: {
+                    show: true,
+                    width: 12  // Decrease the width of the progress bar
+                },
                 axisLine: {
                     lineStyle: {
-                        width: 15,
-                        color: [
-                            [0.25, "#4caf50"],
-                            [0.75, "#ffeb3b"],
-                            [1, "#f44336"],
-                        ],
-                    },
-                },
-                pointer: {
-                    width: 5,
-                    length: "80%",
-                    itemStyle: {
-                        color: "#555",
-                        shadowBlur: 3,
-                    },
+                        width: 12  // Decrease the width of the axis line to match the progress
+                    }
                 },
                 axisTick: {
-                    distance: -15,
-                    length: 5,
-                    lineStyle: {
-                        color: "#fff",
-                        width: 1,
-                    },
+                    show: false
                 },
                 splitLine: {
-                    distance: -15,
-                    length: 8,
+                    length: 10,  // Adjust length of split lines to fit better
                     lineStyle: {
-                        color: "transparent",
                         width: 2,
-                    },
+                        color: '#999'
+                    }
                 },
                 axisLabel: {
-                    color: "#333",
-                    fontSize: 10,
-                    distance: -30,
-                    formatter: function (value) {
-                        return Math.round(value);
-                    },
+                    distance: -10,  // Adjust distance of labels from the axis
+                    color: '#999',
+                    fontSize: 10  // Decrease the font size of axis labels
+                },
+                anchor: {
+                    show: true,
+                    // showAbove: true,
+                    size: 15,  // Decrease the size of the anchor
+                    itemStyle: {
+                        borderWidth: 6
+                    }
                 },
                 title: {
-                    offsetCenter: [0, "65%"],
-                    fontSize: 12,
-                    color: "#333",
-                    show: false,
+                    show: false
                 },
                 detail: {
-                    fontSize: 14,
-                    fontWeight: "bold",
-                    formatter: "{value} kWh",
-                    color: "#333",
-                    offsetCenter: [0, "85%"],
+                    valueAnimation: true,
+                    fontSize: 16,
+                    offsetCenter: [0, '60%'],
+                    formatter: `{value} ${unit}`,
                 },
-                data: [{ value, name }],
-                animationDuration: 1000,
-                animationEasing: "bounceOut",
-            },
-        ],
+                data: [
+                    {
+                        value
+                    }
+                ]
+            }
+        ]
     };
-
-    if (title) {
-        option.title = { text: title };
-    }
-    return option;
 };
 
-const resizeChart = () => {
+    const resizeChart = () => {
     charts.forEach((chart) => {
         chart.resize();
     });

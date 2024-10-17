@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Factory;
-use App\Models\FactoryUser;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,8 +36,9 @@ class FactoryService
                 $siteTotalPower = $this->siteService->fetchData($request, $site->id, 'power', 'all', false);
                 $siteTotalEnergy = $this->siteService->fetchData($request, $site->id, 'energy', 'all', false, 5);
 
-                $site->totalPower = $siteTotalPower;
-                $site->totalEnergy = $siteTotalEnergy;
+                $site->totalPower = $siteTotalPower['total'];
+                $site->totalEnergy = $siteTotalEnergy['total'];
+                $site->timestamp = Carbon::parse($siteTotalEnergy['latest_timestamp'])->diffForHumans();
 
                 if ($siteTotalPower > 0 && $siteTotalEnergy > 0) {
                     $siteNames[] = $site->title;

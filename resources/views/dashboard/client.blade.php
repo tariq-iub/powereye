@@ -11,8 +11,8 @@
         }
 
         .site-chart {
-            width: 150px;
-            height: 150px;
+            width: 125px;
+            height: 125px;
             position: relative;
         }
     </style>
@@ -89,8 +89,10 @@
                                         </h4>
                                     </div>
                                     <div class="card-body row py-1">
-                                        <div class="{{ $hasData ? "d-none": "" }} ">
-                                            No data to display
+                                        <div class="{{ $hasData ? "d-none": "" }}">
+                                            <div class="alert alert-warning" role="alert">
+                                                No data available for this site.
+                                            </div>
                                         </div>
 
                                         <div
@@ -105,6 +107,10 @@
                                                     Energy: <strong class="text-dark">
                                                         <span>{{ $site->totalEnergy }}</span>
                                                         kWh</strong>
+                                                </h6>
+                                                <h6 class="pt-3 text-secondary">
+                                                    Last Updated at:
+                                                    <strong>{{ $site->timestamp }}</strong>
                                                 </h6>
                                             </div>
                                         </div>
@@ -182,173 +188,173 @@
     @endif
 @endsection
 
-@push('scripts')
-    <script>
-        async function log() {
-            const data = await
-        }
-    </script>
-@endpush
+{{--@push('scripts')--}}
+{{--    <script>--}}
+{{--        async function log() {--}}
+{{--            // const data = await--}}
+{{--        }--}}
+{{--    </script>--}}
+{{--@endpush--}}
 
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+{{--@push('scripts')--}}
+{{--    <script>--}}
+{{--        document.addEventListener('DOMContentLoaded', () => {--}}
 
-            const animateValue = (element, start, end, duration, decimals = 2) => {
-                let startTime = null;
+{{--            const animateValue = (element, start, end, duration, decimals = 2) => {--}}
+{{--                let startTime = null;--}}
 
-                const step = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    const progress = Math.min((timestamp - startTime) / duration, 1);
-                    const currentValue = start + (end - start) * progress;
+{{--                const step = (timestamp) => {--}}
+{{--                    if (!startTime) startTime = timestamp;--}}
+{{--                    const progress = Math.min((timestamp - startTime) / duration, 1);--}}
+{{--                    const currentValue = start + (end - start) * progress;--}}
 
-                    element.innerText = currentValue % 2 !== 0 ? currentValue.toFixed(decimals) : currentValue;
+{{--                    element.innerText = currentValue % 2 !== 0 ? currentValue.toFixed(decimals) : currentValue;--}}
 
-                    if (progress < 1) {
-                        requestAnimationFrame(step);
-                    }
-                };
+{{--                    if (progress < 1) {--}}
+{{--                        requestAnimationFrame(step);--}}
+{{--                    }--}}
+{{--                };--}}
 
-                requestAnimationFrame(step);
-            };
+{{--                requestAnimationFrame(step);--}}
+{{--            };--}}
 
-            const initializeFactoryCharts = async (factory) => {
+{{--            const initializeFactoryCharts = async (factory) => {--}}
 
-                const lineChart = initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{
-                    name: 'Power Usage (kW)',
-                    data: [],
-                    type: 'line',
-                    smooth: true
-                }]));
+{{--                const lineChart = initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{--}}
+{{--                    name: 'Power Usage (kW)',--}}
+{{--                    data: [],--}}
+{{--                    type: 'line',--}}
+{{--                    smooth: true--}}
+{{--                }]));--}}
 
-                const doughnutChart = initChart(`sitesEnergyDough-${factory.id}`, doughnutOption('Energy Distribution', factory.chartData.energyBreakdown.map(entry => ({
-                    value: entry.value,
-                    name: entry.name
-                }))));
+{{--                const doughnutChart = initChart(`sitesEnergyDough-${factory.id}`, doughnutOption('Energy Distribution', factory.chartData.energyBreakdown.map(entry => ({--}}
+{{--                    value: entry.value,--}}
+{{--                    name: entry.name--}}
+{{--                }))));--}}
 
-                const barChart = initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{
-                    data: [1, 2, 3],
-                    name: 'Energy Usage (kWh)'
-                }]));
-
-
-                factory.sites.forEach(site => {
-                    initChart(`siteGauge-${site.id}`, gaugeOption("#0f0", "#0ff", site.totalEnergy, "kWh"));
-                });
-
-                await setupTimeframeSelectors(factory, lineChart, barChart);
+{{--                const barChart = initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{--}}
+{{--                    data: [1, 2, 3],--}}
+{{--                    name: 'Energy Usage (kWh)'--}}
+{{--                }]));--}}
 
 
-                setInterval(async () => {
-                    // await updateFactoryAndSiteData(factory, doughnutChart);
-                    await updateLineChart(lineChart, factory.id);
-                    await updateBarChart(barChart, factory.id);
-                }, 10000);
-            };
+{{--                factory.sites.forEach(site => {--}}
+{{--                    initChart(`siteGauge-${site.id}`, gaugeOption("#0f0", "#0ff", site.totalEnergy, "kWh"));--}}
+{{--                });--}}
 
-            const fetchFactoryData = async (factoryId) => {
-                try {
-                    const response = await fetch(`/api/factoryData/${factoryId}`);
-                    return await response.json();
-                } catch (error) {
-                    console.error('Error fetching factory data:', error);
-                }
-            };
-
-            const fetchSensorData = async (factoryId, timeframe, chartType) => {
-                const uri = chartType === 'line' ? '' : 'energy';
-                const url = `sensor-data/factory/${factoryId}/${uri}?startDate=${timeframe}`;
-                return await fetchData(url);
-            };
-
-            const updateFactoryAndSiteData = async (factory, doughnutChart) => {
-                const data = await fetchFactoryData(factory.id);
-                if (data) {
-                    const {factoryMetrics} = data;
+{{--                await setupTimeframeSelectors(factory, lineChart, barChart);--}}
 
 
-                    updateFactoryTotals(factory.id, factoryMetrics.totalPower, factoryMetrics.totalEnergy);
+{{--                setInterval(async () => {--}}
+{{--                    // await updateFactoryAndSiteData(factory, doughnutChart);--}}
+{{--                    await updateLineChart(lineChart, factory.id);--}}
+{{--                    await updateBarChart(barChart, factory.id);--}}
+{{--                }, 6000000);--}}
+{{--            };--}}
+
+{{--            const fetchFactoryData = async (factoryId) => {--}}
+{{--                try {--}}
+{{--                    const response = await fetch(`/api/factoryData/${factoryId}`);--}}
+{{--                    return await response.json();--}}
+{{--                } catch (error) {--}}
+{{--                    console.error('Error fetching factory data:', error);--}}
+{{--                }--}}
+{{--            };--}}
+
+{{--            const fetchSensorData = async (factoryId, timeframe, chartType) => {--}}
+{{--                const uri = chartType === 'line' ? '' : 'energy';--}}
+{{--                const url = `sensor-data/factory/${factoryId}/${uri}?startDate=${timeframe}`;--}}
+{{--                return await fetchData(url);--}}
+{{--            };--}}
+
+{{--            const updateFactoryAndSiteData = async (factory, doughnutChart) => {--}}
+{{--                const data = await fetchFactoryData(factory.id);--}}
+{{--                if (data) {--}}
+{{--                    const {factoryMetrics} = data;--}}
 
 
-                    // updateSiteTotalsAndCharts(factoryMetrics.sites);
+{{--                    updateFactoryTotals(factory.id, factoryMetrics.totalPower, factoryMetrics.totalEnergy);--}}
 
 
-                    const doughnutChartData = factoryMetrics.energyBreakdown.distribution.map(entry => ({
-                        value: entry.value,
-                        name: entry.name
-                    }));
-                    updateChart(doughnutChart, doughnutOption('Energy Distribution', doughnutChartData));
-                }
-            };
-
-            const updateFactoryTotals = (factoryId, totalPower, totalEnergy) => {
-                return;
-                const factoryPower = document.getElementById(`factory-power-${factoryId}`);
-                const factoryEnergy = document.getElementById(`factory-energy-${factoryId}`);
-                animateValue(factoryPower, parseFloat(factoryPower.innerText), totalPower, 1000, 2);
-                animateValue(factoryEnergy, parseFloat(factoryEnergy.innerText), totalEnergy, 1000, 2);
-            };
-
-            const updateSiteTotalsAndCharts = (sites) => {
-                sites.forEach(site => {
-                    const siteId = site.siteId;
-                    const sitePower = document.getElementById(`site-power-${siteId}`);
-                    const siteEnergy = document.getElementById(`site-energy-${siteId}`);
-                    const siteChart = echarts.getInstanceByDom(document.getElementById(`siteChart-${siteId}`));
+{{--                    // updateSiteTotalsAndCharts(factoryMetrics.sites);--}}
 
 
-                    animateValue(sitePower, parseFloat(sitePower.innerText), site.totalPower, 1000);
-                    animateValue(siteEnergy, parseFloat(siteEnergy.innerText), site.totalEnergy, 1000, 5);
+{{--                    const doughnutChartData = factoryMetrics.energyBreakdown.distribution.map(entry => ({--}}
+{{--                        value: entry.value,--}}
+{{--                        name: entry.name--}}
+{{--                    }));--}}
+{{--                    updateChart(doughnutChart, doughnutOption('Energy Distribution', doughnutChartData));--}}
+{{--                }--}}
+{{--            };--}}
+
+{{--            const updateFactoryTotals = (factoryId, totalPower, totalEnergy) => {--}}
+{{--                return;--}}
+{{--                const factoryPower = document.getElementById(`factory-power-${factoryId}`);--}}
+{{--                const factoryEnergy = document.getElementById(`factory-energy-${factoryId}`);--}}
+{{--                animateValue(factoryPower, parseFloat(factoryPower.innerText), totalPower, 1000, 2);--}}
+{{--                animateValue(factoryEnergy, parseFloat(factoryEnergy.innerText), totalEnergy, 1000, 2);--}}
+{{--            };--}}
+
+{{--            const updateSiteTotalsAndCharts = (sites) => {--}}
+{{--                sites.forEach(site => {--}}
+{{--                    const siteId = site.siteId;--}}
+{{--                    const sitePower = document.getElementById(`site-power-${siteId}`);--}}
+{{--                    const siteEnergy = document.getElementById(`site-energy-${siteId}`);--}}
+{{--                    const siteChart = echarts.getInstanceByDom(document.getElementById(`siteChart-${siteId}`));--}}
 
 
-                    if (siteChart) {
-                        siteChart.setOption(gaugeOption("#0f0", "#0ff", site.totalEnergy || 0, "kWh"));
-                    }
-                });
-            };
+{{--                    animateValue(sitePower, parseFloat(sitePower.innerText), site.totalPower, 1000);--}}
+{{--                    animateValue(siteEnergy, parseFloat(siteEnergy.innerText), site.totalEnergy, 1000, 5);--}}
 
-            const updateCharts = (sensorData, chart, chartType, timeframe) => {
-                if (sensorData && sensorData.length > 0) {
-                    const timestamps = sensorData.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const dataField = chartType === 'line' ? 'power' : 'energy';
-                    const data = sensorData.map(dataPoint => dataPoint[dataField]);
 
-                    updateChart(chart, chartType === 'line' ? lineOption(timestamps, [{
-                        data,
-                        name: 'Power Usage (kW)',
-                        type: 'line',
-                        smooth: true,
-                    }]) : barOption(timestamps, [{data, type: 'bar'}]));
-                }
-            };
+{{--                    if (siteChart) {--}}
+{{--                        siteChart.setOption(gaugeOption("#0f0", "#0ff", site.totalEnergy || 0, "kWh"));--}}
+{{--                    }--}}
+{{--                });--}}
+{{--            };--}}
 
-            const updateLineChart = async (lineChart, factoryId) => {
-                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factoryId}`);
-                const timeframe = lineTimeframeSelect ? lineTimeframeSelect.value : '1d';
-                const sensorData = await fetchSensorData(factoryId, timeframe, 'line');
-                updateCharts(sensorData, lineChart, 'line', timeframe);
-            };
+{{--            const updateCharts = (sensorData, chart, chartType, timeframe) => {--}}
+{{--                if (sensorData && sensorData.length > 0) {--}}
+{{--                    const timestamps = sensorData.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));--}}
+{{--                    const dataField = chartType === 'line' ? 'power' : 'energy';--}}
+{{--                    const data = sensorData.map(dataPoint => dataPoint[dataField]);--}}
 
-            const updateBarChart = async (barChart, factoryId) => {
-                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factoryId}`);
-                const timeframe = barTimeframeSelect ? barTimeframeSelect.value : '1d';
-                const sensorData = await fetchSensorData(factoryId, timeframe, 'bar');
-                updateCharts(sensorData, barChart, 'bar', timeframe);
-            };
+{{--                    updateChart(chart, chartType === 'line' ? lineOption(timestamps, [{--}}
+{{--                        data,--}}
+{{--                        name: 'Power Usage (kW)',--}}
+{{--                        type: 'line',--}}
+{{--                        smooth: true,--}}
+{{--                    }]) : barOption(timestamps, [{data, type: 'bar'}]));--}}
+{{--                }--}}
+{{--            };--}}
 
-            const setupTimeframeSelectors = async (factory, lineChart, barChart) => {
-                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
-                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
+{{--            const updateLineChart = async (lineChart, factoryId) => {--}}
+{{--                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factoryId}`);--}}
+{{--                const timeframe = lineTimeframeSelect ? lineTimeframeSelect.value : '1d';--}}
+{{--                const sensorData = await fetchSensorData(factoryId, timeframe, 'line');--}}
+{{--                updateCharts(sensorData, lineChart, 'line', timeframe);--}}
+{{--            };--}}
 
-                if (lineTimeframeSelect) lineTimeframeSelect.addEventListener('change', () => updateLineChart(lineChart, factory.id));
-                if (barTimeframeSelect) barTimeframeSelect.addEventListener('change', () => updateBarChart(barChart, factory.id));
+{{--            const updateBarChart = async (barChart, factoryId) => {--}}
+{{--                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factoryId}`);--}}
+{{--                const timeframe = barTimeframeSelect ? barTimeframeSelect.value : '1d';--}}
+{{--                const sensorData = await fetchSensorData(factoryId, timeframe, 'bar');--}}
+{{--                updateCharts(sensorData, barChart, 'bar', timeframe);--}}
+{{--            };--}}
 
-                await updateLineChart(lineChart, factory.id);
-                await updateBarChart(barChart, factory.id);
-            };
+{{--            const setupTimeframeSelectors = async (factory, lineChart, barChart) => {--}}
+{{--                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);--}}
+{{--                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);--}}
 
-            const factories = @json($factories);
-            factories.forEach(factory => initializeFactoryCharts(factory));
-        });
-    </script>
-@endpush
+{{--                if (lineTimeframeSelect) lineTimeframeSelect.addEventListener('change', () => updateLineChart(lineChart, factory.id));--}}
+{{--                if (barTimeframeSelect) barTimeframeSelect.addEventListener('change', () => updateBarChart(barChart, factory.id));--}}
+
+{{--                await updateLineChart(lineChart, factory.id);--}}
+{{--                await updateBarChart(barChart, factory.id);--}}
+{{--            };--}}
+
+{{--            const factories = @json($factories);--}}
+{{--            factories.forEach(factory => initializeFactoryCharts(factory));--}}
+{{--        });--}}
+{{--    </script>--}}
+{{--@endpush--}}

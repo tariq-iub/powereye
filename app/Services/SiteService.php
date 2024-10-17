@@ -19,32 +19,38 @@ class SiteService
         $precision = $validationResult['precision'];
 
         try {
-
             $startDate = mapTimeframe($timeframe);
 
             $site = Site::with(['data_file.data' => function ($query) use ($columns, $startDate, $timeframe) {
-                $query->select(array_merge($columns, ['data_file_id']))
+                $query->select(array_merge($columns, ['timestamp', 'data_file_id']))
                     ->when($timeframe !== 'all', function ($query) use ($startDate) {
                         $query->where('timestamp', '>=', $startDate);
                     });
             }])
                 ->find($siteId);
 
-
             if (!$site) {
                 $errorResponse = ['error' => 'Site not found'];
                 return $json ? response()->json($errorResponse, 404) : $errorResponse;
             }
 
-            $totalValue = $site->data_file->flatMap(function ($dataFile) {
+            $dataCollection = $site->data_file->flatMap(function ($dataFile) {
                 return $dataFile->data;
-            })->sum(function ($data) use ($columns) {
+            });
+
+            $totalValue = $dataCollection->sum(function ($data) use ($columns) {
                 return array_sum(array_map(fn($col) => $data->$col, $columns));
             });
 
+            $latestData = $dataCollection->sortByDesc('timestamp')->first();
+            $latestTimestamp = $latestData ? $latestData->timestamp : null;
+
             $result = round($totalValue, $precision);
 
-            return $json ? response()->json($result) : $result;
+            return $json
+                ? response()->json(['total' => $result, 'latest_timestamp' => $latestTimestamp])
+                : ['total' => $result, 'latest_timestamp' => $latestTimestamp];
+
         } catch (\Exception $e) {
             \Log::error('Site data processing error: ' . $e->getMessage());
             $errorResponse = ['error' => 'Data processing error'];

@@ -25,36 +25,36 @@ class FactoryService
             $query->where('user_id', $userID);
         })->with('sites.data_file.data')->get();
 
-        foreach ($factories as $factory) {
-            $factoryTotalPower = $this->fetchData($request, $factory->id, 'power', false);
-            $factoryTotalEnergy = $this->fetchData($request, $factory->id, 'energy', false, 8);
-
-            $siteNames = [];
-            $siteEnergies = [];
-
-            foreach ($factory->sites as $site) {
-                $siteTotalPower = $this->siteService->fetchData($request, $site->id, 'power', 'all', false);
-                $siteTotalEnergy = $this->siteService->fetchData($request, $site->id, 'energy', 'all', false, 5);
-
-                $site->totalPower = $siteTotalPower['total'];
-                $site->totalEnergy = $siteTotalEnergy['total'];
-                $site->timestamp = Carbon::parse($siteTotalEnergy['latest_timestamp'])->diffForHumans();
-
-                if ($siteTotalPower > 0 && $siteTotalEnergy > 0) {
-                    $siteNames[] = $site->title;
-                    $siteEnergies[] = $siteTotalEnergy;
-                }
-            }
-
-            $factory->totalPower = $factoryTotalPower;
-            $factory->totalEnergy = $factoryTotalEnergy;
-
-            $factory->chartData = [
-                'energyBreakdown' => array_map(function ($name, $energy) {
-                    return ['value' => $energy, 'name' => $name];
-                }, $siteNames, $siteEnergies),
-            ];
-        }
+//        foreach ($factories as $factory) {
+//            $factoryTotalPower = $this->fetchData($request, $factory->id, 'power', false);
+//            $factoryTotalEnergy = $this->fetchData($request, $factory->id, 'energy', false, 8);
+//
+//            $siteNames = [];
+//            $siteEnergies = [];
+//
+//            foreach ($factory->sites as $site) {
+//                $siteTotalPower = $this->siteService->fetchData($request, $site->id, 'power', 'all', false);
+//                $siteTotalEnergy = $this->siteService->fetchData($request, $site->id, 'energy', 'all', false, 5);
+//
+//                $site->totalPower = $siteTotalPower['total'];
+//                $site->totalEnergy = $siteTotalEnergy['total'];
+//                $site->timestamp = Carbon::parse($siteTotalEnergy['latest_timestamp'])->diffForHumans();
+//
+//                if ($siteTotalPower > 0 && $siteTotalEnergy > 0) {
+//                    $siteNames[] = $site->title;
+//                    $siteEnergies[] = $siteTotalEnergy;
+//                }
+//            }
+//
+//            $factory->totalPower = $factoryTotalPower;
+//            $factory->totalEnergy = $factoryTotalEnergy;
+//
+//            $factory->chartData = [
+//                'energyBreakdown' => array_map(function ($name, $energy) {
+//                    return ['value' => $energy, 'name' => $name];
+//                }, $siteNames, $siteEnergies),
+//            ];
+//        }
 
         return $factories;
     }

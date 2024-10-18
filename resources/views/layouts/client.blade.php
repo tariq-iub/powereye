@@ -31,6 +31,8 @@
 <script src="{{ asset('assets/js/charts.js') }}"></script>
 <script src="{{ asset('assets/vendors/flatpickr/flatpickr.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/choices/choices.min.js') }}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- Stacking JavaScript -->
 @stack('scripts')

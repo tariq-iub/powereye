@@ -41,7 +41,7 @@
                                 {{ $factory->title }}
                             </h3>
                             <div
-                                class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-warning d-flex align-items-center justify-content-center">
+                                class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
                             <span class="fw-bold">
                                 Total Power: <span>{{ $factory->totalPower }}</span> kW
                             </span>
@@ -55,10 +55,10 @@
                         </div>
                         <p class="text-body-tertiary mb-2 m-md-0 mt-md-2 lh-sm">{{ $factory->address }}</p>
                         <div
-                            class="d-block d-md-none col-12 w-max-content my-0 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-warning d-flex align-items-center justify-content-center">
-                        <span class="fw-bold">
-                            Total Power: <span>{{ $factory->totalPower }}</span> kW
-                        </span>
+                            class="d-block d-md-none col-12 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
+                                                <span class="fw-bold">
+                                                    Total Power: <span>{{ $factory->totalPower }}</span> kW
+                                                </span>
                         </div>
                         <div
                             class="d-block d-md-none col-12 w-max-content mt-1 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-success d-flex align-items-center justify-content-center">
@@ -90,7 +90,7 @@
                                     </div>
                                     <div class="card-body row py-1">
                                         <div class="{{ $hasData ? "d-none": "" }}">
-                                            <div class="alert alert-warning" role="alert">
+                                            <div class="badge badge-phoenix badge-phoenix-warning">
                                                 No data available for this site.
                                             </div>
                                         </div>
@@ -123,11 +123,13 @@
                             </div>
                         @endforeach
 
-                        <div class="{{ $hasSites ? 'd-none' : '' }} no-site-{{ $site->id }} ms-2">No site to display
+                        <div
+                            class="{{ $hasSites ? 'd-none' : '' }} no-site-{{ $site->id }} ms-2 badge badge-phoenix badge-phoenix-warning w-max-content">
+                            No data available
                         </div>
                     </div>
 
-                    <div class="vr p-0 bg-body-tertiary d-none d-md-block"></div>
+                    <div class="vr p-0 bg-body-tertiary d-none d-md-block {{ $hasSites ? '' : 'd-md-none' }}"></div>
 
                     <div class="col-12 col-md-4">
                         @php
@@ -173,10 +175,6 @@
                                 </div>
                             </div>
                             <div id="factoryEnergyBar-{{ $factory->id }}" class="chart factory-chart"></div>
-                        </div>
-
-                        <div class="{{ $hasFactoryData ? 'd-none' : '' }} no-chart-{{ $factory->id }} ms-2">No data to
-                            display
                         </div>
                     </div>
                 </div>

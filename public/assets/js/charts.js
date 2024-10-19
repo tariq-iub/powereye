@@ -47,6 +47,8 @@ const lineOption = (
             containLabel: true,
         },
         series: series.map((s) => ({
+            type: 'line',
+            smooth: true,
             ...s,
             min,
             max,

@@ -43,13 +43,14 @@
                             <div
                                 class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
                             <span class="fw-bold">
-                                Total Power: <span>{{ $factory->totalPower }}</span> kW
+                                Total Power: <span id="factoryPower-{{$factory->id}}">{{ $factory->totalPower }}</span> kW
                             </span>
                             </div>
                             <div
                                 class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 ms-md-2 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-success d-flex align-items-center justify-content-center">
                             <span class="fw-bold">
-                                Total Energy: <span>{{ $factory->totalEnergy }}</span> kWh
+                                Total Energy: <span
+                                    id="factoryEnergy-{{$factory->id}}">{{ $factory->totalEnergy }}</span> kWh
                             </span>
                             </div>
                         </div>
@@ -110,7 +111,7 @@
                                                 </h6>
                                                 <h6 class="pt-3 text-secondary">
                                                     Last Updated at:
-                                                    <strong>{{ $site->timestamp }}</strong>
+                                                    <strong>{{ $site->getLastTimestamp() }}</strong>
                                                 </h6>
                                             </div>
                                         </div>
@@ -157,7 +158,7 @@
                             <div class="col-12 row pb-5">
                                 <h4>Energy Distribution among sites</h4>
                             </div>
-                            <div id="sitesEnergyDough-{{ $factory->id }}" class="chart factory-chart"></div>
+                            <div id="siteEnergyDough-{{ $factory->id }}" class="chart factory-chart"></div>
                         </div>
 
                         <div class="{{ $hasFactoryData ? '' : 'd-none' }} bar-{{ $factory->id }} row">
@@ -188,171 +189,28 @@
 
 @push('scripts')
     <script>
-        async function log() {
-            // const data = await
-        }
-    </script>
-@endpush
-
-@push('scripts')
-    <script>
         document.addEventListener('DOMContentLoaded', () => {
-
-            const animateValue = (element, start, end, duration, decimals = 2) => {
-                let startTime = null;
-
-                const step = (timestamp) => {
-                    if (!startTime) startTime = timestamp;
-                    const progress = Math.min((timestamp - startTime) / duration, 1);
-                    const currentValue = start + (end - start) * progress;
-
-                    element.innerText = currentValue % 2 !== 0 ? currentValue.toFixed(decimals) : currentValue;
-
-                    if (progress < 1) {
-                        requestAnimationFrame(step);
-                    }
-                };
-
-                requestAnimationFrame(step);
-            };
-
-            const initializeFactoryCharts = async (factory) => {
-
+            const factories = @json($factories);
+            factories.forEach(factory => {
                 const lineChart = initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{
-                    name: 'Power Usage (kW)',
-                    data: [],
-                    type: 'line',
-                    smooth: true
-                }]));
+                    name: 'Power (kW)',
+                    data: []
+                }]))
+                const BarChart = initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{
+                    name: 'Energy (kWh)',
+                    data: []
+                }]))
 
-                const doughnutChart = initChart(`sitesEnergyDough-${factory.id}`, doughnutOption('Energy Distribution', factory.chartData.energyBreakdown.map(entry => ({
-                    value: entry.value,
-                    name: entry.name
-                }))));
-
-                const barChart = initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{
-                    data: [1, 2, 3],
-                    name: 'Energy Usage (kWh)'
-                }]));
-
+                let energyDistribution = [];
 
                 factory.sites.forEach(site => {
-                    initChart(`siteGauge-${site.id}`, gaugeOption("#0f0", "#0ff", site.totalEnergy, "kWh"));
-                });
+                    const gaugeChart = initChart(`siteGauge-${site.id}`, gaugeOption('', '', site.lastEnergy, 'kWh'))
+                    if (site.totalEnergy > 0) energyDistribution.push({name: site.title, value: site.totalEnergy});
+                })
 
-                await setupTimeframeSelectors(factory, lineChart, barChart);
-
-
-                setInterval(async () => {
-                    // await updateFactoryAndSiteData(factory, doughnutChart);
-                    await updateLineChart(lineChart, factory.id);
-                    await updateBarChart(barChart, factory.id);
-                }, 6000000);
-            };
-
-            const fetchFactoryData = async (factoryId) => {
-                try {
-                    const response = await fetch(`/api/factoryData/${factoryId}`);
-                    return await response.json();
-                } catch (error) {
-                    console.error('Error fetching factory data:', error);
-                }
-            };
-
-            const fetchSensorData = async (factoryId, timeframe, chartType) => {
-                const uri = chartType === 'line' ? '' : 'energy';
-                const url = `sensor-data/factory/${factoryId}/${uri}?startDate=${timeframe}`;
-                return await fetchData(url);
-            };
-
-            const updateFactoryAndSiteData = async (factory, doughnutChart) => {
-                const data = await fetchFactoryData(factory.id);
-                if (data) {
-                    const {factoryMetrics} = data;
-
-
-                    updateFactoryTotals(factory.id, factoryMetrics.totalPower, factoryMetrics.totalEnergy);
-
-
-                    // updateSiteTotalsAndCharts(factoryMetrics.sites);
-
-
-                    const doughnutChartData = factoryMetrics.energyBreakdown.distribution.map(entry => ({
-                        value: entry.value,
-                        name: entry.name
-                    }));
-                    updateChart(doughnutChart, doughnutOption('Energy Distribution', doughnutChartData));
-                }
-            };
-
-            const updateFactoryTotals = (factoryId, totalPower, totalEnergy) => {
-                return;
-                const factoryPower = document.getElementById(`factory-power-${factoryId}`);
-                const factoryEnergy = document.getElementById(`factory-energy-${factoryId}`);
-                animateValue(factoryPower, parseFloat(factoryPower.innerText), totalPower, 1000, 2);
-                animateValue(factoryEnergy, parseFloat(factoryEnergy.innerText), totalEnergy, 1000, 2);
-            };
-
-            const updateSiteTotalsAndCharts = (sites) => {
-                sites.forEach(site => {
-                    const siteId = site.siteId;
-                    const sitePower = document.getElementById(`site-power-${siteId}`);
-                    const siteEnergy = document.getElementById(`site-energy-${siteId}`);
-                    const siteChart = echarts.getInstanceByDom(document.getElementById(`siteChart-${siteId}`));
-
-
-                    animateValue(sitePower, parseFloat(sitePower.innerText), site.totalPower, 1000);
-                    animateValue(siteEnergy, parseFloat(siteEnergy.innerText), site.totalEnergy, 1000, 5);
-
-
-                    if (siteChart) {
-                        siteChart.setOption(gaugeOption("#0f0", "#0ff", site.totalEnergy || 0, "kWh"));
-                    }
-                });
-            };
-
-            const updateCharts = (sensorData, chart, chartType, timeframe) => {
-                if (sensorData && sensorData.length > 0) {
-                    const timestamps = sensorData.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const dataField = chartType === 'line' ? 'power' : 'energy';
-                    const data = sensorData.map(dataPoint => dataPoint[dataField]);
-
-                    updateChart(chart, chartType === 'line' ? lineOption(timestamps, [{
-                        data,
-                        name: 'Power Usage (kW)',
-                        type: 'line',
-                        smooth: true,
-                    }]) : barOption(timestamps, [{data, type: 'bar'}]));
-                }
-            };
-
-            const updateLineChart = async (lineChart, factoryId) => {
-                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factoryId}`);
-                const timeframe = lineTimeframeSelect ? lineTimeframeSelect.value : '1d';
-                const sensorData = await fetchSensorData(factoryId, timeframe, 'line');
-                updateCharts(sensorData, lineChart, 'line', timeframe);
-            };
-
-            const updateBarChart = async (barChart, factoryId) => {
-                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factoryId}`);
-                const timeframe = barTimeframeSelect ? barTimeframeSelect.value : '1d';
-                const sensorData = await fetchSensorData(factoryId, timeframe, 'bar');
-                updateCharts(sensorData, barChart, 'bar', timeframe);
-            };
-
-            const setupTimeframeSelectors = async (factory, lineChart, barChart) => {
-                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
-                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
-
-                if (lineTimeframeSelect) lineTimeframeSelect.addEventListener('change', () => updateLineChart(lineChart, factory.id));
-                if (barTimeframeSelect) barTimeframeSelect.addEventListener('change', () => updateBarChart(barChart, factory.id));
-
-                await updateLineChart(lineChart, factory.id);
-                await updateBarChart(barChart, factory.id);
-            };
-
-            const factories = @json($factories);
-            factories.forEach(factory => initializeFactoryCharts(factory));
+                const DoughChart = initChart(`siteEnergyDough-${factory.id}`, doughnutOption('Energy Distribution', energyDistribution))
+            });
         });
+
     </script>
 @endpush

@@ -753,7 +753,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
 
-        const siteChart = initChart('site-chart', lineChartOption([], [{
+        const siteChart = initChart('site-chart', lineOption([], [{
             name: 'Energy Usage (kWh)',
             data: [],
             type: 'line',
@@ -770,7 +770,7 @@
             const timestamp = data.map(dataPoint => dataPoint.timestamp);
             const energy = data.map(dataPoint => dataPoint.energy);
 
-            updateChart(siteChart, lineChartOption(timestamp, [{
+            updateChart(siteChart, lineOption(timestamp, [{
                 data: energy,
                 name: 'Energy Usage (kWh)',
                 type: 'line',

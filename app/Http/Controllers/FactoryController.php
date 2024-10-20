@@ -122,4 +122,8 @@ class FactoryController extends Controller
     {
         return app(FactoryService::class)->fetchFactoryData($request, $factory);
     }
+
+    public function fetchFactories(){
+        return app(FactoryService::class)->fetchFactories();
+    }
 }

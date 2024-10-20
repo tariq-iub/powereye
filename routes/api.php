@@ -61,3 +61,5 @@ Route::get('sensors/fetch/{type}/{id}', [SensorDataController::class, 'f']);
 Route::get('factoryData/{factory}', [FactoryController::class, 'fetchFactoryData']);
 
 Route::get('device/get-datetime', [DeviceManagementController::class, 'getDateTime']);
+
+Route::get('fetch-factories', [FactoryController::class, 'fetchFactories']);

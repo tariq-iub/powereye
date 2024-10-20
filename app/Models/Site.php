@@ -48,9 +48,19 @@ class Site extends Model
         return round($this->data()->sum(DB::raw('P1 + P2 + P3')), $precision);
     }
 
-    public function getTotalEnergy(int $precision = 4): float
+    public function getTotalEnergy(string $timeframe = 'all', int $precision = 4): float
     {
-        return round($this->data()->sum(DB::raw('E1 + E2 + E3')), $precision);
+        if (!in_array($timeframe, ['8h', '1w', '1m', 'all'])) $timeframe = 'all';
+
+        $tf = mapTimeframe($timeframe);
+
+        $query = $this->data();
+
+        if ($tf && $timeframe !== 'all') {
+            $query->where('timestamp', '>=', $tf);
+        }
+
+        return round($query->sum(DB::raw('E1 + E2 + E3')), $precision);
     }
 
     public function getLastTimestamp(bool $relative = true): string
@@ -67,7 +77,7 @@ class Site extends Model
     }
 
 
-    public function getLastEnergy(int $precision=4): float
+    public function getLastEnergy(int $precision = 4): float
     {
         $lastData = $this->data()->orderBy('timestamp', 'desc')->first();
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Factory;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -158,4 +159,33 @@ class FactoryService
             'factoryMetrics' => $factoryMetrics,
         ]);
     }
+
+    public function fetchFactories(): JsonResponse
+    {
+        $factories = getAuthFactories();
+
+        foreach ($factories as $factory) {
+            $factory->totalPower = 0;
+            $factory->totalEnergy = 0;
+
+            $energyDistribution = [];
+
+            foreach ($factory->sites as $site) {
+                $site->totalPower = $site->getTotalPower();
+                $site->totalEnergy = $site->getTotalEnergy();
+                $site->lastTimestamp = $site->getLastTimestamp();
+                $site->lastEnergy = $site->getLastEnergy();
+
+                $factory->totalPower += $site->totalPower;
+                $factory->totalEnergy += $site->totalEnergy;
+
+                $energyDistribution[] = ['name' => $site->title, 'value' => $site->totalEnergy];
+            }
+
+            $factory->energyDistribution = $energyDistribution;
+        }
+
+        return response()->json(['factories' => $factories]);
+    }
+
 }

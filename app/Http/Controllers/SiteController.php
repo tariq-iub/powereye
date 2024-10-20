@@ -66,10 +66,10 @@ class SiteController extends Controller
 
         $type = 'energy';
 
-        $site->energy = $this->fetchData($request, $site->id, $type, 'all', false);
-        $site->e8h = $this->fetchData($request, $site->id, $type, '8h', false);
-        $site->e1w = $this->fetchData($request, $site->id, $type, '1w', false);
-        $site->e1m = $this->fetchData($request, $site->id, $type, '1m', false);
+        $site->energy = $site->getTotalEnergy(precision: 2);
+        $site->e8h = $site->getTotalEnergy('8h', 2);
+        $site->e1w = $site->getTotalEnergy('1w', 2);
+        $site->e1m = $site->getTotalEnergy('1m', 2);
 
         return view( 'client.sites.show', compact('site'));
     }

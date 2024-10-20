@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Factory;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
@@ -22,6 +23,8 @@ class HomeController extends Controller
             return view('dashboard.admin');
         }
 
+        $userId = Auth::id();
+
         $factories = getAuthFactories();
 
         foreach ($factories as $factory) {
@@ -29,7 +32,7 @@ class HomeController extends Controller
         }
 
         $timeframeOptions = getTimeframeOption();
-        return view('dashboard.client', compact('factories', 'timeframeOptions'));
+        return view('dashboard.client', compact('factories', 'timeframeOptions', 'userId'));
     }
 
     protected function initializeFactoryData($factory): void
@@ -46,9 +49,11 @@ class HomeController extends Controller
     protected function calculateSiteData($site, $factory): void
     {
         $site->lastEnergy = $site->getLastEnergy();
-        $site->totalPower = $site->getTotalPower();
-        $site->totalEnergy = $site->getTotalEnergy();
+        $site->totalPower = $site->getTotalPower(2);
+        $site->totalEnergy = $site->getTotalEnergy(precision: 3);
         $factory->totalPower += $site->getTotalPower();
         $factory->totalEnergy += $site->getTotalEnergy();
+        $factory->totalPower = round($factory->totalPower, 2);
+        $factory->totalEnergy = round($factory->totalEnergy, 2);
     }
 }

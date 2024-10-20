@@ -363,7 +363,7 @@
                                 </li>
                             @endforeach
                         @else
-                            <li class="dropdown-item text-muted">No localities to show</li>
+                            <li class="dropdown-item text-muted">No localities available</li>
                         @endif
                     </ul>
                 </li>

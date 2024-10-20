@@ -49,8 +49,8 @@ class HomeController extends Controller
     protected function calculateSiteData($site, $factory): void
     {
         $site->lastEnergy = $site->getLastEnergy();
-        $site->totalPower = $site->getTotalPower(2);
-        $site->totalEnergy = $site->getTotalEnergy(precision: 3);
+        $site->totalPower = $site->getTotalPower();
+        $site->totalEnergy = $site->getTotalEnergy();
         $factory->totalPower += $site->getTotalPower();
         $factory->totalEnergy += $site->getTotalEnergy();
         $factory->totalPower = round($factory->totalPower, 2);

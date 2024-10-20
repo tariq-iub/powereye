@@ -7,8 +7,10 @@ const initChart = (chartId, option) => {
     return chart;
 };
 
-const updateChart = (chart, option) => {
-    chart.setOption(option, true);
+const updateChart = (chartId, option) => {
+    const dom = document.getElementById(chartId);
+    const chart = echarts.getInstanceByDom(dom);
+    if (chart) chart.setOption(option, true);
 };
 
 const setTitle = (option, title) => {
@@ -20,8 +22,8 @@ const setTitle = (option, title) => {
 const lineOption = (
     xData,
     series,
-    min = 0,
-    max = 100,
+    // min = 0,
+    // max = 1000,
     title = null,
     gridOptions = {},
     showTooltip = true,
@@ -50,8 +52,8 @@ const lineOption = (
             type: 'line',
             smooth: true,
             ...s,
-            min,
-            max,
+            // min,
+            // max,
             label: {
                 show: showDataLabels,
                 position: "top",
@@ -169,7 +171,7 @@ const doughnutOption = (name, seriesData, title = null) => {
     return option;
 };
 
-const gaugeOption = (lightColor, darkColor, value, unit, min = 0, max = 100, splitNumber = 10) => {
+const gaugeOption = (name, value, unit, min = 0, max = 25) => {
     return {
         tooltip: {
             formatter: function (params) {
@@ -178,14 +180,14 @@ const gaugeOption = (lightColor, darkColor, value, unit, min = 0, max = 100, spl
         },
         series: [
             {
-                name: "Energy Consumption",
+                name,
                 type: "gauge",
                 radius: "90%",
                 startAngle: 180,
                 endAngle: 0,
                 splitNumber: 4,
-                min: 0,
-                max: 1,
+                min,
+                max,
                 axisLine: {
                     lineStyle: {
                         width: 15,

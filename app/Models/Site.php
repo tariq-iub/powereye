@@ -48,7 +48,7 @@ class Site extends Model
         return round($this->data()->sum(DB::raw('P1 + P2 + P3')), $precision);
     }
 
-    public function getTotalEnergy(string $timeframe = 'all', int $precision = 4): float
+    public function getTotalEnergy(string $timeframe = 'all', int $precision = 2): float
     {
         if (!in_array($timeframe, ['8h', '1w', '1m', 'all'])) $timeframe = 'all';
 

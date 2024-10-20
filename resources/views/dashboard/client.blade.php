@@ -15,6 +15,11 @@
             height: 125px;
             position: relative;
         }
+
+        .vr {
+            margin-left: 15px;
+            margin-right: 15px;
+        }
     </style>
 @endpush
 
@@ -52,7 +57,8 @@
                     <div
                         class="d-block d-md-none col-12 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
                                                 <span class="fw-bold">
-                                                    Total Power: <span id="factoryPowerSM-{{$factory->id}}">{{ $factory->totalPower }}</span> kW
+                                                    Total Power: <span
+                                                        id="factoryPowerSM-{{$factory->id}}">{{ $factory->totalPower }}</span> kW
                                                 </span>
                     </div>
                     <div
@@ -136,11 +142,11 @@
                 <div class="col-12 col-md-4">
                     @if($hasData)
                         <div class="row pb-6 pt-2">
-                            <div class="col-12 row pb-5">
-                                <div class="col">
+                            <div class="col-12 row pb-5 pe-0 align-items-center justify-content-between">
+                                <div class="col-7">
                                     <h4>Power Usage</h4>
                                 </div>
-                                <div class="col">
+                                <div class="col-5 me-0 pe-0">
                                     <select class="form-select form-select-sm"
                                             id="factoryLineTimeframe-{{ $factory->id }}">
                                         @foreach($timeframeOptions as $label => $value)
@@ -153,18 +159,18 @@
                         </div>
 
                         <div class="row pb-6">
-                            <div class="col-12 row pb-5">
+                            <div class="col-12 row pb-5 ">
                                 <h4>Energy Distribution among sites</h4>
                             </div>
                             <div id="factoryEnergyDough-{{ $factory->id }}" class="chart factory-chart"></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-12 row pb-5">
-                                <div class="col">
+                            <div class="col-12 row pe-0 pb-5">
+                                <div class="col-7">
                                     <h4>Energy Usage</h4>
                                 </div>
-                                <div class="col">
+                                <div class="col-5 me-0 pe-0">
                                     <select class="form-select form-select-sm"
                                             id="factoryLineTimeframe-{{ $factory->id }}">
                                         @foreach($timeframeOptions as $label => $value)
@@ -208,7 +214,7 @@
                 factory.sites.forEach(site => {
                     initChart(
                         `siteGauge-${site.id}`,
-                        gaugeOption('', '', site.lastEnergy, 'kWh')
+                        gaugeOption('Energy', site.lastEnergy, 'kWh')
                     );
 
                     if (site.totalEnergy > 0) {
@@ -273,11 +279,12 @@
 
                 const siteCard = document.getElementById(`site-${site.id}`);
                 const noSiteCard = document.getElementById(`no-site-${site.id}`)
-                const dom = document.getElementById(`siteGauge-${site.id}`)
+                const chartId = `siteGauge-${site.id}`;
+                const chart = document.getElementById(chartId)
 
                 if (siteCard) siteCard.classList.remove('d-none');
                 if (noSiteCard) noSiteCard.classList.add('d-none');
-                if (dom.parentElement) dom.classList.remove('d-none');
+                if (chart) chart.parentElement.classList.remove('d-none');
 
                 const powerSpan = document.getElementById(`sitePower-${id}`);
                 const energySpan = document.getElementById(`siteEnergy-${id}`);
@@ -288,16 +295,14 @@
                 }
 
                 if (energySpan && energySpan.textContent.trim() !== totalEnergy.toString().trim()) {
-                    energySpan.textContent = parseFloat(totalEnergy).toFixed(3);
+                    energySpan.textContent = parseFloat(totalEnergy).toFixed(2);
                 }
 
                 if (timestampSpan && timestampSpan.textContent.trim() !== lastTimestamp.toString().trim()) {
                     timestampSpan.textContent = lastTimestamp;
                 }
 
-                const chart = echarts.getInstanceByDom(dom);
-
-                chart && updateChart(chart, gaugeOption('', '', lastEnergy, 'kWh'));
+                chart && updateChart(chartId, gaugeOption('Energy', parseFloat(lastEnergy).toFixed(4), 'kWh'));
 
             }
         }

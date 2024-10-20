@@ -77,7 +77,7 @@
                     $hasData = $factory->totalPower > 0;
                 @endphp
 
-                <div class="col-12 col-md-8 pb-3 pb-md-0 row justify-content-center justify-content-md-start">
+                <div class="col-12 col-md-8 pe-0 pb-3 pb-md-0 row justify-content-center justify-content-md-start">
                     @forelse($factory->sites as $site)
                         @php
                             $hasSiteData = $site->totalPower > 0;

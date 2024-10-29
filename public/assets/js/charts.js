@@ -15,7 +15,7 @@ const updateChart = (chartId, option) => {
 
 const setTitle = (option, title) => {
     if (title) {
-        option.title = {text: title};
+        option.title = { text: title };
     }
 };
 
@@ -33,11 +33,11 @@ const lineOption = (
         xAxis: {
             type: "category",
             data: xData,
-            axisLabel: {formatter: (value) => value},
+            axisLabel: { formatter: (value) => value },
         },
         yAxis: {
             type: "value",
-            axisLabel: {formatter: (value) => value},
+            axisLabel: { formatter: (value) => value },
         },
         legend: {
             show: true,
@@ -49,7 +49,7 @@ const lineOption = (
             containLabel: true,
         },
         series: series.map((s) => ({
-            type: 'line',
+            type: "line",
             smooth: true,
             ...s,
             // min,
@@ -61,11 +61,11 @@ const lineOption = (
         })),
         tooltip: showTooltip
             ? {
-                trigger: "axis",
-                axisPointer: {
-                    type: "cross",
-                },
-            }
+                  trigger: "axis",
+                  axisPointer: {
+                      type: "cross",
+                  },
+              }
             : null,
     };
 
@@ -85,11 +85,11 @@ const barOption = (
         xAxis: {
             type: "category",
             data: xData,
-            axisLabel: {formatter: (value) => value},
+            axisLabel: { formatter: (value) => value },
         },
         yAxis: {
             type: "value",
-            axisLabel: {formatter: (value) => value},
+            axisLabel: { formatter: (value) => value },
         },
         legend: {
             show: true,
@@ -110,11 +110,11 @@ const barOption = (
         })),
         tooltip: showTooltip
             ? {
-                trigger: "axis",
-                axisPointer: {
-                    type: "shadow",
-                },
-            }
+                  trigger: "axis",
+                  axisPointer: {
+                      type: "shadow",
+                  },
+              }
             : null,
     };
 
@@ -166,7 +166,7 @@ const doughnutOption = (name, seriesData, title = null) => {
     };
 
     if (title) {
-        option.title = {text: title};
+        option.title = { text: title };
     }
     return option;
 };
@@ -243,7 +243,7 @@ const gaugeOption = (name, value, unit, min = 0, max = 25) => {
                     color: "#333",
                     offsetCenter: [0, "85%"],
                 },
-                data: [{value, name}],
+                data: [{ value, name }],
                 animationDuration: 1000,
                 animationEasing: "bounceOut",
             },

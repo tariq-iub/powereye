@@ -164,7 +164,7 @@
                                 <h4>Energy Usage</h4>
                             </div>
                             <div class="col-5 me-0 pe-0">
-                                <select class="form-select form-select-sm" id="factoryLineTimeframe-{{ $factory->id }}">
+                                <select class="form-select form-select-sm" id="factoryBarTimeframe-{{ $factory->id }}">
                                     @foreach($timeframeOptions as $label => $value)
                                         <option value="{{ $value }}">{{ $label }}</option>
                                     @endforeach
@@ -212,9 +212,35 @@
                     if (site.totalEnergy > 0) {
                         energyDistribution.push({ name: site.title, value: site.totalEnergy });
                     }
-
-                    initFactoryCharts(factory, energyDistribution);
                 });
+
+                initFactoryCharts(factory, energyDistribution);
+
+                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
+                if (lineTimeframeSelect) {
+                    lineTimeframeSelect.addEventListener('change', () => {
+                        const timeframe = lineTimeframeSelect.value;
+                        fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
+                            if (!data) return;
+                            const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
+                            const powerData = data.map(dataPoint => dataPoint.power);
+                            updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
+                        });
+                    });
+                }
+
+                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
+                if (barTimeframeSelect) {
+                    barTimeframeSelect.addEventListener('change', () => {
+                        const timeframe = barTimeframeSelect.value;
+                        fetchData(`sensor-data/factory/${factory.id}/energy?startDate=${timeframe}`).then(data => {
+                            if (!data) return;
+                            const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
+                            const energyData = data.map(dataPoint => dataPoint.energy);
+                            updateChart(`factoryEnergyBar-${factory.id}`, barOption(timestamps, [{ name: 'Energy (kWh)', data: energyData }]));
+                        });
+                    });
+                }
 
             });
 
@@ -237,6 +263,7 @@
                             });
 
                             if (factory.totalPower > 0) {
+                                updateFactoryCharts(factory);
                             }
 
                         });
@@ -244,8 +271,31 @@
                     .catch(error => {
                         console.error("Error fetching data:", error);
                     });
-            }, 10000);
+            }, 30000);
         });
+
+        function updateFactoryCharts(factory) {
+            if (factory.totalPower > 0) {
+                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
+                let timeframe = lineTimeframeSelect.value;
+                fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
+                    if (!data) return;
+                    const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
+                    const powerData = data.map(dataPoint => dataPoint.power);
+                    updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
+                });
+
+                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
+                timeframe = barTimeframeSelect.value;
+
+                fetchData(`sensor-data/factory/${factory.id}/energy?startDate=${timeframe}`).then(data => {
+                    if (!data) return;
+                    const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
+                    const energyData = data.map(dataPoint => dataPoint.energy);
+                    updateChart(`factoryEnergyBar-${factory.id}`, barOption(timestamps, [{ name: 'Energy (kWh)', data: energyData }]));
+                });
+            }
+        }
 
         function updateFactoryMetrics(factory) {
             const { id, totalPower, totalEnergy } = factory;

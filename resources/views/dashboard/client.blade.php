@@ -305,7 +305,7 @@
                 initChart(`factoryEnergyDough-${factory.id}`, doughnutOption('Energy Distribution', doughnutData));
                 initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{ name: 'Energy (kWh)', data: [] }]));
 
-                const timeframe = '1m';
+                const timeframe = '1w';
 
                 fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
                     if (!data) return;

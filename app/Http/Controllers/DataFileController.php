@@ -149,11 +149,11 @@ class DataFileController extends Controller
 //            return redirect(route('files.index'))->with('success', 'Data updated successfully.');
 //        }
 
-            $dataFile->site_id = $request->input('site_id');
-            $dataFile->device_id = $device->id;
-            $dataFile->save();
+        $dataFile->site_id = $request->input('site_id');
+        $dataFile->device_id = $device->id;
+        $dataFile->save();
 
-            return redirect(route('files.index'))->with('success', 'Data updated successfully.');
+        return redirect(route('files.index'))->with('success', 'Data updated successfully.');
 
     }
 
@@ -259,12 +259,34 @@ class DataFileController extends Controller
     {
         $filePath = $dataFile->file_path;
 
+        // Check if the file exists
         if (Storage::disk('public')->exists($filePath)) {
             $csv = Reader::createFromPath(Storage::disk('public')->path($filePath), 'r');
             $csv->setHeaderOffset(0);
             $rows = $csv->getRecords();
 
+            // Fetch the site_id from the DataFile record
+            $siteId = $dataFile->site_id;
+
+            // Get the latest SensorData record associated with the site but excluding the new data_file_id
+            $latestRecord = SensorData::whereHas('data_file', function ($query) use ($siteId, $dataFile) {
+                $query->where('site_id', $siteId)->where('id', '<', $dataFile->id);
+            })->orderBy('timestamp', 'desc')->first();
+
+            // Initialize cumulative values from the latest record or set to zero if none exists
+            $cumulativeTotalPower = $latestRecord ? $latestRecord->total_power : 0;
+            $cumulativeTotalEnergy = $latestRecord ? $latestRecord->total_energy : 0;
+
             foreach ($rows as $row) {
+                // Calculate the sum of powers and energies from the CSV row
+                $power_sum = ($row['P1'] ?? 0) + ($row['P2'] ?? 0) + ($row['P3'] ?? 0);
+                $energy_sum = ($row['E1'] ?? 0) + ($row['E2'] ?? 0) + ($row['E3'] ?? 0);
+
+                // Update cumulative totals
+                $cumulativeTotalPower += $power_sum;
+                $cumulativeTotalEnergy += $energy_sum;
+
+                // Create the new SensorData record
                 SensorData::create([
                     'data_file_id' => $dataFile->id,
                     'timestamp' => $row['timestamp'],
@@ -283,6 +305,8 @@ class DataFileController extends Controller
                     'P3' => $row['P3'],
                     'Q3' => $row['Q3'],
                     'E3' => $row['E3'],
+                    'total_power' => $cumulativeTotalPower,
+                    'total_energy' => $cumulativeTotalEnergy,
                     'temperature' => $row['temperature'],
                     'misc1' => $row['misc1'],
                     'misc2' => $row['misc2'],

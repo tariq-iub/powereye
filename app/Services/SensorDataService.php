@@ -9,17 +9,41 @@ use Illuminate\Http\Request;
 
 class SensorDataService
 {
-    public function fetchSensorData(Request $request, int $entityId, string $entityType = 'factory', bool $json = true): array|JsonResponse
+    public function fetchSensorData(Request $request, int $entityId, string $entityType = 'factory', bool $json = true, int $windowSize = 5): array|JsonResponse
     {
         $sensorData = [];
-
         $sensors = $this->getSensors($request, $entityId, $entityType);
 
+        $powerValues = [];
+        $energyValues = [];
+        $rollingPowerSum = 0;
+        $rollingEnergySum = 0;
+
         foreach ($sensors as $sensor) {
+            $power = round($sensor->P1 + $sensor->P2 + $sensor->P3, 2);
+            $energy = round($sensor->E1 + $sensor->E2 + $sensor->E3, 8);
+
+            $powerValues[] = $power;
+            $energyValues[] = $energy;
+            $rollingPowerSum += $power;
+            $rollingEnergySum += $energy;
+
+            if (count($powerValues) > $windowSize) {
+                $rollingPowerSum -= array_shift($powerValues);
+            }
+            if (count($energyValues) > $windowSize) {
+                $rollingEnergySum -= array_shift($energyValues);
+            }
+
+            $rollingAveragePower = round($rollingPowerSum / count($powerValues), 2);
+            $rollingAverageEnergy = round($rollingEnergySum / count($energyValues), 8);
+
             $sensorData[] = [
                 'timestamp' => $sensor->timestamp,
-                'power' => round($sensor->P1 + $sensor->P2 + $sensor->P3, 2),
-                'energy' => round($sensor->E1 + $sensor->E2 + $sensor->E3, 8),
+                'power' => $power,
+                'rolling_average_power' => $rollingAveragePower,
+                'energy' => $energy,
+                'rolling_average_energy' => $rollingAverageEnergy,
                 'factory_id' => $sensor->data_file->site->factory->id ?? null,
                 'site_id' => $sensor->data_file->site->id ?? null,
             ];

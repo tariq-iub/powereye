@@ -768,9 +768,9 @@
             const data = await fetchData(url);
 
             const timestamp = data.map(dataPoint => dataPoint.timestamp);
-            const energy = data.map(dataPoint => dataPoint.energy);
+            const energy = data.map(dataPoint => dataPoint.rolling_average_energy);
 
-            updateChart(siteChart, lineOption(timestamp, [{
+            updateChart('site-chart', lineOption(timestamp, [{
                 data: energy,
                 name: 'Energy Usage (kWh)',
                 type: 'line',

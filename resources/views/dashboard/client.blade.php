@@ -223,7 +223,7 @@
                         fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
                             if (!data) return;
                             const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                            const powerData = data.map(dataPoint => dataPoint.power);
+                            const powerData = data.map(dataPoint => dataPoint.rolling_average_power);
                             updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
                         });
                     });
@@ -271,7 +271,7 @@
                     .catch(error => {
                         console.error("Error fetching data:", error);
                     });
-            }, 30000);
+            }, 300000);
         });
 
         function updateFactoryCharts(factory) {
@@ -281,7 +281,7 @@
                 fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
                     if (!data) return;
                     const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const powerData = data.map(dataPoint => dataPoint.power);
+                    const powerData = data.map(dataPoint => dataPoint.rolling_average_power);
                     updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
                 });
 
@@ -360,7 +360,7 @@
                 fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
                     if (!data) return;
                     const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const powerData = data.map(dataPoint => dataPoint.power);
+                    const powerData = data.map(dataPoint => dataPoint.rolling_average_power);
                     updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
                 });
 

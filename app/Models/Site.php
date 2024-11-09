@@ -47,4 +47,9 @@ class Site extends Model
     {
         return $this->hasMany(SiteSummary::class);
     }
+
+    public function sensorDataWindowed()
+    {
+        return $this->hasMany(SensorDataWindowedSite::class);
+    }
 }

@@ -31,4 +31,9 @@ class Factory extends Model
     {
         return $this->hasMany(FactorySummary::class);
     }
+
+    public function sensorDataWindowed()
+    {
+        return $this->hasMany(SensorDataWindowedFactory::class);
+    }
 }

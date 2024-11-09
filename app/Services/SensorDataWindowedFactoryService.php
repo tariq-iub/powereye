@@ -48,17 +48,20 @@ class SensorDataWindowedFactoryService
         $groupBy = $this->getGroupByClause($timeframe);
 
         // Calculate aggregation based on the grouping
-        return SensorData::select(
-            DB::raw("AVG(P1) as P1"),
-            DB::raw("AVG(P2) as P2"),
-            DB::raw("AVG(P3) as P3"),
-            DB::raw("AVG(E1) as E1"),
-            DB::raw("AVG(E2) as E2"),
-            DB::raw("AVG(E3) as E3"),
-            DB::raw("MIN(timestamp) as window_start"),
-            DB::raw("MAX(timestamp) as window_end")
-        )
-            ->where('site_id', $siteId)
+        return SensorData::whereHas('data_file', function ($query) use ($siteId) {
+            // Filter the data files by site_id (through the data_file relationship)
+            $query->where('site_id', $siteId);
+        })
+            ->select(
+                DB::raw("AVG(P1) as P1"),
+                DB::raw("AVG(P2) as P2"),
+                DB::raw("AVG(P3) as P3"),
+                DB::raw("AVG(E1) as E1"),
+                DB::raw("AVG(E2) as E2"),
+                DB::raw("AVG(E3) as E3"),
+                DB::raw("MIN(timestamp) as window_start"),
+                DB::raw("MAX(timestamp) as window_end")
+            )
             ->groupBy(DB::raw($groupBy))
             ->get();
     }

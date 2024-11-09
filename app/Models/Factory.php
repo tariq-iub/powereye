@@ -26,4 +26,9 @@ class Factory extends Model
             ->withPivot('access_level') // You might want to access the access_level in some cases
             ->withTimestamps();
     }
+
+    public function summaries()
+    {
+        return $this->hasMany(FactorySummary::class);
+    }
 }

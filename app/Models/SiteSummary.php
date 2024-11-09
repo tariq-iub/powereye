@@ -21,4 +21,9 @@ class SiteSummary extends Model
         'start_time',
         'end_time',
     ];
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class);
+    }
 }

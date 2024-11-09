@@ -21,4 +21,9 @@ class FactorySummary extends Model
         'start_time',
         'end_time',
     ];
+
+    public function factory()
+    {
+        return $this->belongsTo(Factory::class);
+    }
 }

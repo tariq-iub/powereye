@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class SensorDataWindowedSiteService
 {
-    public function aggregateDataForSites()
+    public function aggregateSensorDataForSites()
     {
         // Define the timeframes you want to aggregate data for
         $timeframes = ['hour', 'day', 'week', 'month'];

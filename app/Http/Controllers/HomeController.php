@@ -26,34 +26,19 @@ class HomeController extends Controller
         $userId = Auth::id();
 
         $factories = getAuthFactories();
+        $factorySummaries = $factories->mapWithKeys(function ($factory) {
+            return $factory->summary()->toArray();
+        });
 
-        foreach ($factories as $factory) {
-            $this->initializeFactoryData($factory);
-        }
+        $siteSummaries = $factories->mapWithKeys(function ($factory) {
+            return [
+                $factory->id => $factory->sites->map(function ($site) {
+                    return $site->summary();
+                })
+            ];
+        });
 
         $timeframeOptions = getTimeframeOption();
-        return view('dashboard.client', compact('factories', 'timeframeOptions', 'userId'));
-    }
-
-    protected function initializeFactoryData($factory): void
-    {
-        $factory->totalPower = 0;
-        $factory->totalEnergy = 0;
-        $factory->energyDistribution = [];
-
-        foreach ($factory->sites as $site) {
-            $this->calculateSiteData($site, $factory);
-        }
-    }
-
-    protected function calculateSiteData($site, $factory): void
-    {
-        $site->lastEnergy = $site->getLastEnergy();
-        $site->totalPower = $site->getTotalPower();
-        $site->totalEnergy = $site->getTotalEnergy();
-        $factory->totalPower += $site->getTotalPower();
-        $factory->totalEnergy += $site->getTotalEnergy();
-        $factory->totalPower = round($factory->totalPower, 2);
-        $factory->totalEnergy = round($factory->totalEnergy, 2);
+        return view('dashboard.client', compact('factories', 'timeframeOptions', 'userId', 'siteSummaries', 'factorySummaries'));
     }
 }

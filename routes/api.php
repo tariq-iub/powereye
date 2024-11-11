@@ -1,14 +1,15 @@
 <?php
 
 use App\Http\Controllers\DataFileController;
-use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceManagementController;
 use App\Http\Controllers\FactoryController;
+use App\Http\Controllers\FactorySummaryController;
 use App\Http\Controllers\FactoryUserController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SensorDataController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\SiteSummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BinFileController;
@@ -63,3 +64,6 @@ Route::get('factoryData/{factory}', [FactoryController::class, 'fetchFactoryData
 Route::get('device/get-datetime', [DeviceManagementController::class, 'getDateTime']);
 
 Route::get('fetch-factories', [FactoryController::class, 'fetchFactories']);
+
+Route::get('summary/factory/latest/{id}', [FactorySummaryController::class, 'getLatestSummary']);
+Route::get('summary/site/latest/{id}', [SiteSummaryController::class, 'getLatestSummary']);

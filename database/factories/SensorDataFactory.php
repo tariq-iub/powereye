@@ -38,8 +38,8 @@ class SensorDataFactory extends Factory
         $e3 = $p3 / 1000 * 0.00277778;
 
         return [
-            'data_file_id' => 5,
-            'timestamp'=> now(),
+            'data_file_id' => rand(1, 100),
+            'timestamp' => now(),
             'V1' => $v1,
             'I1' => $i1,
             'P1' => $p1,

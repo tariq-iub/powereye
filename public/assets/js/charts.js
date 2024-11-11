@@ -122,7 +122,13 @@ const barOption = (
     return option;
 };
 
-const doughnutOption = (name, seriesData, title = null) => {
+const doughnutOption = (name, seriesData, n, title = null) => {
+    const sameShade = seriesData.length > 6;
+    const baseHue = 200;
+    const colors = generateChartColors(n, { sameShade, baseHue });
+
+    seriesData.sort((a, b) => b.value - a.value);
+
     const option = {
         tooltip: {
             trigger: "item",
@@ -161,6 +167,7 @@ const doughnutOption = (name, seriesData, title = null) => {
                     show: false,
                 },
                 data: seriesData,
+                color: colors,
             },
         ],
     };
@@ -171,11 +178,11 @@ const doughnutOption = (name, seriesData, title = null) => {
     return option;
 };
 
-const gaugeOption = (name, value, unit, min = 0, max = 25) => {
+const gaugeOption = (seriesName, name, value, unit, min = 0, max = 25) => {
     return {
         tooltip: {
             formatter: function (params) {
-                return `<strong>${params.seriesName}</strong><br/>${name}: ${params.value} kWh`;
+                return `<strong>${seriesName}</strong><br/>${name}: ${params.value} ${unit}`;
             },
         },
         series: [
@@ -225,9 +232,9 @@ const gaugeOption = (name, value, unit, min = 0, max = 25) => {
                 axisLabel: {
                     color: "#333",
                     fontSize: 10,
-                    distance: -30,
+                    distance: -50,
                     formatter: function (value) {
-                        return Math.round(value);
+                        return `${Math.round(value)} ${unit}`;
                     },
                 },
                 title: {
@@ -239,7 +246,7 @@ const gaugeOption = (name, value, unit, min = 0, max = 25) => {
                 detail: {
                     fontSize: 14,
                     fontWeight: "bold",
-                    formatter: "{value} kWh",
+                    formatter: `{value} ${unit}`,
                     color: "#333",
                     offsetCenter: [0, "85%"],
                 },

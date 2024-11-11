@@ -34,7 +34,8 @@ class FactorySummaryService
                     foreach ($factory->sites as $site) {
                         // Fetch the latest sensor data entry for each site
                         $latestSensorData = $site->data()->latest('timestamp')->first();
-                        if (!$latestSensorData) continue;
+                        if (!$latestSensorData)
+                            continue;
 
                         $latestTimestamp = $latestTimestamp
                             ? max($latestTimestamp, $latestSensorData->timestamp)
@@ -46,7 +47,8 @@ class FactorySummaryService
                     }
 
                     // Skip if no latest data was found for any site
-                    if (!$latestTimestamp) continue;
+                    if (!$latestTimestamp)
+                        continue;
 
                     // Create or update the "latest" summary record for the factory
                     FactorySummary::updateOrCreate(
@@ -82,7 +84,8 @@ class FactorySummaryService
                             ->whereBetween('timestamp', [$startTime, $endTime])
                             ->get();
 
-                        if ($sensorData->isEmpty()) continue;
+                        if ($sensorData->isEmpty())
+                            continue;
 
                         // Calculate total power for all entries by summing P1, P2, and P3, then add to factory totals
                         $siteTotalEntries = $sensorData->count();
@@ -123,7 +126,8 @@ class FactorySummaryService
                         $maxEnergy = $maxEnergy === null ? $siteMaxEnergy : max($maxEnergy, $siteMaxEnergy);
                     }
 
-                    if ($totalEntries == 0) continue; // Skip if no data was found
+                    if ($totalEntries == 0)
+                        continue; // Skip if no data was found
 
                     // Calculate average power across all sites for the factory
                     $avgPower = $totalPower / $totalEntries;
@@ -162,5 +166,13 @@ class FactorySummaryService
                 }
             }
         }
+    }
+
+    public function getLatestSummary($factoryId)
+    {
+        return FactorySummary::where('factory_id', $factoryId)
+            ->where('time_frame', 'latest')
+            ->orderBy('updated_at', 'desc')
+            ->first();
     }
 }

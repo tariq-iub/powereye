@@ -29,7 +29,8 @@ class SiteSummaryService
                 if ($timeFrame == "latest") {
                     // Fetch the latest sensor data entry
                     $latestSensorData = $site->data()->latest('timestamp')->first();
-                    if (!$latestSensorData) continue;
+                    if (!$latestSensorData)
+                        continue;
 
                     $latestTimestamp = $latestSensorData->timestamp;
                     $avgPower = $latestSensorData->P1 + $latestSensorData->P2 + $latestSensorData->P3;
@@ -60,13 +61,14 @@ class SiteSummaryService
                         ->whereBetween('timestamp', [$startTime, $endTime])
                         ->get();
 
-                    if ($sensorData->isEmpty()) continue;
+                    if ($sensorData->isEmpty())
+                        continue;
 
                     // Calculate average power for all entries by summing P1, P2, and P3, then averaging
                     $totalPowerEntries = $sensorData->count();
                     $avgPower = $sensorData->sum(function ($data) {
-                            return $data->P1 + $data->P2 + $data->P3;
-                        }) / $totalPowerEntries;
+                        return $data->P1 + $data->P2 + $data->P3;
+                    }) / $totalPowerEntries;
 
                     // Calculate min and max power values as the sum of P1, P2, and P3
                     $minPower = $sensorData->min(function ($data) {
@@ -123,5 +125,13 @@ class SiteSummaryService
                 }
             }
         }
+    }
+
+    public function getLatestSummary($siteId)
+    {
+        return SiteSummary::where('site_id', $siteId)
+            ->where('time_frame', 'latest')
+            ->orderBy('updated_at', 'desc')
+            ->first();
     }
 }

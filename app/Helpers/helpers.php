@@ -72,19 +72,19 @@ if (!function_exists('validateAndPrepareData')) {
 }
 
 if (!function_exists('getAuthFactories')) {
-    function getAuthFactories(): Collection
+    function getAuthFactories($relation = 'sites.summaries'): Collection
     {
         return auth()->user()->factories()->with('sites')->get();
     }
 }
 
 if (!function_exists('getAuthSites')) {
-    function getAuthSites()
+    function getAuthSites($relation = 'summaries')
     {
         $factories = getAuthFactories();
 
-        return $factories->flatMap(function ($factory) {
-            return $factory->sites;
+        return $factories->flatMap(function ($factory) use ($relation) {
+            return $factory->sites->with($relation);
         })->values();
     }
 }
@@ -124,10 +124,21 @@ if (!function_exists('convertToLastNDays')) {
     }
 }
 
-if (!function_exists('findAuthSite')){
+if (!function_exists('findAuthSite')) {
     function findAuthSite(int $siteId): Site
     {
         $sites = getAuthSites();
         return $sites->firstWhere('id', $siteId);
+    }
+}
+
+if (!function_exists('getRelativeTime')) {
+    function getRelativeTime(Carbon $date = null): string
+    {
+        if ($date === null) {
+            return 'N/A';
+        }
+
+        return $date->diffForHumans();
     }
 }

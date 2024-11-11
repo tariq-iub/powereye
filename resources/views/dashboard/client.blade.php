@@ -7,7 +7,7 @@
         }
 
         .factory-chart {
-            height: 200px;
+            height: 225px;
         }
 
         .site-chart {
@@ -25,6 +25,11 @@
 
 @section('content')
 @forelse($factories as $factory)
+    @php
+        $factorySummary = $factory->summary();
+        $hasFactoryData = $factorySummary?->power > 0;
+    @endphp
+
     <div class="mx-n4 px-4 py-3 mx-lg-n6 bg-body-emphasis border-top">
         <div class="row align-items-center">
             <div class="col-2 col-md-1 d-flex align-items-center justify-content-center p-2">
@@ -40,13 +45,13 @@
                     <div
                         class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
                         <span class="fw-bold">
-                            Total Power: <span id="factoryPower-{{$factory->id}}">{{ $factory->totalPower }}</span> kW
+                            Total Power: <span id="factoryPower-{{$factory->id}}">{{ $factorySummary->power }}</span> kW
                         </span>
                     </div>
                     <div
                         class="me-3 d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 ms-md-2 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-success d-flex align-items-center justify-content-center">
                         <span class="fw-bold">
-                            Total Energy: <span id="factoryEnergy-{{$factory->id}}">{{ $factory->totalEnergy }}</span> kWh
+                            Total Energy: <span id="factoryEnergy-{{$factory->id}}">{{ $factorySummary->energy }}</span> kWh
                         </span>
                     </div>
                 </div>
@@ -69,22 +74,19 @@
         <hr>
 
         <div class="row">
-            @php
-                $hasData = $factory->totalPower > 0;
-            @endphp
-
             <div class="col-12 col-md-8 pe-0 pb-3 pb-md-0 row justify-content-center justify-content-md-start">
                 @forelse($factory->sites as $site)
                         @php
-                            $hasSiteData = $site->totalPower > 0;
+                            $siteSummary = $site->summary();
+                            $hasSiteData = $siteSummary?->power > 0;
                         @endphp
 
                         <div class="site-card-{{ $site->id }} col-12 col-md-6 pb-3">
                             <div class="card shadow border rounded pb-4">
                                 <div class="pb-2 card-header border-0 d-flex justify-content-between align-items-start">
                                     <h4 class="mb-0">
-                                        <a {{ $hasData ? 'href=' . route('sites.show', $site->id) : '' }}
-                                            class="{{ $hasData ? '' : 'disabled' }} text-decoration-none">
+                                        <a {{ $hasSiteData ? 'href=' . route('sites.show', $site->id) : '' }}
+                                            class="{{ $hasSiteData ? '' : 'disabled' }} text-decoration-none">
                                             {{ $site->title }}
                                         </a>
                                     </h4>
@@ -100,18 +102,25 @@
                                         id="site-{{$site->id}}">
                                         <div>
                                             <h6 class="mb-2 text-secondary">
-                                                Power: <strong class="text-dark">
-                                                    <span id="sitePower-{{$site->id}}">{{ $site->totalPower }}</span>
-                                                    kW</strong>
+                                                Power:
+                                                <strong class="text-dark">
+                                                    <span id="sitePower-{{$site->id}}">{{ $siteSummary->power ?? 0 }}</span>
+                                                    kW
+                                                </strong>
                                             </h6>
                                             <h6 class="mb-2 text-secondary">
-                                                Energy: <strong class="text-dark">
-                                                    <span id="siteEnergy-{{$site->id}}">{{ $site->totalEnergy }}</span>
-                                                    kWh</strong>
+                                                Energy:
+                                                <strong class="text-dark">
+                                                    <span id="siteEnergy-{{$site->id}}">{{ $siteSummary->energy ?? 0 }}</span>
+                                                    kWh
+                                                </strong>
                                             </h6>
-                                            <h6 class="pt-3 text-secondary">
-                                                Last Updated at:
-                                                <strong id="siteTimestamp-{{$site->id}}">{{ $site->getLastTimestamp() }}</strong>
+                                            <h6 class="mb-2 text-secondary">
+                                                Updated at:
+                                                <strong class="text-dark">
+                                                    <span
+                                                        id="siteTimestamp-{{$site->id}}">{{ getRelativeTime($siteSummary?->updated_at) ?? 'N/A' }}</span>
+                                                </strong>
                                             </h6>
                                         </div>
                                     </div>
@@ -134,7 +143,7 @@
             <hr class="d-block d-md-none w-75 mx-auto">
 
             <div class="col-12 col-md-4">
-                @if($hasData)
+                @if($hasFactoryData)
                     <div class="row pb-6 pt-2">
                         <div class="col-12 row pb-5 pe-0 align-items-center justify-content-between">
                             <div class="col-7">
@@ -155,7 +164,7 @@
                         <div class="col-12 row pb-5 ">
                             <h4>Energy Distribution among sites</h4>
                         </div>
-                        <div id="factoryEnergyDough-{{ $factory->id }}" class="chart factory-chart"></div>
+                        <div id="factoryPowerDough-{{ $factory->id }}" class="chart factory-chart"></div>
                     </div>
 
                     <div class="row">
@@ -199,22 +208,25 @@
         document.addEventListener('DOMContentLoaded', () => {
             const factories = @json($factories);
 
+            const siteSummaries = @json($siteSummaries);
 
             factories.forEach(factory => {
-                let energyDistribution = [];
+                let powerDistribution = [];
 
-                factory.sites.forEach(site => {
+                const sitesSummary = siteSummaries[factory.id];
+
+                factory.sites.forEach((site, idx) => {
+
+                    const siteSummary = sitesSummary[idx];
+
                     initChart(
                         `siteGauge-${site.id}`,
-                        gaugeOption('Energy', site.lastEnergy, 'kWh')
+                        gaugeOption('Power', site.title, siteSummary.power, 'kW', 0, 1000)
                     );
-
-                    if (site.totalEnergy > 0) {
-                        energyDistribution.push({ name: site.title, value: site.totalEnergy });
-                    }
+                    powerDistribution.push({ name: site.title, value: siteSummary.power });
                 });
 
-                initFactoryCharts(factory, energyDistribution);
+                initFactoryCharts(factory, powerDistribution);
 
                 const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
                 if (lineTimeframeSelect) {
@@ -350,9 +362,14 @@
         }
 
         function initFactoryCharts(factory, doughnutData) {
-            if (factory.totalPower > 0) {
+            const factorySummaries = @json($factorySummaries);
+            const factorySummary = factorySummaries[factory.id];
+
+            console.log(factorySummaries);
+
+            if (factorySummaries) {
                 initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{ name: 'Power (kW)', data: [] }]));
-                initChart(`factoryEnergyDough-${factory.id}`, doughnutOption('Energy Distribution', doughnutData));
+                initChart(`factoryPowerDough-${factory.id}`, doughnutOption('Power Distribution', doughnutData, 11));
                 initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{ name: 'Energy (kWh)', data: [] }]));
 
                 const timeframe = '1d';

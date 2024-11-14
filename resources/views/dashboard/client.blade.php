@@ -26,8 +26,10 @@
 @section('content')
 @forelse($factories as $factory)
     @php
-        $factorySummary = $factory->summary();
-        $hasFactoryData = $factorySummary?->power > 0;
+        $factorySummary = $factory->summary;
+        $hasFactorySummary = $factorySummary && true;
+        $factoryPower = $factorySummary->power ?? null;
+        $factoryEnergy = $factorySummary->energy ?? null;
     @endphp
 
     <div class="mx-n4 px-4 py-3 mx-lg-n6 bg-body-emphasis border-top">
@@ -45,13 +47,13 @@
                     <div
                         class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
                         <span class="fw-bold">
-                            Total Power: <span id="factoryPower-{{$factory->id}}">{{ $factorySummary->power }}</span> kW
+                            Total Power: <span id="factoryPower-{{$factory->id}}">{{ $factoryPower }}</span> kW
                         </span>
                     </div>
                     <div
                         class="me-3 d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 ms-md-2 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-success d-flex align-items-center justify-content-center">
                         <span class="fw-bold">
-                            Total Energy: <span id="factoryEnergy-{{$factory->id}}">{{ $factorySummary->energy }}</span> kWh
+                            Total Energy: <span id="factoryEnergy-{{$factory->id}}">{{ $factoryEnergy }}</span> kWh
                         </span>
                     </div>
                 </div>
@@ -59,13 +61,13 @@
                 <div
                     class="d-block d-md-none col-12 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
                     <span class="fw-bold">
-                        Total Power: <span id="factoryPowerSM-{{$factory->id}}">{{ $factory->totalPower }}</span> kW
+                        Total Power: <span id="factoryPowerSM-{{$factory->id}}">{{ $factoryPower }}</span> kW
                     </span>
                 </div>
                 <div
                     class="d-block d-md-none col-12 w-max-content mt-1 badge badge-phoenix fs-10 fs-md-9 badge-phoenix-success d-flex align-items-center justify-content-center">
                     <span class="fw-bold">
-                        Total Energy: <span id="factoryEnergySM-{{$factory->id}}">{{ $factory->totalEnergy }}</span> kWh
+                        Total Energy: <span id="factoryEnergySM-{{$factory->id}}">{{ $factoryEnergy }}</span> kWh
                     </span>
                 </div>
             </div>
@@ -77,55 +79,56 @@
             <div class="col-12 col-md-8 pe-0 pb-3 pb-md-0 row justify-content-center justify-content-md-start">
                 @forelse($factory->sites as $site)
                         @php
-                            $siteSummary = $site->summary();
-                            $hasSiteData = $siteSummary?->power > 0;
+                            $siteSummary = $site->summary;
+                            $hasSiteSummary = $site->summary && true;
+                            $sitePower = $siteSummary->power ?? null;
+                            $siteEnergy = $siteSummary->energy ?? null;
+                            $siteUpdatedAt = getRelativeTime($siteSummary?->updated_at) ?? 'N/A';
                         @endphp
-
                         <div class="site-card-{{ $site->id }} col-12 col-md-6 pb-3">
                             <div class="card shadow border rounded pb-4">
                                 <div class="pb-2 card-header border-0 d-flex justify-content-between align-items-start">
                                     <h4 class="mb-0">
-                                        <a {{ $hasSiteData ? 'href=' . route('sites.show', $site->id) : '' }}
-                                            class="{{ $hasSiteData ? '' : 'disabled' }} text-decoration-none">
+                                        <a {{ $hasSiteSummary ? 'href=' . route('sites.show', $site->id) : '' }}
+                                            class="{{ $hasSiteSummary ? '' : 'disabled' }} text-decoration-none">
                                             {{ $site->title }}
                                         </a>
                                     </h4>
                                 </div>
                                 <div class="card-body row py-1">
-                                    <div class="{{ $hasSiteData ? 'd-none' : '' }}" id="no-site-{{$site->id}}">
+                                    <div class="{{ $hasSiteSummary ? 'd-none' : '' }}" id="no-site-{{$site->id}}">
                                         <div class="mw-100 text-truncate badge badge-phoenix badge-phoenix-warning">
                                             No data available for this site.
                                         </div>
                                     </div>
 
-                                    <div class="{{ $hasSiteData ? '' : 'd-none' }} pt-3 col d-flex flex-column justify-content-between"
+                                    <div class="{{ $hasSiteSummary ? '' : 'd-none' }} pt-3 col d-flex flex-column justify-content-between"
                                         id="site-{{$site->id}}">
                                         <div>
                                             <h6 class="mb-2 text-secondary">
                                                 Power:
                                                 <strong class="text-dark">
-                                                    <span id="sitePower-{{$site->id}}">{{ $siteSummary->power ?? 0 }}</span>
+                                                    <span id="sitePower-{{$site->id}}">{{ $sitePower }}</span>
                                                     kW
                                                 </strong>
                                             </h6>
                                             <h6 class="mb-2 text-secondary">
                                                 Energy:
                                                 <strong class="text-dark">
-                                                    <span id="siteEnergy-{{$site->id}}">{{ $siteSummary->energy ?? 0 }}</span>
+                                                    <span id="siteEnergy-{{$site->id}}">{{ $siteEnergy }}</span>
                                                     kWh
                                                 </strong>
                                             </h6>
                                             <h6 class="mb-2 text-secondary">
                                                 Updated at:
                                                 <strong class="text-dark">
-                                                    <span
-                                                        id="siteTimestamp-{{$site->id}}">{{ getRelativeTime($siteSummary?->updated_at) ?? 'N/A' }}</span>
+                                                    <span id="siteTimestamp-{{$site->id}}">{{ $siteUpdatedAt }}</span>
                                                 </strong>
                                             </h6>
                                         </div>
                                     </div>
                                     <div
-                                        class="{{ $hasSiteData ? '' : 'd-none' }} col d-flex align-items-center justify-content-center m-0 p-0">
+                                        class="{{ $hasSiteSummary ? '' : 'd-none' }} col d-flex align-items-center justify-content-center m-0 p-0">
                                         <div class="chart site-chart p-0 m-0" id="siteGauge-{{ $site->id }}"></div>
                                     </div>
                                 </div>
@@ -143,7 +146,7 @@
             <hr class="d-block d-md-none w-75 mx-auto">
 
             <div class="col-12 col-md-4">
-                @if($hasFactoryData)
+                @if($hasFactorySummary)
                     <div class="row pb-6 pt-2">
                         <div class="col-12 row pb-5 pe-0 align-items-center justify-content-between">
                             <div class="col-7">
@@ -208,22 +211,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             const factories = @json($factories);
 
-            const siteSummaries = @json($siteSummaries);
-
             factories.forEach(factory => {
                 let powerDistribution = [];
 
-                const sitesSummary = siteSummaries[factory.id];
-
                 factory.sites.forEach((site, idx) => {
-
-                    const siteSummary = sitesSummary[idx];
 
                     initChart(
                         `siteGauge-${site.id}`,
-                        gaugeOption('Power', site.title, siteSummary.power, 'kW', 0, 1000)
+                        gaugeOption('Power', site.title, site.summary.power ?? 0, 'kW', 0, 1000)
                     );
-                    powerDistribution.push({ name: site.title, value: siteSummary.power });
+                    powerDistribution.push({ name: site.title, value: site.summary.power ?? 0 });
                 });
 
                 initFactoryCharts(factory, powerDistribution);
@@ -362,12 +359,7 @@
         }
 
         function initFactoryCharts(factory, doughnutData) {
-            const factorySummaries = @json($factorySummaries);
-            const factorySummary = factorySummaries[factory.id];
-
-            console.log(factorySummaries);
-
-            if (factorySummaries) {
+            if (factory.summary) {
                 initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{ name: 'Power (kW)', data: [] }]));
                 initChart(`factoryPowerDough-${factory.id}`, doughnutOption('Power Distribution', doughnutData, 11));
                 initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{ name: 'Energy (kWh)', data: [] }]));

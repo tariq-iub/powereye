@@ -3,14 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Factory;
+use App\Services\FactorySummaryService;
+use App\Services\SiteSummaryService;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
 
+    protected FactorySummaryService $factorySummaryService;
+    protected SiteSummaryService $siteSummaryService;
+
     public function __construct()
     {
         $this->middleware('auth');
+        $this->factorySummaryService = app(FactorySummaryService::class);
+        $this->siteSummaryService = app(SiteSummaryService::class);
     }
 
     public function index()
@@ -26,19 +33,16 @@ class HomeController extends Controller
         $userId = Auth::id();
 
         $factories = getAuthFactories();
-        $factorySummaries = $factories->mapWithKeys(function ($factory) {
-            return $factory->summary()->toArray();
-        });
 
-        $siteSummaries = $factories->mapWithKeys(function ($factory) {
-            return [
-                $factory->id => $factory->sites->map(function ($site) {
-                    return $site->summary();
-                })
-            ];
-        });
+        foreach ($factories as $factory) {
+            $factory->summary = $this->factorySummaryService->getLatestSummary($factory->id);
+
+            foreach ($factory->sites as $site) {
+                $site->summary = $this->siteSummaryService->getLatestSummary($site->id);
+            }
+        }
 
         $timeframeOptions = getTimeframeOption();
-        return view('dashboard.client', compact('factories', 'timeframeOptions', 'userId', 'siteSummaries', 'factorySummaries'));
+        return view('dashboard.client', compact('factories', 'timeframeOptions', 'userId'));
     }
 }

@@ -13,7 +13,10 @@ if (!function_exists('mapTimeframe')) {
         $startDate = clone $currentDate;
 
         return match (strtolower($timeframe)) {
+            '1h' => $startDate->subHour(),
+            '6h' => $startDate->subHours(6),
             '8h' => $startDate->subHours(8),
+            '12h' => $startDate->subHours(12),
             '1d' => $startDate->subDay(),
             '1w' => $startDate->subWeek(),
             '1m' => $startDate->subMonth(),
@@ -28,11 +31,14 @@ if (!function_exists('getTimeframeOptions')) {
     function getTimeframeOption(): array
     {
         return [
+            'Last Hour' => '1h',
+            'Last 6 hours' => '6h',
+            'Last 12 hours' => '12h',
             'Last 24 hours' => '1d',
             'Last 7 Days' => '1w',
-            'Last 30 Days' => '1m',
-            'Last 12 Months' => '1y',
-            'All Time' => 'all',
+            // 'Last 30 Days' => '1m',
+            // 'Last 12 Months' => '1y',
+            // 'All Time' => 'all',
         ];
     }
 }

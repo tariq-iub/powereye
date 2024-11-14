@@ -67,3 +67,4 @@ Route::get('fetch-factories', [FactoryController::class, 'fetchFactories']);
 
 Route::get('summary/factory/latest/{id}', [FactorySummaryController::class, 'getLatestSummary']);
 Route::get('summary/site/latest/{id}', [SiteSummaryController::class, 'getLatestSummary']);
+Route::get('agg', [SiteSummaryController::class, '']);

@@ -122,7 +122,7 @@ const barOption = (
     return option;
 };
 
-const doughnutOption = (name, seriesData, n, title = null) => {
+const doughnutOption = (name, seriesData, n, title = null, unit = "kW") => {
     const sameShade = seriesData.length > 6;
     const baseHue = 200;
     const colors = generateChartColors(n, { sameShade, baseHue });
@@ -134,8 +134,8 @@ const doughnutOption = (name, seriesData, n, title = null) => {
             trigger: "item",
             formatter: function (params) {
                 return `
-                    <div style="font-weight: bold;">Energy Distribution</div>
-                    ${params.name}: <strong>${params.value}</strong> kWh (${params.percent}%)
+                    <div style="font-weight: bold;">Power Distribution</div>
+                    ${params.name}: <strong>${params.value}</strong> ${unit} (${params.percent}%)
                 `;
             },
         },
@@ -168,6 +168,10 @@ const doughnutOption = (name, seriesData, n, title = null) => {
                 },
                 data: seriesData,
                 color: colors,
+                itemStyle: {
+                    borderColor: "#fff",
+                    borderWidth: 1,
+                },
             },
         ],
     };

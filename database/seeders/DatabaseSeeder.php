@@ -14,14 +14,14 @@ class DatabaseSeeder extends Seeder
     {
         //
         $this->call([
-//            RolesTableSeeder::class,
-//            UsersTableSeeder::class,
+            RolesTableSeeder::class,
+            UsersTableSeeder::class,
 //            MenusTableSeeder::class,
-//            FactoryTableSeeder::class,
-//            SitesTableSeeder::class,
-//            DeviceTableSeeder::class,
+            FactoryTableSeeder::class,
+            SitesTableSeeder::class,
+            DeviceTableSeeder::class,
 //            DataFileSeeder::class,
-            SensorDataSeeder::class,
+//            SensorDataSeeder::class,
         ]);
     }
 }

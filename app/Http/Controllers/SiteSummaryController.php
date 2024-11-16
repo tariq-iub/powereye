@@ -13,18 +13,8 @@ class SiteSummaryController extends Controller
         $this->summaryService = $summaryService;
     }
 
-    public function getLatestSummary($factoryId, $jsonResponse = true)
+    public function getLatestSummary($siteId, $jsonResponse = true)
     {
-        if (!$factoryId) {
-            return abort(404);
-        }
-
-        $summary = $this->summaryService->getLatestSummary($factoryId);
-
-        if (!$summary) {
-            return abort(404);
-        }
-
-        return $jsonResponse ? response()->json($summary) : $summary;
+        return app(SiteSummaryService::class)->getLatestSummary($siteId, $jsonResponse);
     }
 }

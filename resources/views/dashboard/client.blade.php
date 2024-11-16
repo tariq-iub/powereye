@@ -83,7 +83,7 @@
                             $hasSiteSummary = $site->summary && true;
                             $sitePower = $siteSummary->power ?? null;
                             $siteEnergy = $siteSummary->energy ?? null;
-                            $siteUpdatedAt = getRelativeTime($siteSummary?->updated_at) ?? 'N/A';
+                            $siteUpdatedAt = $siteSummary?->updated_at_r;
                         @endphp
                         <div class="site-card-{{ $site->id }} col-12 col-md-6 pb-3">
                             <div class="card shadow border rounded pb-4">
@@ -211,176 +211,218 @@
         document.addEventListener('DOMContentLoaded', () => {
             const factories = @json($factories);
 
+            // Initialize charts and setup event listeners for each factory
             factories.forEach(factory => {
                 let powerDistribution = [];
 
-                factory.sites.forEach((site, idx) => {
-
-                    initChart(
-                        `siteGauge-${site.id}`,
-                        gaugeOption('Power', site.title, site.summary.power ?? 0, 'kW', 0, 1000)
-                    );
-                    powerDistribution.push({ name: site.title, value: site.summary.power ?? 0 });
+                // Initialize site gauges and collect power distribution data
+                factory.sites.forEach(site => {
+                    if (site.summary) {
+                        initChart(
+                            `siteGauge-${site.id}`,
+                            gaugeOption('Power', site.title, site.summary.power ?? 0, 'kW', 0, 1000)
+                        );
+                        powerDistribution.push({
+                            name: site.title,
+                            value: site.summary.power ?? 0
+                        });
+                    }
                 });
 
+                // Initialize factory charts with initial data
                 initFactoryCharts(factory, powerDistribution);
 
-                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
-                if (lineTimeframeSelect) {
-                    lineTimeframeSelect.addEventListener('change', () => {
-                        const timeframe = lineTimeframeSelect.value;
-                        fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
-                            if (!data) return;
-                            const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                            const powerData = data.map(dataPoint => dataPoint.rolling_average_power);
-                            updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
-                        });
-                    });
-                }
-
-                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
-                if (barTimeframeSelect) {
-                    barTimeframeSelect.addEventListener('change', () => {
-                        const timeframe = barTimeframeSelect.value;
-                        fetchData(`sensor-data/factory/${factory.id}/energy?startDate=${timeframe}`).then(data => {
-                            if (!data) return;
-                            const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                            const energyData = data.map(dataPoint => dataPoint.energy);
-                            updateChart(`factoryEnergyBar-${factory.id}`, barOption(timestamps, [{ name: 'Energy (kWh)', data: energyData }]));
-                        });
-                    });
-                }
-
+                // Setup timeframe change handlers
+                setupTimeframeHandlers(factory);
             });
 
-            setInterval(() => {
-                fetch('/api/fetch-factories')
-                    .then(response => response.json())
-                    .then(data => {
-                        const { factories } = data;
+            // Setup periodic data refresh
+            setInterval(async () => {
+                for (const factory of factories) {
+                    try {
+                        // Update factory summary data
+                        const data = await fetchData(`factory/${factory.id}/summary/latest`);
+                        if (!data) continue;
 
-                        factories.forEach(factory => {
-                            updateFactoryMetrics(factory);
-                            let energyDistribution = [];
-
-                            factory.sites.forEach(site => {
-                                updateSiteCard(site);
-
-                                if (site.totalEnergy > 0) {
-                                    energyDistribution.push({ name: site.title, value: site.totalEnergy });
-                                }
-                            });
-
-                            if (factory.totalPower > 0) {
-                                updateFactoryCharts(factory);
-                            }
-
+                        updateFactoryMetrics({
+                            id: factory.id,
+                            totalPower: data.power,
+                            totalEnergy: data.energy
                         });
-                    })
-                    .catch(error => {
-                        console.error("Error fetching data:", error);
-                    });
-            }, 300000);
+
+                        // Update site data
+                        for (const site of factory.sites) {
+                            const siteData = await fetchData(`site/${site.id}/summary/latest`);
+                            if (siteData) {
+                                updateSiteCard({
+                                    site_id: site.id,
+                                    total_power: siteData.power,
+                                    total_energy: siteData.energy,
+                                    updated_at: siteData.updated_at_r
+                                });
+                            }
+                        }
+
+                        // Update factory charts
+                        const lineSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
+                        const barSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
+
+                        await fetchAndUpdatePowerChart(factory.id, lineSelect.value);
+                        await fetchAndUpdateEnergyChart(factory.id, barSelect.value);
+
+                        // Update power distribution chart
+                        const powerDistribution = factory.sites
+                            .filter(site => site.summary)
+                            .map(site => ({
+                                name: site.title,
+                                value: site.summary.power ?? 0
+                            }));
+
+                        updateChart(
+                            `factoryPowerDough-${factory.id}`,
+                            doughnutOption('Power Distribution', powerDistribution, factory.sites.length)
+                        );
+
+                    } catch (error) {
+                        console.error(`Error updating data for factory ${factory.id}:`, error);
+                    }
+                }
+            }, 30000); // Refresh every 30 seconds
         });
 
-        function updateFactoryCharts(factory) {
-            if (factory.totalPower > 0) {
-                const lineTimeframeSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
-                let timeframe = lineTimeframeSelect.value;
-                fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
-                    if (!data) return;
-                    const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const powerData = data.map(dataPoint => dataPoint.rolling_average_power);
-                    updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
-                });
+        function setupTimeframeHandlers(factory) {
+            const lineSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
+            const barSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
 
-                const barTimeframeSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
-                timeframe = barTimeframeSelect.value;
-
-                fetchData(`sensor-data/factory/${factory.id}/energy?startDate=${timeframe}`).then(data => {
-                    if (!data) return;
-                    const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const energyData = data.map(dataPoint => dataPoint.energy);
-                    updateChart(`factoryEnergyBar-${factory.id}`, barOption(timestamps, [{ name: 'Energy (kWh)', data: energyData }]));
+            if (lineSelect) {
+                lineSelect.addEventListener('change', () => {
+                    fetchAndUpdatePowerChart(factory.id, lineSelect.value);
                 });
             }
+
+            if (barSelect) {
+                barSelect.addEventListener('change', () => {
+                    fetchAndUpdateEnergyChart(factory.id, barSelect.value);
+                });
+            }
+        }
+
+        async function fetchAndUpdatePowerChart(factoryId, timeframe) {
+            const data = await fetchData(`factory/${factoryId}/aggregate-sensor-data?timerange=${timeframe}`);
+            if (!data) return;
+
+            const timestamps = data.map(d => d.timestamp);
+            const powerData = data.map(d => d.total_power);
+
+            updateChart(
+                `factoryPowerLine-${factoryId}`,
+                lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }])
+            );
+        }
+
+        async function fetchAndUpdateEnergyChart(factoryId, timeframe) {
+            const data = await fetchData(`factory/${factoryId}/aggregate-sensor-data?timerange=${timeframe}`);
+            if (!data) return;
+
+            const timestamps = data.map(d => d.timestamp);
+            const energyData = data.map(d => d.total_energy);
+
+            updateChart(
+                `factoryEnergyBar-${factoryId}`,
+                barOption(timestamps, [{ name: 'Energy (kWh)', data: energyData }])
+            );
         }
 
         function updateFactoryMetrics(factory) {
             const { id, totalPower, totalEnergy } = factory;
-
             const SM = isMobileDevice() ? 'SM' : '';
 
-            const factoryPowerSpan = document.getElementById(`factoryPower${SM}-${id}`);
-            const factoryEnergySpan = document.getElementById(`factoryEnergy${SM}-${id}`);
+            ['', SM].forEach(suffix => {
+                const powerSpan = document.getElementById(`factoryPower${suffix}-${id}`);
+                const energySpan = document.getElementById(`factoryEnergy${suffix}-${id}`);
 
-            if (factoryPowerSpan && factoryPowerSpan.textContent.trim() !== totalPower.toString().trim()) {
-                factoryPowerSpan.textContent = parseFloat(totalPower).toFixed(2);
-            }
-
-            if (factoryEnergySpan && factoryEnergySpan.textContent.trim() !== totalEnergy.toString().trim()) {
-                factoryEnergySpan.textContent = parseFloat(totalEnergy).toFixed(2);
-            }
+                if (powerSpan) {
+                    const currentPower = powerSpan.textContent;
+                    const newPower = parseFloat(totalPower).toFixed(2);
+                    if (currentPower !== newPower) {
+                        powerSpan.textContent = newPower;
+                    }
+                }
+                if (energySpan) {
+                    const currentEnergy = energySpan.textContent;
+                    const newEnergy = parseFloat(totalEnergy).toFixed(2);
+                    if (currentEnergy !== newEnergy) {
+                        energySpan.textContent = newEnergy;
+                    }
+                }
+            });
         }
 
-        function updateSiteCard(site) {
-            const { id, totalPower, totalEnergy, lastTimestamp, lastEnergy } = site;
+        function updateSiteCard(data) {
+            const { site_id: id, total_power: totalPower, total_energy: totalEnergy, updated_at: lastTimestamp } = data;
 
-            if (totalPower > 0) {
+            // Show site card and hide no-data message
+            const elements = {
+                siteCard: document.getElementById(`site-${id}`),
+                noSiteCard: document.getElementById(`no-site-${id}`),
+                chart: document.getElementById(`siteGauge-${id}`),
+                powerSpan: document.getElementById(`sitePower-${id}`),
+                energySpan: document.getElementById(`siteEnergy-${id}`),
+                timestampSpan: document.getElementById(`siteTimestamp-${id}`)
+            };
 
-                const siteCard = document.getElementById(`site-${site.id}`);
-                const noSiteCard = document.getElementById(`no-site-${site.id}`)
-                const chartId = `siteGauge-${site.id}`;
-                const chart = document.getElementById(chartId)
+            // Update visibility
+            if (elements.siteCard) elements.siteCard.classList.remove('d-none');
+            if (elements.noSiteCard) elements.noSiteCard.classList.add('d-none');
+            if (elements.chart) elements.chart.parentElement.classList.remove('d-none');
 
-                if (siteCard) siteCard.classList.remove('d-none');
-                if (noSiteCard) noSiteCard.classList.add('d-none');
-                if (chart) chart.parentElement.classList.remove('d-none');
-
-                const powerSpan = document.getElementById(`sitePower-${id}`);
-                const energySpan = document.getElementById(`siteEnergy-${id}`);
-                const timestampSpan = document.getElementById(`siteTimestamp-${id}`);
-
-                if (powerSpan && powerSpan.textContent.trim() !== totalPower.toString().trim()) {
-                    powerSpan.textContent = parseFloat(totalPower).toFixed(2);
+            // Update metrics only if values have changed
+            if (elements.powerSpan) {
+                const currentPower = elements.powerSpan.textContent;
+                const newPower = parseFloat(totalPower).toFixed(2);
+                if (currentPower !== newPower) {
+                    elements.powerSpan.textContent = newPower;
                 }
-
-                if (energySpan && energySpan.textContent.trim() !== totalEnergy.toString().trim()) {
-                    energySpan.textContent = parseFloat(totalEnergy).toFixed(2);
+            }
+            if (elements.energySpan) {
+                const currentEnergy = elements.energySpan.textContent;
+                const newEnergy = parseFloat(totalEnergy).toFixed(2);
+                if (currentEnergy !== newEnergy) {
+                    elements.energySpan.textContent = newEnergy;
                 }
-
-                if (timestampSpan && timestampSpan.textContent.trim() !== lastTimestamp.toString().trim()) {
-                    timestampSpan.textContent = lastTimestamp;
+            }
+            if (elements.timestampSpan) {
+                const currentTimestamp = elements.timestampSpan.textContent;
+                if (currentTimestamp !== lastTimestamp) {
+                    elements.timestampSpan.textContent = lastTimestamp;
                 }
+            }
 
-                chart && updateChart(chartId, gaugeOption('Energy', parseFloat(lastEnergy).toFixed(4), 'kWh'));
-
+            // Update gauge chart only if power value has changed
+            if (elements.chart) {
+                const currentPower = elements.powerSpan?.textContent;
+                const newPower = parseFloat(totalPower).toFixed(2);
+                if (currentPower !== newPower) {
+                    updateChart(
+                        `siteGauge-${id}`,
+                        gaugeOption('Power', '', totalPower, 'kW', 0, 1000)
+                    );
+                }
             }
         }
 
         function initFactoryCharts(factory, doughnutData) {
-            if (factory.summary) {
-                initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{ name: 'Power (kW)', data: [] }]));
-                initChart(`factoryPowerDough-${factory.id}`, doughnutOption('Power Distribution', doughnutData, 11));
-                initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{ name: 'Energy (kWh)', data: [] }]));
+            if (!factory.summary) return;
 
-                const timeframe = '1d';
+            // Initialize empty charts
+            initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{ name: 'Power (kW)', data: [] }]));
+            initChart(`factoryPowerDough-${factory.id}`, doughnutOption('Power Distribution', doughnutData, factory.sites.length));
+            initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{ name: 'Energy (kWh)', data: [] }]));
 
-                fetchData(`sensor-data/factory/${factory.id}?startDate=${timeframe}`).then(data => {
-                    if (!data) return;
-                    const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const powerData = data.map(dataPoint => dataPoint.rolling_average_power);
-                    updateChart(`factoryPowerLine-${factory.id}`, lineOption(timestamps, [{ name: 'Power (kW)', data: powerData }]));
-                });
-
-                fetchData(`sensor-data/factory/${factory.id}/energy?startDate=${timeframe}`).then(data => {
-                    if (!data) return;
-                    const timestamps = data.map(dataPoint => formatTimestamp(new Date(dataPoint.timestamp), timeframe));
-                    const energyData = data.map(dataPoint => dataPoint.energy);
-                    updateChart(`factoryEnergyBar-${factory.id}`, barOption(timestamps, [{ name: 'Energy (kWh)', data: energyData }]));
-                });
-            }
+            // Fetch initial data with 1h timeframe
+            const timeframe = '1h';
+            fetchAndUpdatePowerChart(factory.id, timeframe);
+            fetchAndUpdateEnergyChart(factory.id, timeframe);
         }
-
     </script>
 @endpush

@@ -35,10 +35,10 @@ class HomeController extends Controller
         $factories = getAuthFactories();
 
         foreach ($factories as $factory) {
-            $factory->summary = $this->factorySummaryService->getLatestSummary($factory->id);
+            $factory->summary = $this->factorySummaryService->getLatestSummary($factory->id, false);
 
             foreach ($factory->sites as $site) {
-                $site->summary = $this->siteSummaryService->getLatestSummary($site->id);
+                $site->summary = $this->siteSummaryService->getLatestSummary($site->id, false);
             }
         }
 

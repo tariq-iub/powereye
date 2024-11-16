@@ -15,16 +15,6 @@ class FactorySummaryController extends Controller
 
     public function getLatestSummary($factoryId, $jsonResponse = true)
     {
-        if (!$factoryId) {
-            return abort(404);
-        }
-
-        $summary = $this->summaryService->getLatestSummary($factoryId);
-
-        if (!$summary) {
-            return abort(404);
-        }
-
-        return $jsonResponse ? response()->json($summary) : $summary;
+        return app(FactorySummaryService::class)->getLatestSummary($factoryId, $jsonResponse);
     }
 }

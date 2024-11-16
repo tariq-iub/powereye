@@ -168,11 +168,13 @@ class FactorySummaryService
         }
     }
 
-    public function getLatestSummary($factoryId)
+    public function getLatestSummary($factoryId, $jsonResponse = true)
     {
-        return FactorySummary::where('factory_id', $factoryId)
+        $summary = FactorySummary::where('factory_id', $factoryId)
             ->where('time_frame', 'latest')
             ->orderBy('updated_at', 'desc')
             ->first();
+
+        return $jsonResponse ? response()->json($summary) : $summary;
     }
 }

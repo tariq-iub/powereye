@@ -32,11 +32,11 @@ if (!function_exists('getTimeframeOptions')) {
     {
         return [
             'Last Hour' => '1h',
-            'Last 6 hours' => '6h',
-            'Last 12 hours' => '12h',
-            'Last 24 hours' => '1d',
-            'Last 7 Days' => '1w',
-            // 'Last 30 Days' => '1m',
+            // 'Last 6 hours' => '6h',
+            // 'Last 12 hours' => '12h',
+            'Last day' => '1d',
+            'Last week' => '1w',
+            'Last month' => '1m',
             // 'Last 12 Months' => '1y',
             // 'All Time' => 'all',
         ];

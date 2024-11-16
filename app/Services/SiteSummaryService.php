@@ -127,11 +127,17 @@ class SiteSummaryService
         }
     }
 
-    public function getLatestSummary($siteId)
+    public function getLatestSummary($siteId, $jsonResponse = true)
     {
-        return SiteSummary::where('site_id', $siteId)
+        $summary = SiteSummary::where('site_id', $siteId)
             ->where('time_frame', 'latest')
             ->orderBy('updated_at', 'desc')
             ->first();
+
+        if ($summary) {
+            $summary->updated_at_r = $summary->updated_at->diffForHumans();
+        }
+
+        return $jsonResponse ? response()->json($summary) : $summary;
     }
 }

@@ -3,12 +3,14 @@
 use App\Http\Controllers\DataFileController;
 use App\Http\Controllers\DeviceManagementController;
 use App\Http\Controllers\FactoryController;
+use App\Http\Controllers\FactorySensorDataController;
 use App\Http\Controllers\FactorySummaryController;
 use App\Http\Controllers\FactoryUserController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SensorDataController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\SiteSensorDataController;
 use App\Http\Controllers\SiteSummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +54,13 @@ Route::prefix('file-ota')->group(function () {
     Route::post('/replace', [BinFileController::class, 'replace']);
 });
 
+
+Route::get('factory/{id}/aggregate-sensor-data', [FactorySensorDataController::class, 'fetch']);
+
+Route::get('factory/{id}/summary/latest', [FactorySummaryController::class, 'getLatestSummary']);
+
+Route::get('site/{id}/summary/latest', [SiteSummaryController::class, 'getLatestSummary']);
+
 Route::get('factory/{factoryId}/{type}', [FactoryController::class, 'fetchData']);
 Route::get('site/{siteId}/{type}', [SiteController::class, 'fetchData']);
 Route::get('sensor-data/{entityType}/{entityId}/', [SensorDataController::class, 'fetch']);
@@ -65,6 +74,4 @@ Route::get('device/get-datetime', [DeviceManagementController::class, 'getDateTi
 
 Route::get('fetch-factories', [FactoryController::class, 'fetchFactories']);
 
-Route::get('summary/factory/latest/{id}', [FactorySummaryController::class, 'getLatestSummary']);
-Route::get('summary/site/latest/{id}', [SiteSummaryController::class, 'getLatestSummary']);
-Route::get('agg', [SiteSummaryController::class, '']);
+Route::get('site/{id}/aggregate-sensor-data', [SiteSensorDataController::class, 'fetch']);

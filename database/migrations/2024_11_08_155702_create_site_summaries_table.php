@@ -20,8 +20,8 @@ return new class extends Migration {
             $table->float('max_power');
             $table->float('min_energy');
             $table->float('max_energy');
-            $table->timestamp('start_time');
-            $table->timestamp('end_time');
+            $table->timestamp('start_time')->nullable();
+            $table->timestamp('end_time')->nullable();
             $table->timestamps();
             $table->unique(['site_id', 'time_frame', 'start_time', 'end_time'], 'unique_site_summary');
         });

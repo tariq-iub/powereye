@@ -15,8 +15,8 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('site_id');                     // Reference to the site
             $table->enum('timeframe', ['hour', 'day', 'week', 'month']); // Aggregation timeframe
-            $table->timestamp('window_start');                         // Start of the window timeframe
-            $table->timestamp('window_end');                           // End of the window timeframe
+            $table->timestamp('window_start')->nullable();                         // Start of the window timeframe
+            $table->timestamp('window_end')->nullable();                           // End of the window timeframe
 
             // Retained sensor data columns for power and energy phases
             $table->double('P1')->default(0);                          // Power phase 1

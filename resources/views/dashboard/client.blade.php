@@ -361,7 +361,6 @@
         function updateSiteCard(data) {
             const { site_id: id, total_power: totalPower, total_energy: totalEnergy, updated_at: lastTimestamp } = data;
 
-            // Show site card and hide no-data message
             const elements = {
                 siteCard: document.getElementById(`site-${id}`),
                 noSiteCard: document.getElementById(`no-site-${id}`),
@@ -371,12 +370,10 @@
                 timestampSpan: document.getElementById(`siteTimestamp-${id}`)
             };
 
-            // Update visibility
             if (elements.siteCard) elements.siteCard.classList.remove('d-none');
             if (elements.noSiteCard) elements.noSiteCard.classList.add('d-none');
             if (elements.chart) elements.chart.parentElement.classList.remove('d-none');
 
-            // Update metrics only if values have changed
             if (elements.powerSpan) {
                 const currentPower = elements.powerSpan.textContent;
                 const newPower = parseFloat(totalPower).toFixed(2);
@@ -398,7 +395,6 @@
                 }
             }
 
-            // Update gauge chart only if power value has changed
             if (elements.chart) {
                 const currentPower = elements.powerSpan?.textContent;
                 const newPower = parseFloat(totalPower).toFixed(2);
@@ -414,12 +410,10 @@
         function initFactoryCharts(factory, doughnutData) {
             if (!factory.summary) return;
 
-            // Initialize empty charts
             initChart(`factoryPowerLine-${factory.id}`, lineOption([], [{ name: 'Power (kW)', data: [] }]));
             initChart(`factoryPowerDough-${factory.id}`, doughnutOption('Power Distribution', doughnutData, factory.sites.length));
             initChart(`factoryEnergyBar-${factory.id}`, barOption([], [{ name: 'Energy (kWh)', data: [] }]));
 
-            // Fetch initial data with 1h timeframe
             const timeframe = '1h';
             fetchAndUpdatePowerChart(factory.id, timeframe);
             fetchAndUpdateEnergyChart(factory.id, timeframe);

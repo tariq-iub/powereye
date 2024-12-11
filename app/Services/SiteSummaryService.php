@@ -127,10 +127,10 @@ class SiteSummaryService
         }
     }
 
-    public function getLatestSummary($siteId, $jsonResponse = true)
+    public function getSummary($siteId, $timeframe, $jsonResponse = true)
     {
         $summary = SiteSummary::where('site_id', $siteId)
-            ->where('time_frame', 'latest')
+            ->where('time_frame', $timeframe)
             ->orderBy('updated_at', 'desc')
             ->first();
 
@@ -139,5 +139,10 @@ class SiteSummaryService
         }
 
         return $jsonResponse ? response()->json($summary) : $summary;
+    }
+
+    public function getLatestSummary(int $siteId, $jsonResponse = true)
+    {
+        return $this->getSummary($siteId, 'latest', $jsonResponse);
     }
 }

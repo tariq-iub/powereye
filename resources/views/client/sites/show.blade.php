@@ -18,7 +18,7 @@
                             <span class="fa-stack-1x fa-solid fa-bolt text-success" data-fa-transform="shrink-2 up-8 right-6"></span>
                         </span>
                         <div class="ms-3">
-                            <h4 class="mb-0">{{ $site->energy }} kWh</h4>
+                            <h4 class="mb-0">{{ $site->energy ?? 0.00 }} kWh</h4>
                             <p class="text-body-secondary fs-9 mb-0">Total Energy Consumed</p>
                         </div>
                     </div>
@@ -31,8 +31,8 @@
                             <span class="fa-stack-1x fa-solid fa-hourglass-half text-warning" data-fa-transform="shrink-2 up-8 right-6"></span>
                         </span>
                         <div class="ms-3">
-                            <h4 class="mb-0">{{ $site->e8h }} kWh</h4>
-                            <p class="text-body-secondary fs-9 mb-0">Energy consumed in last 8 hours</p>
+                            <h4 class="mb-0">{{ $site->e12h ?? 0.00 }} kWh</h4>
+                            <p class="text-body-secondary fs-9 mb-0">Energy consumed in last 12 hours</p>
                         </div>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                             <span class="fa-stack-1x fa-solid fa-calendar-week text-danger" data-fa-transform="shrink-2 up-8 right-6"></span>
                         </span>
                         <div class="ms-3">
-                            <h4 class="mb-0">{{ $site->e1w }} kWh</h4>
+                            <h4 class="mb-0">{{ $site->e1w ?? 0.00 }} kWh</h4>
                             <p class="text-body-secondary fs-9 mb-0">Energy consumed in last week</p>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
                             <span class="fa-stack-1x fa-solid fa-calendar-alt text-stats-circle-info" data-fa-transform="shrink-2 up-8 right-6"></span>
                         </span>
                         <div class="ms-3">
-                            <h4 class="mb-0">{{ $site->e1m }} kWh</h4>
+                            <h4 class="mb-0">{{ $site->e1m ?? 0.00 }} kWh</h4>
                             <p class="text-body-secondary fs-9 mb-0">Energy consumed in last month</p>
                         </div>
                     </div>

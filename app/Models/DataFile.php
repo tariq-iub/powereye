@@ -18,6 +18,11 @@ class DataFile extends Model
 //        'created' => DataFileInserted::class,
 //    ];
 
+    public function factory()
+    {
+        return $this->belongsTo(Factory::class);
+    }
+
     public function site()
     {
         return $this->belongsTo(Site::class);

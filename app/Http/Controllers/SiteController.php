@@ -10,15 +10,19 @@ use App\Models\SensorData;
 use App\Models\Site;
 use App\Services\SensorDataService;
 use App\Services\SiteService;
+use App\Services\SiteSummaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SiteController extends Controller
 {
-    protected  SensorDataService  $sensorDataService;
-    public function __construct(SensorDataService  $sensorDataService)
+    protected SensorDataService $sensorDataService;
+    protected SiteSummaryService $siteSummaryService;
+
+    public function __construct(SensorDataService $sensorDataService, SiteSummaryService $siteSummaryService)
     {
         $this->sensorDataService = $sensorDataService;
+        $this->siteSummaryService = $siteSummaryService;
     }
 
     /**
@@ -61,17 +65,15 @@ class SiteController extends Controller
     public function show(Request $request, Site $site)
     {
         if (in_array(Auth::user()->role->id, [1, 2])) {
-            return view( 'admin.sites.show', compact('site'));
+            return view('admin.sites.show', compact('site'));
         }
 
-        $type = 'energy';
+        $site->energy = $this->siteSummaryService->getLatestSummary($site->id, false)->energy;
+        $site->e12h = $this->siteSummaryService->getSummary($site->id, '12-hours', false)->energy;
+        $site->e1w = $this->siteSummaryService->getSummary($site->id, '1-week', false)->energy;
+        $site->e1m = $this->siteSummaryService->getSummary($site->id, '1-month', false)->energy;
 
-        $site->energy = $site->getTotalEnergy(precision: 2);
-        $site->e8h = $site->getTotalEnergy('8h', 2);
-        $site->e1w = $site->getTotalEnergy('1w', 2);
-        $site->e1m = $site->getTotalEnergy('1m', 2);
-
-        return view( 'client.sites.show', compact('site'));
+        return view('client.sites.show', compact('site'));
     }
 
     /**
@@ -114,18 +116,23 @@ class SiteController extends Controller
                 ->with(['components'])
                 ->first();
 
-            if ($data) return response()->json($data, 200);
-            else return response()->json(['message' => 'Site is not registered in the system.'], 404);
+            if ($data)
+                return response()->json($data, 200);
+            else
+                return response()->json(['message' => 'Site is not registered in the system.'], 404);
         } else {
             $data = Site::with(['components'])
                 ->get();
 
-            if ($data) return response()->json($data, 200);
-            else return response()->json(['message' => 'No sites registered in the system.'], 404);
+            if ($data)
+                return response()->json($data, 200);
+            else
+                return response()->json(['message' => 'No sites registered in the system.'], 404);
         }
     }
 
-    public function fetchData(Request $request, int $siteId, string $type, string $timeframe = 'all', bool $json = true, $precisionVal = 2) {
+    public function fetchData(Request $request, int $siteId, string $type, string $timeframe = 'all', bool $json = true, $precisionVal = 2)
+    {
         return app(SiteService::class)->fetchData($request, $siteId, $type, $timeframe, $json, $precisionVal);
     }
 }

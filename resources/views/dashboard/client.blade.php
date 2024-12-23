@@ -211,11 +211,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const factories = @json($factories);
 
-            // Initialize charts and setup event listeners for each factory
             factories.forEach(factory => {
                 let powerDistribution = [];
 
-                // Initialize site gauges and collect power distribution data
                 factory.sites.forEach(site => {
                     if (site.summary) {
                         initChart(
@@ -229,18 +227,14 @@
                     }
                 });
 
-                // Initialize factory charts with initial data
                 initFactoryCharts(factory, powerDistribution);
 
-                // Setup timeframe change handlers
                 setupTimeframeHandlers(factory);
             });
 
-            // Setup periodic data refresh
             setInterval(async () => {
                 for (const factory of factories) {
                     try {
-                        // Update factory summary data
                         const data = await fetchData(`factory/${factory.id}/summary/latest`);
                         if (!data) continue;
 
@@ -250,7 +244,6 @@
                             totalEnergy: data.energy
                         });
 
-                        // Update site data
                         for (const site of factory.sites) {
                             const siteData = await fetchData(`site/${site.id}/summary/latest`);
                             if (siteData) {
@@ -263,14 +256,12 @@
                             }
                         }
 
-                        // Update factory charts
                         const lineSelect = document.getElementById(`factoryLineTimeframe-${factory.id}`);
                         const barSelect = document.getElementById(`factoryBarTimeframe-${factory.id}`);
 
                         await fetchAndUpdatePowerChart(factory.id, lineSelect.value);
                         await fetchAndUpdateEnergyChart(factory.id, barSelect.value);
 
-                        // Update power distribution chart
                         const powerDistribution = factory.sites
                             .filter(site => site.summary)
                             .map(site => ({
@@ -287,7 +278,7 @@
                         console.error(`Error updating data for factory ${factory.id}:`, error);
                     }
                 }
-            }, 30000); // Refresh every 30 seconds
+            }, 30000); // 30 seconds
         });
 
         function setupTimeframeHandlers(factory) {

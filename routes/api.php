@@ -57,6 +57,8 @@ Route::prefix('file-ota')->group(function () {
 
 Route::get('factory/{id}/aggregate-sensor-data', [FactorySensorDataController::class, 'fetch']);
 
+Route::get('site/{id}/aggregate-sensor-data', [SiteSensorDataController::class, 'fetch']);
+
 Route::get('factory/{id}/summary/latest', [FactorySummaryController::class, 'getLatestSummary']);
 
 Route::get('site/{id}/summary/latest', [SiteSummaryController::class, 'getLatestSummary']);
@@ -73,5 +75,3 @@ Route::get('factoryData/{factory}', [FactoryController::class, 'fetchFactoryData
 Route::get('device/get-datetime', [DeviceManagementController::class, 'getDateTime']);
 
 Route::get('fetch-factories', [FactoryController::class, 'fetchFactories']);
-
-Route::get('site/{id}/aggregate-sensor-data', [SiteSensorDataController::class, 'fetch']);

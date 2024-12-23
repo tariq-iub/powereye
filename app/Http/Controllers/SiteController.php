@@ -68,12 +68,16 @@ class SiteController extends Controller
             return view('admin.sites.show', compact('site'));
         }
 
-        $site->energy = $this->siteSummaryService->getLatestSummary($site->id, false)->energy;
-        $site->e12h = $this->siteSummaryService->getSummary($site->id, '12-hours', false)->energy;
-        $site->e1w = $this->siteSummaryService->getSummary($site->id, '1-week', false)->energy;
-        $site->e1m = $this->siteSummaryService->getSummary($site->id, '1-month', false)->energy;
+        $siteId = $site->id;
 
-        return view('client.sites.show', compact('site'));
+        $latest_energy = $this->siteSummaryService->getLatestSummary($siteId, false)->energy;
+        $_12h_energy = $this->siteSummaryService->getSummary($siteId, '12-hours', false)->energy;
+        $_1w_energy = $this->siteSummaryService->getSummary($siteId, '1-week', false)->energy;
+        $_1m_energy = $this->siteSummaryService->getSummary($siteId, '1-month', false)->energy;
+
+        $timeframeOptions = getTimeframeOption();
+
+        return view('client.sites.show', compact('site', 'latest_energy', '_12h_energy', '_1w_energy', '_1m_energy', 'timeframeOptions'));
     }
 
     /**

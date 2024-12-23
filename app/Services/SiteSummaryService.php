@@ -126,7 +126,6 @@ class SiteSummaryService
             }
         }
     }
-
     public function getSummary($siteId, $timeframe, $jsonResponse = true)
     {
         $summary = SiteSummary::where('site_id', $siteId)
@@ -144,5 +143,20 @@ class SiteSummaryService
     public function getLatestSummary(int $siteId, $jsonResponse = true)
     {
         return $this->getSummary($siteId, 'latest', $jsonResponse);
+    }
+
+    public function getSummaries($siteId, $jsonResponse = true)
+    {
+        $summaries = SiteSummary::where('site_id', $siteId)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        if ($summaries->isNotEmpty()) {
+            foreach ($summaries as $summary) {
+                $summary->updated_at_r = $summary->updated_at->diffForHumans();
+            }
+        }
+
+        return $jsonResponse ? response()->json($summaries) : $summaries;
     }
 }

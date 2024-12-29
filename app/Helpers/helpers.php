@@ -80,36 +80,40 @@ if (!function_exists('validateAndPrepareData')) {
 if (!function_exists('getAuthFactories')) {
     function getAuthFactories($relation = 'sites.summaries'): Collection
     {
-        return auth()->user()->factories()->with('sites')->get();
+        return auth()->user()->factories()->with($relation)->get();
     }
 }
 
 if (!function_exists('getAuthSites')) {
     function getAuthSites($relation = 'summaries')
     {
-        $factories = getAuthFactories();
-
-        return $factories->flatMap(function ($factory) use ($relation) {
-            return $factory->sites->with($relation);
-        })->values();
+        return auth()->user()->factories()
+            ->with([
+                'sites' => function ($query) use ($relation) {
+                    $query->with($relation);
+                }
+            ])
+            ->get()
+            ->pluck('sites')
+            ->flatten();
     }
 }
 
 if (!function_exists('isAuthFactory')) {
     function isAuthFactory(int $factoryId): bool
     {
-        $factories = getAuthFactories();
-        $factory = $factories->find($factoryId)->count();
-        return $factory === 1;
+        return auth()->user()->factories()
+            ->where('id', $factoryId)
+            ->exists();
     }
 }
 
 if (!function_exists('isAuthSite')) {
     function isAuthSite(int $siteId): bool
     {
-        $sites = getAuthSites();
-        $site = $sites->find($siteId)->count();
-        return $site === 1;
+        return getAuthSites()
+            ->where('id', $siteId)
+            ->isNotEmpty();
     }
 }
 

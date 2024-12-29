@@ -41,9 +41,11 @@
             </div>
             <div class="col-10 col-md-11">
                 <div class="row">
-                    <h3 class="col">
-                        {{ $factory->title }}
-                    </h3>
+                    <a class="col text-decoration-none" href="{{route('factories.show', $factory->id)}}">
+                        <h3>
+                            {{ $factory->title }}
+                        </h3>
+                    </a>
                     <div
                         class="d-none d-md-flex col-md-4 col-lg-3 w-max-content my-0 badge badge-phoenix badge-phoenix-primary fs-10 fs-md-9 d-flex align-items-center justify-content-center">
                         <span class="fw-bold">

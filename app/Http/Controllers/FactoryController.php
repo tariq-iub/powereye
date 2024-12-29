@@ -5,10 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Factory;
 use App\Models\User;
 use App\Services\FactoryService;
+use App\Services\FactorySummaryService;
 use Illuminate\Http\Request;
 
 class FactoryController extends Controller
 {
+    protected FactorySummaryService $factorySummaryService;
+
+    public function __construct(FactorySummaryService $factorySummaryService)
+    {
+        $this->factorySummaryService = $factorySummaryService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -27,6 +35,27 @@ class FactoryController extends Controller
     public function create()
     {
         return view('admin.factories.create');
+    }
+
+    public function show(Factory $factory)
+    {
+        $factoryId = $factory->id;
+
+        $latest_energy = $this->factorySummaryService->getLatestSummary($factoryId, false)->energy;
+        $_12h_energy = $this->factorySummaryService->getSummary($factoryId, '12-hours', false)->energy;
+        $_1w_energy = $this->factorySummaryService->getSummary($factoryId, '1-week', false)->energy;
+        $_1m_energy = $this->factorySummaryService->getSummary($factoryId, '1-month', false)->energy;
+
+        $timeframeOptions = getTimeframeOption();
+
+        return view('client.factories.show', compact(
+            'factory',
+            'latest_energy',
+            '_12h_energy',
+            '_1w_energy',
+            '_1m_energy',
+            'timeframeOptions'
+        ));
     }
 
     /**
@@ -102,14 +131,18 @@ class FactoryController extends Controller
                 ->with(['sites'])
                 ->first();
 
-            if ($data) return response()->json($data, 200);
-            else return response()->json(['message' => 'Factory is not registered in the system.'], 404);
+            if ($data)
+                return response()->json($data, 200);
+            else
+                return response()->json(['message' => 'Factory is not registered in the system.'], 404);
         } else {
             $data = Factory::with(['sites'])
                 ->get();
 
-            if ($data) return response()->json($data, 200);
-            else return response()->json(['message' => 'No factories registered in the system.'], 404);
+            if ($data)
+                return response()->json($data, 200);
+            else
+                return response()->json(['message' => 'No factories registered in the system.'], 404);
         }
     }
 
@@ -123,7 +156,8 @@ class FactoryController extends Controller
         return app(FactoryService::class)->fetchFactoryData($request, $factory);
     }
 
-    public function fetchFactories(){
+    public function fetchFactories()
+    {
         return app(FactoryService::class)->fetchFactories();
     }
 }

@@ -170,11 +170,35 @@ class FactorySummaryService
 
     public function getLatestSummary($factoryId, $jsonResponse = true)
     {
+        return $this->getSummary($factoryId, 'latest', $jsonResponse);
+    }
+
+    public function getSummary($factoryId, $timeframe, $jsonResponse = true)
+    {
         $summary = FactorySummary::where('factory_id', $factoryId)
-            ->where('time_frame', 'latest')
+            ->where('time_frame', $timeframe)
             ->orderBy('updated_at', 'desc')
             ->first();
 
+        if ($summary) {
+            $summary->updated_at_r = $summary->updated_at->diffForHumans();
+        }
+
         return $jsonResponse ? response()->json($summary) : $summary;
+    }
+
+    public function getSummaries($factoryId, $jsonResponse = true)
+    {
+        $summaries = FactorySummary::where('factory_id', $factoryId)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        if ($summaries->isNotEmpty()) {
+            foreach ($summaries as $summary) {
+                $summary->updated_at_r = $summary->updated_at->diffForHumans();
+            }
+        }
+
+        return $jsonResponse ? response()->json($summaries) : $summaries;
     }
 }

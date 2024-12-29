@@ -126,6 +126,7 @@ class SiteSummaryService
             }
         }
     }
+    
     public function getSummary($siteId, $timeframe, $jsonResponse = true)
     {
         $summary = SiteSummary::where('site_id', $siteId)
